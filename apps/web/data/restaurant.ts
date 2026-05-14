@@ -272,6 +272,7 @@ export const services = [
     description:
       'Trải nghiệm phòng ăn thanh lịch với dịch vụ tận tâm và không gian tinh tế',
     icon: 'UtensilsCrossed',
+    price: 0,
   },
   {
     id: 'svc-2',
@@ -279,6 +280,7 @@ export const services = [
     description:
       'Tổ chức dịp đặc biệt tại phòng ăn riêng với thực đơn thiết kế riêng',
     icon: 'Users',
+    price: 500,
   },
   {
     id: 'svc-3',
@@ -286,6 +288,7 @@ export const services = [
     description:
       'Mang tinh hoa ẩm thực Savoré đến sự kiện của bạn với dịch vụ tiệc chuyên nghiệp',
     icon: 'Utensils',
+    price: 200,
   },
   {
     id: 'svc-4',
@@ -293,6 +296,7 @@ export const services = [
     description:
       'Sommelier của chúng tôi chọn lựa rượu vang hoàn hảo để tôn vinh từng món',
     icon: 'Wine',
+    price: 45,
   },
 ];
 

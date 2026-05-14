@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,28 +44,27 @@ export default function Header() {
             whileHover={{ scale: 1.05 }}
             transition={{ type: 'spring', stiffness: 400, damping: 10 }}
           >
-            <a href="#" className="text-2xl font-serif font-bold text-primary">
+            <Link href="/" className="text-2xl font-serif font-bold text-primary">
               Savore
-            </a>
+            </Link>
           </motion.div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             {navItems.map((item, idx) => (
-              <motion.a
+              <Link
                 key={idx}
                 href={item.href}
                 className="text-foreground/80 hover:text-primary transition-colors font-medium text-sm"
-                whileHover={{ color: 'var(--primary)' }}
               >
                 {item.label}
-              </motion.a>
+              </Link>
             ))}
           </nav>
 
           {/* CTA Button */}
           <motion.a
-            href="#contact"
+            href="/reservation"
             className="hidden md:block px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium text-sm"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -95,23 +95,23 @@ export default function Header() {
         >
           <div className="px-4 py-4 space-y-3">
             {navItems.map((item, idx) => (
-              <a
+              <Link
                 key={idx}
                 href={item.href}
                 className="block text-foreground/80 hover:text-primary transition-colors font-medium py-2"
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
             <div className="pt-3 border-t border-border/50">
-              <a
-                href="#contact"
+              <Link
+                href="/reservation"
                 className="block px-4 py-2 bg-primary text-primary-foreground rounded-md text-center font-medium"
                 onClick={() => setIsOpen(false)}
               >
                 Đặt bàn
-              </a>
+              </Link>
             </div>
           </div>
         </motion.nav>
