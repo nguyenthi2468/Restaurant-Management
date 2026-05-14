@@ -1,0 +1,103 @@
+import axios from 'axios';
+import { API_BASE_URL, API_ENDPOINTS, ROUTES } from '@/constants';
+import Cookies from 'js-cookie';
+import toast from 'react-hot-toast';
+
+// Create axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const accessToken = Cookies.get('accessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+const AUTH_WHITELIST = [
+  API_ENDPOINTS.AUTH.LOGIN,
+  API_ENDPOINTS.AUTH.REFRESH_TOKEN,
+  API_ENDPOINTS.AUTH.REGISTER,
+];
+// Response interceptor to refresh token
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    const requestUrl = originalRequest.url;
+    const isAuthEndpoint = AUTH_WHITELIST.some((url) =>
+      requestUrl?.includes(url)
+    );
+    // Nếu lỗi là "Network Error"
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error — cannot reach API server.');
+      alert('Network error — cannot reach server.');
+      return Promise.reject(error);
+    }
+    if (
+      error.response?.status === 401 &&
+      !isAuthEndpoint &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const { data } = await api.post(
+          `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`
+        );
+
+        // Save the new tokens
+        setAuthTokens(data.accessToken);
+
+        // Retry the original request
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        return axios(originalRequest);
+      } catch (refreshError) {
+        // If refresh fails, logout the user
+        Cookies.remove('accessToken');
+        window.location.href = `${ROUTES.LOGIN}?session=expired`;
+        return Promise.reject(refreshError);
+      }
+    }
+    if (error.response?.status === 403) {
+      toast.error('You do not have permission to access this feature');
+      if (window.location.pathname !== ROUTES.FORBIDDEN) {
+        setTimeout(() => {
+          window.location.href = ROUTES.FORBIDDEN;
+        }, 200);
+      }
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Helper function to set auth tokens
+export const setAuthTokens = (accessToken: string) => {
+  // Store tokens in cookies
+  Cookies.set('accessToken', accessToken, {
+    expires: 30,
+    secure: true,
+    sameSite: 'strict',
+  });
+
+  // Update axios headers
+  api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+};
+
+// Helper function to clear auth tokens
+export const clearAuthTokens = () => {
+  Cookies.remove('accessToken');
+  delete api.defaults.headers.common.Authorization;
+};
+
+export default api;

@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Be_Vietnam_Pro } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
-
+import { Toaster } from 'react-hot-toast';
+import QueryProvider from '@/providers/QueryProvider';
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ['latin', 'vietnamese'],
   variable: '--font-sans',
@@ -41,7 +42,11 @@ export default function RootLayout({
         'font-sans',
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <QueryProvider>
+          {children}<Toaster position="top-center" />
+        </QueryProvider>
+      </body>
     </html>
   );
 }
