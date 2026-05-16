@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration, envValidationSchema } from './config';
+import { PrismaModule } from './database';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { configuration, envValidationSchema } from './config';
         abortEarly: true,
       },
     }),
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

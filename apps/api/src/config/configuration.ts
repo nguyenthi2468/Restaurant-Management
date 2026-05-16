@@ -5,7 +5,11 @@ export interface AppConfig {
   corsOrigins: string[];
 }
 
-export default (): { app: AppConfig } => ({
+export interface DatabaseConfig {
+  url: string;
+}
+
+export default (): { app: AppConfig; database: DatabaseConfig } => ({
   app: {
     nodeEnv: process.env.NODE_ENV ?? 'development',
     port: Number(process.env.PORT) || 8080,
@@ -14,5 +18,8 @@ export default (): { app: AppConfig } => ({
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean),
+  },
+  database: {
+    url: process.env.DATABASE_URL!,
   },
 });
