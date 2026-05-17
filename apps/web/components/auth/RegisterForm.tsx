@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
-import { Mail } from 'lucide-react';
+import { Mail, User } from 'lucide-react';
 import { Lock } from 'lucide-react';
 import { Eye } from 'lucide-react';
 import { EyeOff } from 'lucide-react';
@@ -71,6 +71,7 @@ const RegisterForm = () => {
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="register-form-firstName">Họ</FieldLabel>
                 <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Nhập họ"
                     className="pl-10"
@@ -98,6 +99,7 @@ const RegisterForm = () => {
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="register-form-lastName">Tên</FieldLabel>
                 <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Nhập tên"
                     className="pl-10"

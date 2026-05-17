@@ -2,13 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import Link from 'next/link';
-
+import { ROUTES } from '@/constants';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/providers/AuthProvider';
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-
+ const { user, logout } = useAuth();
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -18,11 +28,11 @@ export default function Header() {
   }, []);
 
   const navItems = [
-    { label: 'Thực đơn', href: '#menu' },
-    { label: 'Giới thiệu', href: '#about' },
-    { label: 'Dịch vụ', href: '#services' },
-    { label: 'Thư viện ảnh', href: '#gallery' },
-    { label: 'Liên hệ', href: '#contact' },
+    { label: 'Thực đơn', href: '/menu' },
+    { label: 'Giới thiệu', href: '/about' },
+    { label: 'Tin tức', href: '/news' },
+    { label: 'Xác nhận đặt bàn', href: '/verify-booking' },
+    { label: 'Liên hệ', href: '/contact' },
   ];
 
   return (
@@ -63,15 +73,67 @@ export default function Header() {
           </nav>
 
           {/* CTA Button */}
-          <motion.a
-            href="/reservation"
-            className="hidden md:block px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium text-sm"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Đặt bàn
-          </motion.a>
-
+          <div className="hidden md:flex items-center gap-2">
+            <Link
+              href={ROUTES.RESERVATION}
+              className="hidden md:block px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium text-sm"
+            >
+              Đặt bàn
+            </Link>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="cursor-pointer">
+                    <AvatarImage src={user?.avatar?.url} />
+                    <AvatarFallback>
+                      <div className="bg-primary text-white w-full h-full flex justify-center items-center">
+                        {user.firstName?.charAt(0) || '?'}
+                      </div>
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user.firstName || '?'} {user.lastName || '?'}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link href="/me">Account</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/me/my-bookings">My Bookings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/me/sale">My offers</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <button
+                      className="cursor-pointer w-full h-full text-start"
+                      onClick={logout}
+                    >
+                      Logout
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                href={ROUTES.LOGIN}
+                className="hidden md:flex p-2 border border-primary text-primary rounded-full hover:bg-primary/10 transition-colors"
+                title="Đăng nhập"
+              >
+                <User className="w-5 h-5" />
+              </Link>
+            )}
+          </div>
           {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2"
@@ -104,14 +166,42 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
-            <div className="pt-3 border-t border-border/50">
+            <div className="pt-3 border-t border-border/50 flex flex-col gap-2">
               <Link
-                href="/reservation"
+                href={ROUTES.RESERVATION}
                 className="block px-4 py-2 bg-primary text-primary-foreground rounded-md text-center font-medium"
                 onClick={() => setIsOpen(false)}
               >
                 Đặt bàn
               </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/me"
+                    className="block px-4 py-2 border border-primary text-primary rounded-md text-center font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Tài khoản
+                  </Link>
+                  <button
+                    className="block w-full px-4 py-2 border border-destructive text-destructive rounded-md text-center font-medium"
+                    onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}
+                  >
+                    Đăng xuất
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href={ROUTES.LOGIN}
+                  className="flex justify-center items-center px-4 py-2 border border-primary text-primary rounded-md font-medium"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User className="w-5 h-5" />
+                </Link>
+              )}
             </div>
           </div>
         </motion.nav>

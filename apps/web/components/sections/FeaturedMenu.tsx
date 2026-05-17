@@ -13,6 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { formatCurrency } from '@/utils/currency';
 
 export default function FeaturedMenu() {
   const ref = useRef(null);
@@ -30,7 +31,7 @@ export default function FeaturedMenu() {
       id: 'feat-1',
       name: 'Miso-Glazed Cod',
       description: 'Pan-seared Atlantic cod with white miso butter, accompanied by jasmine rice and seasonal vegetables',
-      price: 42,
+      price: 420000,
       image: '/images/placeholder-1.jpg',
       tag: 'Chef\'s Selection',
     },
@@ -38,7 +39,7 @@ export default function FeaturedMenu() {
       id: 'feat-2',
       name: 'Wagyu Beef Perfection',
       description: 'Premium Japanese A5 Wagyu with five-spice rub and truffle mashed potatoes',
-      price: 58,
+      price: 580000,
       image: '/images/placeholder-2.jpg',
       tag: 'Premium',
     },
@@ -46,7 +47,7 @@ export default function FeaturedMenu() {
       id: 'feat-3',
       name: 'Peking Duck',
       description: 'Traditionally roasted duck with crispy skin, thin pancakes, and hoisin sauce',
-      price: 52,
+      price: 520000,
       image: '/images/placeholder-3.jpg',
       tag: 'House Specialty',
     },
@@ -54,7 +55,7 @@ export default function FeaturedMenu() {
       id: 'feat-4',
       name: 'Yuzu Panna Cotta',
       description: 'Silky panna cotta with yuzu citrus sauce and edible flowers',
-      price: 11,
+      price: 110000,
       image: '/images/placeholder-4.jpg',
       tag: 'Dessert',
     },
@@ -125,7 +126,7 @@ export default function FeaturedMenu() {
 
                         <div className="flex items-center justify-between pt-4 border-t border-border/50">
                           <span className="text-2xl font-serif font-bold text-primary">
-                            ${item.price}
+                            {formatCurrency(item.price)}
                           </span>
                           <motion.a
                             href="#contact"

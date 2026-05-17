@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { menuItems } from '@/data/restaurant';
 import { useRef, useState } from 'react';
 import { useInView } from 'framer-motion';
+import { formatCurrency } from '@/utils/currency';
 
 export default function MenuCategories() {
   const ref = useRef(null);
@@ -136,7 +137,7 @@ export default function MenuCategories() {
                         </div>
                       </div>
                       <span className="text-xl font-serif font-bold text-primary ml-4 flex-shrink-0">
-                        ${menuItem.price}
+                        {formatCurrency(menuItem.price)}
                       </span>
                     </div>
 
@@ -177,7 +178,7 @@ export default function MenuCategories() {
                             {item.name}
                           </h4>
                           <span className="text-primary font-bold ml-4 flex-shrink-0">
-                            ${item.price}
+                            {formatCurrency(item.price)}
                           </span>
                         </div>
                         <p className="text-sm text-foreground/70">

@@ -5,6 +5,7 @@ import { setMenus } from '@/data/restaurant';
 import { useRef } from 'react';
 import { useInView } from 'framer-motion';
 import { Check } from 'lucide-react';
+import { formatCurrency } from '@/utils/currency';
 
 export default function SetMenus() {
   const ref = useRef(null);
@@ -121,7 +122,7 @@ export default function SetMenus() {
                           Mỗi người
                         </p>
                         <div className="text-3xl font-serif font-bold text-primary">
-                          ${menu.price}
+                          {formatCurrency(menu.price)}
                         </div>
                       </div>
                     </div>
