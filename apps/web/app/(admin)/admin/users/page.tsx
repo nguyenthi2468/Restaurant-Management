@@ -7,6 +7,7 @@ import {
   UserFormValues,
   RoleAssignUserFormValues,
 } from '@/features/user';
+import { useRolesQuery } from '@/features/roles';
 import { UsersFilters } from '@/components/users/UserFilter';
 import { useState, useEffect } from 'react';
 import UserManagementTable from '@/components/users/UserManagementTable';
@@ -48,8 +49,11 @@ function UserManagementPage() {
   const users = data?.data || [];
   const totalPages = data?.meta ? Math.ceil(data.meta.total / limit) : 0;
 
+  // Fetch roles for filter
+  const { data: rolesData } = useRolesQuery();
+
   // Available roles for filtering
-  const availableRoles = ['all', 'admin', 'user'];
+  const availableRoles = ['all', ...(rolesData?.map((role) => role.name) || [])];
 
   const handleEdit = (user: User) => {
     setUserToEdit(user);

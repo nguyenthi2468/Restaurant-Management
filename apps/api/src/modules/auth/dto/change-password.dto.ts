@@ -35,6 +35,6 @@ export class ChangePasswordDto {
 
   @IsString()
   @MinLength(PW_MIN)
-  @Matches('newPassword')
+  @Match('newPassword')
   confirmPassword!: string;
 }
