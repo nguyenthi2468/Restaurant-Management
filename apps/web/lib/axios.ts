@@ -88,6 +88,7 @@ export const setAuthTokens = (accessToken: string) => {
     expires: 30,
     secure: true,
     sameSite: 'strict',
+    path: '/',
   });
 
   // Update axios headers
@@ -96,7 +97,10 @@ export const setAuthTokens = (accessToken: string) => {
 
 // Helper function to clear auth tokens
 export const clearAuthTokens = () => {
-  Cookies.remove('accessToken');
+  Cookies.remove('accessToken', {
+    path: '/',
+  });
+
   delete api.defaults.headers.common.Authorization;
 };
 
