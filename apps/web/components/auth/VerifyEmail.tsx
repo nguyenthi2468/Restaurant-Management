@@ -1,144 +1,155 @@
-import React from 'react';
-import { Eye, EyeOff, Loader, Lock } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import {
+  resendVerificationEmail,
+  resendVerificationEmailSchema,
+  verifyEmail,
+} from '@/features/auth';
+import { MESSAGES } from '@/constants/message';
+import { ApiError } from '@/types';
+import { ROUTES } from '@/constants';
+import z, { set } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { resetPasswordSchema } from '@/features/auth/validator';
-import type * as z from 'zod';
-import { useSearchParams } from 'next/navigation';
-import { useAuth } from '@/providers/AuthProvider';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Loader, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Field, FieldGroup, FieldLabel } from '../ui/field';
-
-type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
-
-export default function ResetPasswordForm() {
-  const { resetPassword, loading } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+import toast from 'react-hot-toast';
+import { Field, FieldLabel } from '../ui/field';
+type ResendVerticationForm = z.infer<typeof resendVerificationEmailSchema>;
+export default function VerifyEmail() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-
-  const form = useForm<ResetPasswordFormValues>({
-    resolver: zodResolver(resetPasswordSchema),
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle');
+  const [error, setError] = useState<string | null>(null);
+  const form = useForm<ResendVerticationForm>({
+    resolver: zodResolver(resendVerificationEmailSchema),
     defaultValues: {
-      password: '',
-      confirmPassword: '',
+      email: '',
     },
   });
+  useEffect(() => {
+    const verifyToken = async () => {
+      if (!token || typeof token !== 'string') return;
 
-  const onSubmit = async (values: ResetPasswordFormValues) => {
-    try {
-      if (typeof token !== 'string') {
-        return;
+      try {
+        setStatus('loading');
+        await verifyEmail(token);
+        setStatus('success');
+      } catch (err) {
+        const error = err as ApiError;
+        console.error('Lỗi xác thực:', error);
+        setStatus('error');
+        setError(
+          error?.response?.data.message || MESSAGES.AUTH.VERIFY_EMAIL_FAILED
+        );
       }
-      await resetPassword(token, values.password, values.confirmPassword);
-      // Redirect happens in the auth context after successful reset
-    } catch (error) {
-      console.error('Reset password error:', error);
+    };
+
+    if (token) {
+      verifyToken();
+    }
+  }, [token, verifyEmail]);
+  const handleSubmit = async (values: ResendVerticationForm) => {
+    try {
+      setLoading(true);
+      await resendVerificationEmail(values.email);
+      toast.success(
+        'Verification email resent! Please check your inbox.'
+      );
+      setLoading(false);
+      router.push(ROUTES.LOGIN);
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(
+        error?.response?.data?.message || 'Failed to resend verification email.'
+      );
+      setLoading(false);
+      console.error('Forgot password error:', error);
     }
   };
   return (
- <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <FieldGroup>
-        <Controller
-          name="password"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="reset-password">Password</FieldLabel>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className="pl-10"
-                  disabled={loading}
-                  {...field}
-                  aria-invalid={fieldState.invalid}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
-                  )}
-                  <span className="sr-only">
-                    {showPassword ? 'Hide password' : 'Show password'}
-                  </span>
-                </Button>
-              </div>
-              {fieldState.invalid && (
-                <span className="text-xs text-destructive mt-1 block">
-                  {fieldState.error?.message}
-                </span>
-              )}
-            </Field>
+    <>
+      {' '}
+      {status === 'loading' && (
+        <div className="flex flex-col items-center justify-center py-6">
+          <div className="w-12 h-12 border-4 border-primary-500 rounded-full border-t-transparent animate-spin mb-4"></div>
+          <p className="text-gray-700">Verifying your email...</p>
+        </div>
+      )}
+      {status === 'success' && (
+        <div className="text-center">
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-6">
+            <p>Your email has been successfully verified</p>
+          </div>
+          <Link href={ROUTES.LOGIN}>
+            <Button>Login</Button>
+          </Link>
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+            <p>
+              {error || 'Failed to verify email. The link may have expired.'}
+            </p>
+          </div>
+          {error !== MESSAGES.AUTH.VERIFY_EMAIL_EXPIRED && (
+            <Link href={ROUTES.LOGIN}>
+              <Button>Back to login</Button>
+            </Link>
           )}
-        />
-      </FieldGroup>
-
-      <FieldGroup>
-        <Controller
-          name="confirmPassword"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="reset-confirm-password">
-                Confirm password
-              </FieldLabel>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className="pl-10"
-                  disabled={loading}
-                  {...field}
-                  aria-invalid={fieldState.invalid}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+          {error === MESSAGES.AUTH.VERIFY_EMAIL_EXPIRED && (
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-4"
+              >
+                <Controller
+                  control={form.control}
+                  name="email"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>Email</FieldLabel>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Email"
+                            className="pl-10"
+                            disabled={loading}
+                            {...field}
+                            {...(fieldState.invalid && {
+                              'aria-invalid': true,
+                              'aria-describedby': `${name}-error`,
+                            })}
+                          />
+                      </div>
+                      {fieldState.invalid && (
+                      <p className="text-error-500" id="email-error">
+                        {fieldState.error?.message}
+                      </p>
+                    )}
+                    </Field>
                   )}
-                  <span className="sr-only">
-                    {showPassword ? 'Hide password' : 'Show password'}
-                  </span>
+                />
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader className="animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send verification email'
+                  )}
                 </Button>
-              </div>
-              {fieldState.invalid && (
-                <span className="text-xs text-destructive mt-1 block">
-                  {fieldState.error?.message}
-                </span>
-              )}
-            </Field>
+              </form>
           )}
-        />
-      </FieldGroup>
-
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? (
-          <Loader className="animate-spin">Sending...</Loader>
-        ) : (
-          'Reset Password'
-        )}
-      </Button>
-    </form>
+        </div>
+      )}
+    </>
   );
 }

@@ -1,49 +1,43 @@
-import { ValidationPipe } from '@nestjs/common';
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import type { AppConfig } from './config';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
 
-async function bootstrap() {
+let cachedApp: any = null;
+
+async function createApp() {
+  if (cachedApp) return cachedApp;
   const app = await NestFactory.create(AppModule);
-
-  const configService = app.get(ConfigService);
-  const { port, apiPrefix, corsOrigins } =
-    configService.get<AppConfig>('app')!;
-
   app.use(cookieParser());
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
-
+  app.useGlobalFilters(new PrismaExceptionFilter());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.enableCors({
-    origin: corsOrigins,
+    origin: true,
     credentials: true,
   });
+  app.setGlobalPrefix('api/v1');
+  await app.init();
 
-  app.setGlobalPrefix(apiPrefix);
-
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Savore - Restaurant Management API')
-    .setDescription('API documentation for Savore restaurant management system')
-    .setVersion('1.0')
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'access-token',
-    )
-    .build();
-
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
-
-  await app.listen(port);
+  cachedApp = app.getHttpAdapter().getInstance();
+  return cachedApp;
 }
-bootstrap();
+
+const handler = async (req: any, res: any) => {
+  const app = await createApp();
+  return app(req, res);
+};
+
+// ✅ Tự động start server khi chạy dev (Node environment)
+if (process.env.NODE_ENV !== 'production') {
+  createApp().then((app) => {
+    const port = process.env.PORT ?? 3000;
+    app.listen(port, () =>
+      console.log(`🚀 Dev server running on http://localhost:${port}`),
+    );
+  });
+}
+
+// Export default cho Vercel
+export default handler;

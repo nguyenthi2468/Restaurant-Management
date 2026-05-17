@@ -1,142 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
-  provider     = "prisma-client"
-  output       = "../generated/prisma"
-  moduleFormat = "cjs"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-}
-
-enum ActionMode {
-  ANY
-  ALL
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
-  passwordHash  String
-  firstName     String
-  lastName      String
   emailVerified Boolean  @default(false)
-  avatar        Avatar?
-  roles         UserRole[]
-  refreshTokens RefreshToken[]
+  passwordHash  String?
+  firstName     String?
+  lastName      String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  @@map("users")
+  roles UserRole[]
+
+  avatarId String?
+  avatar   ImageAsset? @relation("UserAvatar", fields: [avatarId], references: [id], onDelete: SetNull)
+
+  provider   AuthProvider @default(LOCAL)
+  providerId String?      @unique
+
+  sessions         AuthSession[]
+  verifyTokens     EmailVerifyToken[]
+  resetTokens      PasswordResetToken[]
+  galleries        ImageGallery[]
+  folderGalleries  FolderGallery[]
+
 }
-
-model Avatar {
-  id        String @id @default(cuid())
-  url       String
-  secureUrl String
-  publicId  String
-  userId    String @unique
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("avatars")
-}
-
 model Role {
   id          String           @id @default(cuid())
   name        String           @unique
   description String?
   users       UserRole[]
   permissions RolePermission[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  @@map("roles")
 }
 
 model Permission {
-  id          String           @id @default(cuid())
-  name        String           @unique
+  id          String            @id @default(cuid())
+  name        String            @unique
   description String?
   roles       RolePermission[]
-  policies    Policy[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  @@map("permissions")
+  apiPolicies ApiActionPolicy[]
 }
 
 model UserRole {
+  user   User   @relation(fields: [userId], references: [id])
   userId String
+  role   Role   @relation(fields: [roleId], references: [id])
   roleId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
-  @@map("user_roles")
 }
 
 model RolePermission {
+  role         Role       @relation(fields: [roleId], references: [id])
   roleId       String
+  permission   Permission @relation(fields: [permissionId], references: [id])
   permissionId String
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
-  @@map("role_permissions")
 }
 
-model Action {
-  id          String     @id @default(cuid())
-  key         String     @unique
-  description String?
-  enabled     Boolean    @default(true)
-  mode        ActionMode @default(ANY)
-  policies    Policy[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+model AuthSession {
+  id          String       @id @default(cuid())
+  userId      String
+  jti         String       @unique
+  refreshHash String
+  provider    AuthProvider @default(LOCAL)
 
-  @@map("actions")
-}
-
-model Policy {
-  actionId     String
-  permissionId String
-  action       Action     @relation(fields: [actionId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@id([actionId, permissionId])
-  @@map("policies")
-}
-
-model RefreshToken {
-  id        String    @id @default(cuid())
-  jti       String    @unique
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ip        String?
+  createdAt DateTime  @default(now())
   expiresAt DateTime
   revokedAt DateTime?
+  revokedBy String?
+  reason    String?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailVerifyToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
   createdAt DateTime  @default(now())
 
-  @@map("refresh_tokens")
+  @@index([userId])
+  @@index([tokenHash])
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
+  id        String    @id @default(cuid())
   userId    String
-  expiresAt DateTime
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @db.VarChar(64)
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
 
-  @@map("password_reset_tokens")
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
 }
 
-model EmailVerificationToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime @default(now())
+model ApiAction {
+  id          String            @id @default(cuid())
+  key         String            @unique // ví dụ: "hotel.update"
+  description String?
+  enabled     Boolean           @default(true)
+  mode        PolicyMode        @default(ANY)
+  policies    ApiActionPolicy[]
 
-  @@map("email_verification_tokens")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ApiActionPolicy {
+  action       ApiAction  @relation(fields: [actionId], references: [id])
+  actionId     String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId String
+
+  @@id([actionId, permissionId])
+}
+
+model ImageAsset {
+  id        String @id @default(cuid())
+  // publicId là định danh xoá trên Cloudinary (bắt buộc để delete)
+  publicId  String @unique
+  url       String
+  secureUrl String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Liên kết 1-1 cho avatar user (optional)
+  userAvatarOf User[] @relation("UserAvatar")
+
+  // Liên kết N-N có payload cho Hotel/RoomType/Location qua các bảng nối
+}
+
+model ImageGallery {
+  id        String @id @default(cuid())
+  publicId  String @unique
+  url       String
+  secureUrl String
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  userId    String
+  folderId  String
+  folder    FolderGallery @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FolderGallery {
+  id         String         @id @default(cuid())
+  folderName String         @unique
+  userId     String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  galleries  ImageGallery[]
+}
+
+// ==================== ENUM ====================
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+enum PolicyMode {
+  ANY // chỉ cần 1 quyền trong danh sách
+  ALL // cần đủ toàn bộ quyền
+}
+
+enum ImageKind {
+  AVATAR // avatar user
+  COVER // ảnh bìa/cover
+  GALLERY // ảnh trong bộ sưu tập
+  DOC // tài liệu/biên lai nếu cần
 }

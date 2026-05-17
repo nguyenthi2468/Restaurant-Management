@@ -1,0 +1,45 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { ActionsService } from './actions.service';
+import { UpsertActionDto } from './dto/upsert-action.dto';
+import { SetActionPermissionsDto } from './dto/set-action-permissions.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { Permissions } from '../auth/decorator/permissions.decorator';
+import { Action } from '../auth/decorator/action.decorator';
+
+@Controller('actions')
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+export class ActionsController {
+  constructor(private readonly service: ActionsService) {}
+
+  @Post('upsert')
+  upsert(@Body() dto: UpsertActionDto) {
+    return this.service.upsert(dto);
+  }
+
+  @Get()
+  @Action('actions.list')
+  list() {
+    return this.service.findAll();
+  }
+
+  @Get(':key')
+  get(@Param('key') key: string) {
+    return this.service.findOneByKey(key);
+  }
+
+  @Patch(':id/permissions')
+  setPerms(@Param('id') id: string, @Body() dto: SetActionPermissionsDto) {
+    return this.service.setActionPermissions(id, dto.permissionIds);
+  }
+}
