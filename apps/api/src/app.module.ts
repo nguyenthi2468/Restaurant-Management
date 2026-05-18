@@ -15,6 +15,7 @@ import { ImageModule } from './modules/image/image.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { TableModule } from './modules/table/table.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { APP_GUARD } from '@nestjs/core';
     CloudinaryModule,
     ImageModule,
     MenuModule,
+    TableModule,
   ],
   controllers: [AppController],
   providers: [

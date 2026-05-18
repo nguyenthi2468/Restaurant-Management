@@ -181,6 +181,26 @@ model FolderGallery {
   galleries  ImageGallery[]
 }
 
+// ==================== TABLE MODELS ====================
+
+model Table {
+  id        String      @id @default(cuid())
+  number    Int         @unique
+  capacity  Int
+  status    TableStatus @default(AVAILABLE)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([status])
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  MAINTENANCE
+}
+
 // ==================== MENU MODELS ====================
 
 model MenuCategory {
