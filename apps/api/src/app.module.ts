@@ -17,6 +17,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { TableModule } from './modules/table/table.module';
 import { OrderModule } from './modules/order/order.module';
+import { OrderItemModule } from './modules/order-item/order-item.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { OrderModule } from './modules/order/order.module';
     MenuModule,
     TableModule,
     OrderModule,
+    OrderItemModule,
   ],
   controllers: [AppController],
   providers: [
