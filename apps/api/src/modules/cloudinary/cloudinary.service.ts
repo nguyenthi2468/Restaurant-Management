@@ -122,20 +122,19 @@ export class CloudinaryService {
   }
 
   async getFolderGalleries(userId: string) {
-  return this.prisma.folderGallery.findMany({
-    where: { userId },
-    include: {
-      _count: {
-        select: {
-          galleries: {
-            where: { userId }, // only count images of this user
+    return this.prisma.folderGallery.findMany({
+      where: { userId },
+      include: {
+        _count: {
+          select: {
+            galleries: {
+              where: { userId }, // only count images of this user
+            },
           },
         },
       },
-    },
-  });
-}
-
+    });
+  }
 
   async getImageGalleries(userId: string, folderId: string) {
     return this.prisma.imageGallery.findMany({

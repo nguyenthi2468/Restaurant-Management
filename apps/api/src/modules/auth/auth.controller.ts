@@ -24,22 +24,49 @@ import { minutes, Throttle } from '@nestjs/throttler';
 import type { Response, Request } from 'express';
 import { AuthProvider } from '@prisma/client';
 import { ResendEmailDto } from '../auth/dto/resend-email.dto';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiCreatedResponse,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Đăng ký người dùng mới' })
+  @ApiCreatedResponse({ description: 'Người dùng đã được đăng ký thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   register(@Body() body: RegisterDto) {
     return this.authService.register(body);
   }
 
   @Post('verify-email')
+  @ApiOperation({ summary: 'Xác thực email' })
+  @ApiResponse({ status: 200, description: 'Email đã được xác thực' })
+  @ApiResponse({ status: 400, description: 'Token không hợp lệ hoặc hết hạn' })
   async verify(@Body() body: VerifyEmailDto) {
     return this.authService.verifyEmail(body.token);
   }
   @Post('login')
   @HttpCode(200)
+  @ApiOperation({ summary: 'Đăng nhập người dùng' })
+  @ApiCreatedResponse({
+    description: 'Đăng nhập thành công, trả về access token và jti',
+    schema: {
+      example: {
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        jti: 'uuid-here',
+        tokenType: 'Bearer',
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'Sai email hoặc mật khẩu' })
   async login(
     @Body() dto: LoginDto,
     @Req() req: any,
@@ -68,6 +95,21 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(200)
+  @ApiOperation({ summary: 'Làm mới access token bằng refresh token' })
+  @ApiCreatedResponse({
+    description: 'Đã làm mới token thành công',
+    schema: {
+      example: {
+        accessToken: 'new-access-token',
+        jti: 'new-jti',
+        tokenType: 'Bearer',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh token không hợp lệ hoặc hết hạn',
+  })
   async refresh(
     @Req() req: any,
     @Ip() ip: string,
@@ -94,6 +136,10 @@ export class AuthController {
   @Post('logout')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(204)
+  @ApiOperation({ summary: 'Đăng xuất (xóa phiên hiện tại)' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 204, description: 'Đã đăng xuất thành công' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logout(
     @Body() dto: LogoutDto,
     @Req() req: any,
@@ -119,6 +165,13 @@ export class AuthController {
   @Post('logout-all')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
+  @ApiOperation({ summary: 'Đăng xuất khỏi tất cả các phiên' })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Đã đăng xuất khỏi tất cả các phiên',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logoutAll(@Req() req: any, @Res({ passthrough: true }) res: Response) {
     await this.authService.revokeAllUserSessions(
       req.user.sub,
@@ -135,6 +188,9 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @ApiOperation({ summary: 'Đặt lại mật khẩu bằng token' })
+  @ApiResponse({ status: 200, description: 'Mật khẩu đã được đặt lại' })
+  @ApiResponse({ status: 400, description: 'Token không hợp lệ hoặc hết hạn' })
   async resetPassword(
     @Body()
     body: ResetPasswordDto,
@@ -147,10 +203,17 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Bắt đầu quy trình đăng nhập bằng Google' })
+  @ApiResponse({ status: 302, description: 'Chuyển hướng tới Google' })
   googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Callback từ Google sau xác thực' })
+  @ApiResponse({
+    status: 302,
+    description: 'Chuyển hướng trở lại ứng dụng web với access token',
+  })
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const { accessToken, refreshToken } =
       await this.authService.loginWithGoogle(req.user as any, {
@@ -174,6 +237,10 @@ export class AuthController {
 
   @Get('sessions')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Lấy danh sách các phiên hiện tại của người dùng' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Danh sách các phiên' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async mySessions(@Req() req: any) {
     const userId = req.user.id;
     const sessions = await this.authService.getSessions(userId);
@@ -183,6 +250,12 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('resend')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Gửi lại email xác thực' })
+  @ApiResponse({
+    status: 200,
+    description: 'Nếu email tồn tại và chưa xác thực, link đã được gửi',
+  })
+  @ApiResponse({ status: 400, description: 'Yêu cầu không hợp lệ' })
   async resend(@Body() dto: ResendEmailDto) {
     await this.authService.resendVerificationEmail(dto.email);
     return {
@@ -194,6 +267,12 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('forgot-password')
   @HttpCode(202)
+  @ApiOperation({ summary: 'Gửi email đặt lại mật khẩu' })
+  @ApiResponse({
+    status: 202,
+    description: 'Email đã được gửi (nếu email tồn tại)',
+  })
+  @ApiResponse({ status: 400, description: 'Yêu cầu không hợp lệ' })
   async forgotPassword(@Body() body: ForgotPasswordDto) {
     await this.authService.forgotPassword(body.email);
     return { oke: true };

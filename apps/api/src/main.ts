@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 let cachedApp: any = null;
 
@@ -18,6 +19,24 @@ async function createApp() {
     credentials: true,
   });
   app.setGlobalPrefix('api/v1');
+
+  // Cấu hình Swagger cho tài liệu API
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Restaurant Management API')
+      .setDescription('API để quản lý hoạt động của nhà hàng')
+      .setVersion('1.0')
+      .addTag('menu', 'Quản lý menu')
+      .addTag('auth', 'Xác thực và quản lý phiên')
+      .addTag('users', 'Quản lý người dùng')
+      .addTag('roles', 'Quản lý vai trò và quyền')
+      .addTag('permissions', 'Quản lý quyền truy cập')
+      .addTag('actions', 'Quản lý hành động hệ thống')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api-docs', app, document);
+  }
+
   await app.init();
 
   cachedApp = app.getHttpAdapter().getInstance();

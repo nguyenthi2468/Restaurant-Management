@@ -153,6 +153,10 @@ model ImageAsset {
   userAvatarOf User[] @relation("UserAvatar")
 
   // Liên kết N-N có payload cho Hotel/RoomType/Location qua các bảng nối
+
+  // Relations for menu
+  menuCategories MenuCategory[] @relation("MenuCategoryImage")
+  menuItems MenuItem[] @relation("MenuItemImage")
 }
 
 model ImageGallery {
@@ -175,6 +179,111 @@ model FolderGallery {
   userId     String
   user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   galleries  ImageGallery[]
+}
+
+// ==================== MENU MODELS ====================
+
+model MenuCategory {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  imageId       String?
+  image         ImageAsset? @relation("MenuCategoryImage", fields: [imageId], references: [id], onDelete: SetNull)
+  // For ordering categories in the menu
+  position      Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relation to menu items
+  menuItems     MenuItem[]
+
+  @@index([isActive])
+  @@index([position])
+}
+
+model MenuItem {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal  @db.Decimal(10, 2) // Price in currency units
+  categoryId    String
+  category      MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  imageId       String?
+  image         ImageAsset? @relation("MenuItemImage", fields: [imageId], references: [id], onDelete: SetNull)
+  // For ordering items within category
+  position      Int      @default(0)
+  isAvailable   Boolean  @default(true)
+  // Dietary information
+  isVegetarian  Boolean  @default(false)
+  isVegan       Boolean  @default(false)
+  isGlutenFree  Boolean  @default(false)
+  isSpicy       Boolean  @default(false)
+  // Preparation time in minutes
+  preparationTime Int?   // Null if standard time
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations for ingredients and options
+  ingredients   MenuItemIngredient[]
+  options       MenuItemOption[] @relation("MenuItemOptions")
+
+  @@index([categoryId])
+  @@index([isAvailable])
+  @@index([position])
+}
+
+model MenuItemIngredient {
+  id            String   @id @default(cuid())
+  menuItemId    String
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  ingredientName String
+  quantity      Decimal  @db.Decimal(8, 3) // Quantity needed per serving
+  unit          String   // e.g., "g", "ml", "pcs", "oz"
+  isAllergen    Boolean  @default(false) // Mark if this ingredient is a common allergen
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([menuItemId])
+  @@index([isAllergen])
+}
+
+model MenuItemOption {
+  id            String   @id @default(cuid())
+  menuItemId    String
+  menuItem      MenuItem @relation("MenuItemOptions", fields: [menuItemId], references: [id], onDelete: Cascade)
+  name          String   // e.g., "Extra cheese", "Spice level"
+  description   String?
+  // For grouping options (e.g., "Size", "Toppings", "Cooking level")
+  group         String?
+  isRequired    Boolean  @default(false)
+  // For ordering options
+  position      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relation to option values
+  values        MenuItemOptionValue[] @relation("MenuItemOptionValues")
+
+  @@index([menuItemId])
+  @@index([position])
+}
+
+model MenuItemOptionValue {
+  id            String   @id @default(cuid())
+  optionId      String
+  option        MenuItemOption @relation("MenuItemOptionValues", fields: [optionId], references: [id], onDelete: Cascade)
+  name          String   // e.g., "Small", "Medium", "Large" or "Mild", "Medium", "Hot"
+  description   String?
+  // Additional price for this option value
+  priceAdjustment Decimal @db.Decimal(10, 2) @default(0) // Can be positive or negative
+  // For ordering values within an option
+  position      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([optionId])
+  @@index([position])
 }
 
 // ==================== ENUM ====================

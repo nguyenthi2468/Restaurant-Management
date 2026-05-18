@@ -11,7 +11,8 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { ActionsModule } from './modules/actions/actions.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
-import { ImageService } from './modules/image/image.service';
+import { ImageModule } from './modules/image/image.module';
+import { MenuModule } from './modules/menu/menu.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -36,12 +37,13 @@ import { APP_GUARD } from '@nestjs/core';
     RolesModule,
     ActionsModule,
     CloudinaryModule,
+    ImageModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     PrismaService,
-    ImageService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
