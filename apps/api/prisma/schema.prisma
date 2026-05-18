@@ -191,6 +191,8 @@ model Table {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
+  orders    Order[]
+
   @@index([status])
 }
 
@@ -199,6 +201,46 @@ enum TableStatus {
   OCCUPIED
   RESERVED
   MAINTENANCE
+}
+
+// ==================== ORDER MODELS ====================
+
+model Order {
+  id        String      @id @default(cuid())
+  tableId   String
+  table     Table       @relation(fields: [tableId], references: [id])
+  status    OrderStatus @default(PENDING)
+  total     Decimal     @db.Decimal(10, 2) @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  items     OrderItem[]
+
+  @@index([tableId])
+  @@index([status])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity   Int
+  price      Decimal  @db.Decimal(10, 2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([menuItemId])
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  SERVED
+  COMPLETED
+  CANCELLED
 }
 
 // ==================== MENU MODELS ====================
@@ -247,6 +289,7 @@ model MenuItem {
   // Relations for ingredients and options
   ingredients   MenuItemIngredient[]
   options       MenuItemOption[] @relation("MenuItemOptions")
+  orderItems    OrderItem[]
 
   @@index([categoryId])
   @@index([isAvailable])
