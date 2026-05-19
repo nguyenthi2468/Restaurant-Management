@@ -103,6 +103,7 @@ export class MenuItemController {
     description: 'Món ăn đã được tạo thành công',
     type: CreateMenuItemDto,
   })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async create(
@@ -214,6 +215,7 @@ export class MenuItemController {
     status: 200,
     description: 'Món ăn đã được cập nhật',
   })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 404, description: 'Món ăn không tìm thấy' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })

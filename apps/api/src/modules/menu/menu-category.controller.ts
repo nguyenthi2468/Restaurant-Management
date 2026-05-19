@@ -35,6 +35,7 @@ export class MenuCategoryController {
     description: 'Danh mục menu đã được tạo thành công',
     type: CreateMenuCategoryDto,
   })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   create(@Body() createMenuCategoryDto: CreateMenuCategoryDto) {
@@ -73,6 +74,7 @@ export class MenuCategoryController {
     status: 200,
     description: 'Danh mục menu đã được cập nhật',
   })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 404, description: 'Danh mục menu không tìm thấy' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
