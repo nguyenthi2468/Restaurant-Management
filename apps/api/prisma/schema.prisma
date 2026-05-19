@@ -151,12 +151,6 @@ model ImageAsset {
 
   // Liên kết 1-1 cho avatar user (optional)
   userAvatarOf User[] @relation("UserAvatar")
-
-  // Liên kết N-N có payload cho Hotel/RoomType/Location qua các bảng nối
-
-  // Relations for menu
-  menuCategories MenuCategory[] @relation("MenuCategoryImage")
-  menuItems MenuItem[] @relation("MenuItemImage")
 }
 
 model ImageGallery {
@@ -171,6 +165,9 @@ model ImageGallery {
   folderId  String
   folder    FolderGallery @relation(fields: [folderId], references: [id], onDelete: Cascade)
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+   // Relations for menu
+  menuCategories MenuCategory[] @relation("MenuCategoryImage")
+  menuItems MenuItem[] @relation("MenuItemImage")
 }
 
 model FolderGallery {
@@ -250,7 +247,7 @@ model MenuCategory {
   name          String
   description   String?
   imageId       String?
-  image         ImageAsset? @relation("MenuCategoryImage", fields: [imageId], references: [id], onDelete: SetNull)
+  image         ImageGallery? @relation("MenuCategoryImage", fields: [imageId], references: [id], onDelete: SetNull)
   // For ordering categories in the menu
   position      Int      @default(0)
   isActive      Boolean  @default(true)
@@ -272,7 +269,7 @@ model MenuItem {
   categoryId    String
   category      MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   imageId       String?
-  image         ImageAsset? @relation("MenuItemImage", fields: [imageId], references: [id], onDelete: SetNull)
+  image         ImageGallery? @relation("MenuItemImage", fields: [imageId], references: [id], onDelete: SetNull)
   // For ordering items within category
   position      Int      @default(0)
   isAvailable   Boolean  @default(true)

@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { assignPermissionsToRole, createRole, updateRole, deleteRole } from "./api";
-import { Role } from "./types";
 import { PermissionAssignRoleFormValues, RoleFormValues } from "./validator";
 export const useUpdateRoleMutation = () => {
   const queryClient = useQueryClient();

@@ -20,4 +20,9 @@ export const API_ENDPOINTS = {
     PERMISSIONS: "/permissions",
     ACTIONS: "/actions"
   },
+  MENU_CATEGORIES: "/menu-categories",
+  GALLERY: {
+    FOLDERS: "/upload/db-folders",
+    CREATE_FOLDER: "/upload/create-folder",
+  },
 };
