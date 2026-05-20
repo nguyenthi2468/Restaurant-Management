@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
     ACTIONS: "/actions"
   },
   MENU_CATEGORIES: "/menu-categories",
+  MENU_ITEMS: "/menu-items",
   GALLERY: {
     FOLDERS: "/upload/db-folders",
     CREATE_FOLDER: "/upload/create-folder",

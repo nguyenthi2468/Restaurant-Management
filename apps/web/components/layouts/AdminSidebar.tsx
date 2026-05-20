@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText } from 'lucide-react';
+import { Bookmark, ChefHat, FileText } from 'lucide-react';
 import {
   ChevronDown,
   Home,
@@ -54,6 +54,18 @@ export const navItems: NavItem[] = [
     href: ROUTES.ADMIN_NEWS,
     icon: FileText,
     action: "news.read",
+  },
+  {
+    title: 'Menu Categories',
+    href: ROUTES.ADMIN_MENU_CATEGORIES,
+    icon: Bookmark,
+    action: "menu_categories.read",
+  },
+  {
+    title: 'Menu Items',
+    href: ROUTES.ADMIN_MENU_ITEMS,
+    icon: ChefHat,
+    action: "menu_items.read",
   },
   {
     title: 'Users',

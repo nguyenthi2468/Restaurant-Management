@@ -20,4 +20,5 @@ export const ROUTES = {
   ADMIN_PERMISSIONS: '/admin/users/permissions',
   ADMIN_ACTIONS: '/admin/users/actions',
   ADMIN_MENU_CATEGORIES: '/admin/menu-categories',
+  ADMIN_MENU_ITEMS: '/admin/menu-items',
 };

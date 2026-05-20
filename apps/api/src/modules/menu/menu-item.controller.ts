@@ -37,8 +37,8 @@ export class MenuItemController {
   ) {}
 
   @Post()
-  @Roles('admin', 'manager')
-  @UseGuards(RolesGuard)
+  // @Roles('admin', 'manager')
+  // @UseGuards(RolesGuard)
   @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: 'Tạo món ăn mới' })
   @ApiConsumes('multipart/form-data')
