@@ -1,11 +1,7 @@
 'use client';
 
-import { Bookmark, ChefHat, FileText } from 'lucide-react';
-import {
-  ChevronDown,
-  Home,
-  Users,
-} from 'lucide-react';
+import { Bookmark, ChefHat, FileText, Receipt } from 'lucide-react';
+import { ChevronDown, Home, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -47,54 +43,69 @@ export const navItems: NavItem[] = [
     title: 'Dashboard',
     href: ROUTES.ADMIN_DASHBOARD,
     icon: Home,
-    action: "dashboard.read",
+    action: 'dashboard.read',
   },
   {
     title: 'News',
     href: ROUTES.ADMIN_NEWS,
     icon: FileText,
-    action: "news.read",
+    action: 'news.read',
   },
   {
     title: 'Menu Categories',
     href: ROUTES.ADMIN_MENU_CATEGORIES,
     icon: Bookmark,
-    action: "menu_categories.read",
+    action: 'menu_categories.read',
   },
   {
     title: 'Menu Items',
     href: ROUTES.ADMIN_MENU_ITEMS,
     icon: ChefHat,
-    action: "menu_items.read",
+    action: 'menu_items.read',
+  },
+  {
+    title: 'Cashier',
+    href: ROUTES.ADMIN_CASHIER,
+    icon: Receipt,
+    action: 'cashier.read',
   },
   {
     title: 'Users',
     href: ROUTES.ADMIN_USERS,
     icon: Users,
-    action: "users.list",
+    action: 'users.list',
     submenu: [
-      { title: 'Users', href: ROUTES.ADMIN_USERS, action: "users.list" },
-      { title: 'Roles', href: ROUTES.ADMIN_ROLES, action: "roles.list" },
-      { title: 'Permissions', href: ROUTES.ADMIN_PERMISSIONS, action: "permissions.list" },
-      { title: 'Actions', href: ROUTES.ADMIN_ACTIONS, action: "actions.list" },
-    ]
+      { title: 'Users', href: ROUTES.ADMIN_USERS, action: 'users.list' },
+      { title: 'Roles', href: ROUTES.ADMIN_ROLES, action: 'roles.list' },
+      {
+        title: 'Permissions',
+        href: ROUTES.ADMIN_PERMISSIONS,
+        action: 'permissions.list',
+      },
+      { title: 'Actions', href: ROUTES.ADMIN_ACTIONS, action: 'actions.list' },
+    ],
   },
 ];
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { can } = usePermission();
-  
-  function filterMenu(menu: NavItem[], can: (action: string) => boolean): NavItem[] {
+
+  function filterMenu(
+    menu: NavItem[],
+    can: (action: string) => boolean,
+  ): NavItem[] {
     return menu
       .filter((item) => !item.action || can(item.action))
       .map((item) => ({
         ...item,
         submenu: item.submenu
-          ? item.submenu.filter((subItem) => !subItem.action || can(subItem.action))
+          ? item.submenu.filter(
+              (subItem) => !subItem.action || can(subItem.action),
+            )
           : undefined,
       }));
   }
-  
+
   const filteredMenu = filterMenu(navItems, can);
   // const filteredMenu = navItems;
   return (
