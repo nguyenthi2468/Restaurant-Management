@@ -33,7 +33,7 @@ import {
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private users: UsersService) {}
-  
+
   @Post('me/change-password')
   @ApiOperation({ summary: 'Đổi mật khẩu người dùng hiện tại' })
   @ApiBody({ type: ChangePasswordDto })
@@ -44,7 +44,7 @@ export class UsersController {
     await this.users.changePassword(req.user.id, body);
     return { ok: true };
   }
-  
+
   @Get('me')
   @ApiOperation({ summary: 'Lấy thông tin người dùng hiện tại' })
   @ApiResponse({
@@ -104,7 +104,9 @@ export class UsersController {
 
   @Get()
   @Action('users.list')
-  @ApiOperation({ summary: 'Lấy danh sách người dùng với bộ lọc và phân trang' })
+  @ApiOperation({
+    summary: 'Lấy danh sách người dùng với bộ lọc và phân trang',
+  })
   @ApiResponse({
     status: 200,
     description: 'Danh sách người dùng',
@@ -119,7 +121,7 @@ export class UsersController {
           excludeExtraneousValues: true,
         }),
       ),
-      meta, 
+      meta,
     };
   }
 }

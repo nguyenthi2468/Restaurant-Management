@@ -30,8 +30,6 @@ export class TableService {
       data: {
         name: dto.name,
         floor: dto.floor,
-        area: dto.area,
-        seats: dto.seats,
         status: dto.status,
       },
     });
@@ -102,8 +100,6 @@ export class TableService {
       data: {
         name: dto.name,
         floor: dto.floor,
-        area: dto.area,
-        seats: dto.seats,
         status: dto.status,
       },
     });

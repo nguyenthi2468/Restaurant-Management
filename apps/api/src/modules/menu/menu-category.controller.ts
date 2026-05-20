@@ -21,7 +21,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 
-@ApiTags('menu-categories')
+@ApiTags('Menu Categories Management')
 @ApiBearerAuth()
 @Controller('menu-categories')
 export class MenuCategoryController {

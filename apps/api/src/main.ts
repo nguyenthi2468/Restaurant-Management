@@ -32,8 +32,6 @@ async function createApp() {
       .addTag('roles', 'Quản lý vai trò và quyền')
       .addTag('permissions', 'Quản lý quyền truy cập')
       .addTag('actions', 'Quản lý hành động hệ thống')
-      .addTag('table', 'Quản lý bàn')
-      .addTag('order', 'Quản lý đơn hàng')
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api-docs', app, document);

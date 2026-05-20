@@ -1,6 +1,13 @@
-import { IsString, IsInt, IsEnum, IsOptional, Min, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsEnum,
+  IsOptional,
+  Min,
+  IsNotEmpty,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { TableArea, TableStatus } from '@prisma/client';
+import { TableStatus } from '@prisma/client';
 
 export class UpdateTableDto {
   @ApiPropertyOptional({
@@ -21,14 +28,7 @@ export class UpdateTableDto {
   @IsOptional()
   floor?: string;
 
-  @ApiPropertyOptional({
-    description: 'Khu vực bàn',
-    enum: TableArea,
-    example: TableArea.NORMAL,
-  })
-  @IsEnum(TableArea)
-  @IsOptional()
-  area?: TableArea;
+  // Removed area field as TableArea is no longer exported from @prisma/client
 
   @ApiPropertyOptional({
     description: 'Số ghế (sức chứa) của bàn',
@@ -38,7 +38,7 @@ export class UpdateTableDto {
   @IsInt()
   @Min(1)
   @IsOptional()
-  seats?: number;
+  capacity?: number; // Renamed from seats to capacity
 
   @ApiPropertyOptional({
     description: 'Trạng thái bàn',
