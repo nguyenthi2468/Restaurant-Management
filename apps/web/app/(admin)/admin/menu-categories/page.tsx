@@ -13,7 +13,7 @@ import {
 } from '@/features/menu-categories';
 import { ApiError } from '@/types';
 import { Plus, Search } from 'lucide-react';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { ROUTES } from '@/constants';
 import Link from 'next/link';
 
