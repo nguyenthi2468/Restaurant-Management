@@ -7,11 +7,9 @@ import {
   IsBoolean,
   IsArray,
   ValidateNested,
+  IsNumber,
 } from 'class-validator';
-import {
-  ApiProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class IngredientDto {
@@ -145,7 +143,8 @@ export class CreateMenuItemDto {
 
   @ApiPropertyOptional({
     description: 'Mô tả món ăn',
-    example: 'Pizza truyền thống với sốt cà chua, phô mai mozzarella và lá húng quế',
+    example:
+      'Pizza truyền thống với sốt cà chua, phô mai mozzarella và lá húng quế',
   })
   @IsString()
   @IsOptional()
@@ -156,7 +155,7 @@ export class CreateMenuItemDto {
     example: 12.99,
     minimum: 0,
   })
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 3 })
   @Min(0)
   price: number;
 
