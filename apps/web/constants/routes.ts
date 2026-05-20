@@ -22,4 +22,5 @@ export const ROUTES = {
   ADMIN_MENU_CATEGORIES: '/admin/menu-categories',
   ADMIN_MENU_ITEMS: '/admin/menu-items',
   ADMIN_CASHIER: '/admin/cashier',
+  ADMIN_TABLES: '/admin/tables',
 };

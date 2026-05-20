@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, ChefHat, FileText, Receipt } from 'lucide-react';
+import { Armchair, Bookmark, ChefHat, FileText, Receipt } from 'lucide-react';
 import { ChevronDown, Home, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -62,6 +62,12 @@ export const navItems: NavItem[] = [
     href: ROUTES.ADMIN_MENU_ITEMS,
     icon: ChefHat,
     action: 'menu_items.read',
+  },
+  {
+    title: 'Tables',
+    href: ROUTES.ADMIN_TABLES,
+    icon: Armchair,
+    action: 'tables.read',
   },
   {
     title: 'Cashier',
