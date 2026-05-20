@@ -182,8 +182,10 @@ model FolderGallery {
 
 model Table {
   id        String      @id @default(cuid())
-  number    Int         @unique
-  capacity  Int
+  name      String      @unique
+  floor     String      
+  area      TableArea   @default(NORMAL)
+  seats  Int
   status    TableStatus @default(AVAILABLE)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
@@ -191,6 +193,11 @@ model Table {
   orders    Order[]
 
   @@index([status])
+}
+
+enum TableArea {
+  NORMAL
+  VIP
 }
 
 enum TableStatus {
@@ -207,10 +214,12 @@ model Order {
   tableId   String
   table     Table       @relation(fields: [tableId], references: [id])
   status    OrderStatus @default(PENDING)
-  total     Decimal     @db.Decimal(10, 2) @default(0)
+  totalAmount     Decimal     @db.Decimal(12, 3) @default(0)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-
+  note    String?
+  customerName    String?
+  customerPhone    String?
   items     OrderItem[]
 
   @@index([tableId])
@@ -224,7 +233,7 @@ model OrderItem {
   menuItemId String
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
   quantity   Int
-  price      Decimal  @db.Decimal(10, 2)
+  price      Decimal  @db.Decimal(12, 3)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -234,7 +243,6 @@ model OrderItem {
 
 enum OrderStatus {
   PENDING
-  PREPARING
   SERVED
   COMPLETED
   CANCELLED
