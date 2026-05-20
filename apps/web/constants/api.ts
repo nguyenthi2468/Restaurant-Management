@@ -27,4 +27,11 @@ export const API_ENDPOINTS = {
     FOLDERS: '/upload/db-folders',
     CREATE_FOLDER: '/upload/create-folder',
   },
+  ORDERS: {
+    BASE: '/orders',
+  },
+  ORDER_ITEMS: {
+    BASE: '/order-items',
+    ORDER: '/order-items/order',
+  },
 };

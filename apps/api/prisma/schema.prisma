@@ -214,7 +214,7 @@ model Order {
   tableId   String
   table     Table       @relation(fields: [tableId], references: [id])
   status    OrderStatus @default(PENDING)
-  totalAmount     Decimal     @db.Decimal(12, 3) @default(0)
+  total     Decimal     @db.Decimal(12, 3) @default(0)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   note    String?
@@ -273,7 +273,7 @@ model MenuItem {
   id            String   @id @default(cuid())
   name          String
   description   String?
-  price         Decimal  @db.Decimal(10, 2) // Price in currency units
+  price         Decimal  @db.Decimal(12, 3) // Price in currency units
   categoryId    String
   category      MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   imageId       String?
@@ -344,7 +344,7 @@ model MenuItemOptionValue {
   name          String   // e.g., "Small", "Medium", "Large" or "Mild", "Medium", "Hot"
   description   String?
   // Additional price for this option value
-  priceAdjustment Decimal @db.Decimal(10, 2) @default(0) // Can be positive or negative
+  priceAdjustment Decimal @db.Decimal(12, 3) @default(0) // Can be positive or negative
   // For ordering values within an option
   position      Int      @default(0)
   createdAt     DateTime @default(now())
