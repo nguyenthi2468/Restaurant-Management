@@ -14,7 +14,9 @@ export class MenuItemService {
     });
 
     if (!category) {
-      throw new NotFoundException(`Menu category with ID ${createMenuItemDto.categoryId} not found`);
+      throw new NotFoundException(
+        `Menu category with ID ${createMenuItemDto.categoryId} not found`,
+      );
     }
 
     // Start a transaction to create menu item, ingredients, and options
@@ -38,9 +40,12 @@ export class MenuItemService {
       });
 
       // Create ingredients if provided
-      if (createMenuItemDto.ingredients && createMenuItemDto.ingredients.length > 0) {
+      if (
+        createMenuItemDto.ingredients &&
+        createMenuItemDto.ingredients.length > 0
+      ) {
         await tx.menuItemIngredient.createMany({
-          data: createMenuItemDto.ingredients.map(ing => ({
+          data: createMenuItemDto.ingredients.map((ing) => ({
             menuItemId: menuItem.id,
             ingredientName: ing.ingredientName,
             quantity: ing.quantity,
@@ -68,7 +73,7 @@ export class MenuItemService {
           // Create option values
           if (opt.values && opt.values.length > 0) {
             await tx.menuItemOptionValue.createMany({
-              data: opt.values.map(val => ({
+              data: opt.values.map((val) => ({
                 optionId: option.id,
                 name: val.name,
                 description: val.description,
@@ -149,24 +154,26 @@ export class MenuItemService {
       });
 
       if (!category) {
-        throw new NotFoundException(`Menu category with ID ${updateMenuItemDto.categoryId} not found`);
+        throw new NotFoundException(
+          `Menu category with ID ${updateMenuItemDto.categoryId} not found`,
+        );
       }
     }
 
-    // Filter out undefined values from the DTO
-    const updateData: any = {};
-    for (const key in updateMenuItemDto) {
-      if (updateMenuItemDto[key] !== undefined) {
-        updateData[key] = updateMenuItemDto[key];
+    // Filter out undefined values from the DTO, excluding 'ingredients' and 'options'
+    const updateData: Record<string, any> = {};
+    Object.entries(updateMenuItemDto).forEach(([key, value]) => {
+      if (value !== undefined && key !== 'ingredients' && key !== 'options') {
+        updateData[key] = value;
       }
-    }
+    });
 
     // Start a transaction to update menu item, ingredients, and options
     return this.prisma.$transaction(async (tx) => {
       // Update menu item with filtered data
       const updatedMenuItem = await tx.menuItem.update({
         where: { id },
-        data: updateData,
+        data: updateData as any,
       });
 
       // Handle ingredients: delete existing and create new if provided
@@ -177,9 +184,12 @@ export class MenuItemService {
         });
 
         // Create new ingredients if provided
-        if (updateMenuItemDto.ingredients && updateMenuItemDto.ingredients.length > 0) {
+        if (
+          updateMenuItemDto.ingredients &&
+          updateMenuItemDto.ingredients.length > 0
+        ) {
           await tx.menuItemIngredient.createMany({
-            data: updateMenuItemDto.ingredients.map(ing => ({
+            data: updateMenuItemDto.ingredients.map((ing) => ({
               menuItemId: id,
               ingredientName: ing.ingredientName,
               quantity: ing.quantity,
@@ -215,7 +225,7 @@ export class MenuItemService {
             // Create option values
             if (opt.values && opt.values.length > 0) {
               await tx.menuItemOptionValue.createMany({
-                data: opt.values.map(val => ({
+                data: opt.values.map((val) => ({
                   optionId: option.id,
                   name: val.name,
                   description: val.description,
