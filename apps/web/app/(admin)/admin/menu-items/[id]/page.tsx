@@ -37,7 +37,7 @@ function MenuItemPage() {
       ? {
           name: menuItem.name ?? '',
           description: menuItem.description ?? '',
-          price: menuItem.price ?? 0,
+          price: Number(menuItem.price) ?? 0,
           categoryId: menuItem.categoryId ?? '',
           imageId: menuItem.imageId ?? '',
           position: menuItem.position ?? 0,

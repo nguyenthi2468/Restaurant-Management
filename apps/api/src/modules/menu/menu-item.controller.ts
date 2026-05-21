@@ -55,6 +55,7 @@ export class MenuItemController {
         description: { type: 'string' },
         price: { type: 'number' },
         categoryId: { type: 'string' },
+        imageId: { type: 'string' },
         position: { type: 'number' },
         isAvailable: { type: 'boolean' },
         isVegetarian: { type: 'boolean' },
@@ -107,23 +108,10 @@ export class MenuItemController {
   @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  async create(
-    @UploadedFile() image: Express.Multer.File,
-    @Body() createMenuItemDto: CreateMenuItemDto,
-  ) {
-    let imageId = createMenuItemDto.imageId; // Giữ imageId từ body làm default
+  async create(@Body() createMenuItemDto: CreateMenuItemDto) {
+  
 
-    if (image) {
-      const uploaded = await this.imageService.uploadImage(image, {
-        folder: 'menu-items',
-      });
-      imageId = uploaded.id; // Dùng id (PK), không phải publicId
-    }
-
-    return this.menuItemService.create({
-      ...createMenuItemDto,
-      imageId,
-    });
+    return this.menuItemService.create(createMenuItemDto);
   }
 
   @Get()
@@ -168,6 +156,7 @@ export class MenuItemController {
         description: { type: 'string' },
         price: { type: 'number' },
         categoryId: { type: 'string' },
+        imageId: { type: 'string' },
         position: { type: 'number' },
         isAvailable: { type: 'boolean' },
         isVegetarian: { type: 'boolean' },
@@ -223,21 +212,10 @@ export class MenuItemController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async update(
     @Param('id') id: string,
-    @UploadedFile() image: Express.Multer.File,
     @Body() updateMenuItemDto: UpdateMenuItemDto,
   ) {
-    const imageId = image
-      ? (
-          await this.imageService.uploadImage(image, {
-            folder: 'menu-items',
-          })
-        ).publicId
-      : undefined;
 
-    return this.menuItemService.update(id, {
-      ...updateMenuItemDto,
-      imageId,
-    });
+    return this.menuItemService.update(id, updateMenuItemDto);
   }
 
   @Delete(':id')

@@ -42,7 +42,7 @@ function MenuCategoryManagementTable({ menuCategories, onDelete }: MenuCategoryT
                         alt={menuCategory.name}
                         width={200}
                         height={200}
-                        className="h-30 w-30 object-cover rounded"
+                        className="h-20 w-20 object-cover rounded"
                       />
                     ) : (
                       <div className="h-6 w-6 bg-secondary/50 rounded flex items-center justify-center">

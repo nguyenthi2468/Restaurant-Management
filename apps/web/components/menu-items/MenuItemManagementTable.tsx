@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card';
 import { MenuItem } from '@/features/menu-items';
 import Link from 'next/link';
 import { ROUTES } from '@/constants';
+import Image from 'next/image';
 
 interface MenuItemTableProps {
   menuItems: MenuItem[];
@@ -51,10 +52,12 @@ function MenuItemManagementTable({ menuItems, onDelete }: MenuItemTableProps) {
               <TableCell className="text-foreground font-medium">
                 <div className="flex items-center gap-3">
                   {menuItem.image ? (
-                    <img
+                    <Image
                       src={menuItem.image.url}
                       alt={menuItem.name}
-                      className="h-12 w-12 object-cover rounded"
+                      width={200}
+                      height={200}
+                      className="h-20 w-20 object-cover rounded"
                     />
                   ) : (
                     <div className="h-12 w-12 bg-secondary/50 rounded flex items-center justify-center">
