@@ -34,4 +34,8 @@ export const API_ENDPOINTS = {
     BASE: '/order-items',
     ORDER: '/order-items/order',
   },
+  BOOKINGS: {
+    BASE: '/bookings',
+    VNPAY_RETURN: '/bookings/vnpay-return',
+  },
 };
