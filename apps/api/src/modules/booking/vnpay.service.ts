@@ -10,22 +10,20 @@ export class VnpayService {
   private readonly returnUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    // Config values are required; use non‑null assertion to satisfy TypeScript
     this.tmnCode = this.configService.get<string>('VNP_TMN_CODE')!;
     this.hashSecret = this.configService.get<string>('VNP_HASH_SECRET')!;
     this.vnpUrl = this.configService.get<string>('VNP_URL')!;
     this.returnUrl = this.configService.get<string>('VNP_RETURN_URL')!;
   }
 
-  /**
-   * Generate VNPay payment URL.
-   * @param amount   Amount in VND (integer).
-   * @param orderId  Unique order identifier.
-   * @param orderInfo Description of the order.
-   */
+  // Hàm encode đúng chuẩn VNPAY: space → "+", các ký tự khác → %XX
+  private encodeValue(val: string | number): string {
+    return encodeURIComponent(String(val)).replace(/%20/g, '+');
+  }
+
   createPaymentUrl(amount: number, orderId: string, orderInfo: string): string {
     const createDate = this.formatDate(new Date());
-    console.log(this.tmnCode, this.hashSecret, this.vnpUrl, this.returnUrl); // Debug log to verify config values
+
     const vnpParams: Record<string, string | number> = {
       vnp_Version: '2.1.0',
       vnp_Command: 'pay',
@@ -35,54 +33,52 @@ export class VnpayService {
       vnp_TxnRef: orderId,
       vnp_OrderInfo: orderInfo,
       vnp_OrderType: 'billpayment',
-      vnp_Locale: 'vn', // ← thêm dòng này
+      vnp_Locale: 'vn',
       vnp_CreateDate: createDate,
       vnp_IpAddr: '127.0.0.1',
       vnp_ReturnUrl: this.returnUrl,
     };
 
-    const sortedParams = this.sortParams(vnpParams);
-    const queryStr = this.buildQueryString(sortedParams);
-    const signature = this.generateSignature(queryStr);
+    const sortedKeys = Object.keys(vnpParams).sort();
 
-    return `${this.vnpUrl}?${queryStr}&vnp_SecureHash=${signature}`;
+    // hashData: space → "+", dùng để ký
+    const hashData = sortedKeys
+      .map((key) => `${key}=${this.encodeValue(vnpParams[key])}`)
+      .join('&');
+
+    // queryString: dùng cho URL (giống hashData vì đã encode)
+    const queryString = hashData;
+
+    console.log('hashData:', hashData);
+
+    const signature = this.generateSignature(hashData);
+    return `${this.vnpUrl}?${queryString}&vnp_SecureHash=${signature}`;
   }
 
-  // Ensure a newline before the next method for readability
-  // (ESLint rule: newline-before-return)
-
-  /**
-   * Verify VNPay response signature.
-   * @param params All query parameters returned by VNPay (including vnp_SecureHash).
-   */
   verifyResponse(params: Record<string, any>): boolean {
-    const { vnp_SecureHash, ...data } = params;
-    const sortedParams = this.sortParams(data);
-    const queryStr = this.buildQueryString(sortedParams);
-    const expectedSignature = this.generateSignature(queryStr);
+    const { vnp_SecureHash, vnp_SecureHashType, ...data } = params;
+
+    const sortedKeys = Object.keys(data).sort();
+
+    // NestJS đã decode sẵn, cần encode lại đúng chuẩn VNPAY
+    const hashData = sortedKeys
+      .map((key) => `${key}=${this.encodeValue(data[key])}`)
+      .join('&');
+
+    const expectedSignature = this.generateSignature(hashData);
     return vnp_SecureHash === expectedSignature;
   }
 
-  private generateSignature(queryStr: string): string {
+  private generateSignature(hashData: string): string {
     return crypto
       .createHmac('sha512', this.hashSecret)
-      .update(queryStr)
+      .update(Buffer.from(hashData, 'utf-8'))
       .digest('hex');
-  }
-
-  private sortParams(params: Record<string, any>): string[] {
-    return Object.keys(params)
-      .sort()
-      .map((key) => `${key}=${params[key]}`);
-  }
-
-  private buildQueryString(sortedParams: string[]): string {
-    return sortedParams.join('&');
   }
 
   private formatDate(date: Date): string {
     const pad = (n: number) => n.toString().padStart(2, '0');
-    const d = new Date(date.getTime() + 7 * 60 * 60 * 1000); // UTC+7
+    const d = new Date(date.getTime() + 7 * 60 * 60 * 1000);
     return (
       d.getUTCFullYear().toString() +
       pad(d.getUTCMonth() + 1) +

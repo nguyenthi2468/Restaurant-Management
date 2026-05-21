@@ -26,6 +26,19 @@ import { Action } from '../auth/decorator/action.decorator';
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
+  @Get('vnpay-return')
+  @Action('booking:handle_vnpay_return')
+  @ApiOperation({ summary: 'Handle VNPay return callback' })
+  @ApiResponse({
+    status: 200,
+    description: 'Booking updated',
+    type: BookingDto,
+  })
+  async handleVnpayReturn(@Query() query: any): Promise<BookingDto> {
+    const booking = await this.bookingService.handleVnpayReturn(query);
+    return booking as unknown as BookingDto;
+  }
+
   @Post()
   @Action('booking:create')
   @ApiOperation({ summary: 'Create a new booking' })
@@ -191,18 +204,5 @@ export class BookingController {
   ): Promise<{ paymentUrl: string }> {
     const paymentUrl = await this.bookingService.createVnpayPayment(id);
     return { paymentUrl };
-  }
-
-  @Get('vnpay-return')
-  @Action('booking:handle_vnpay_return')
-  @ApiOperation({ summary: 'Handle VNPay return callback' })
-  @ApiResponse({
-    status: 200,
-    description: 'Booking updated',
-    type: BookingDto,
-  })
-  async handleVnpayReturn(@Query() query: any): Promise<BookingDto> {
-    const booking = await this.bookingService.handleVnpayReturn(query);
-    return booking as unknown as BookingDto;
   }
 }
