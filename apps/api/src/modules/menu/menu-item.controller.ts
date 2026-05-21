@@ -110,13 +110,14 @@ export class MenuItemController {
     @UploadedFile() image: Express.Multer.File,
     @Body() createMenuItemDto: CreateMenuItemDto,
   ) {
-    const imageId = image
-      ? (
-          await this.imageService.uploadImage(image, {
-            folder: 'menu-items',
-          })
-        ).publicId
-      : undefined;
+    let imageId = createMenuItemDto.imageId; // Giữ imageId từ body làm default
+
+    if (image) {
+      const uploaded = await this.imageService.uploadImage(image, {
+        folder: 'menu-items',
+      });
+      imageId = uploaded.id; // Dùng id (PK), không phải publicId
+    }
 
     return this.menuItemService.create({
       ...createMenuItemDto,
