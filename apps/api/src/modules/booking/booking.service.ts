@@ -8,7 +8,12 @@ import { TableService } from '../table/table.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { CreateBookingMenuItemDto } from './dto/create-booking-menu-item.dto';
-import { Booking, BookingStatus, DepositStatus } from '@prisma/client';
+import {
+  Booking,
+  BookingStatus,
+  DepositStatus,
+  PaymentStatus,
+} from '@prisma/client';
 import { VnpayService } from './vnpay.service';
 import { Prisma } from '@prisma/client'; // Import Prisma types
 
@@ -116,6 +121,7 @@ export class BookingService {
       include: {
         bookingTables: true,
         preOrderItems: true,
+        payments: true,
       },
     });
 
@@ -127,6 +133,7 @@ export class BookingService {
       include: {
         bookingTables: true,
         preOrderItems: true,
+        payments: true,
       },
     });
   }
@@ -135,8 +142,21 @@ export class BookingService {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: {
-        bookingTables: true,
-        preOrderItems: true,
+        bookingTables: {
+          include: {
+            table: {
+              include: {
+                floor: true,
+              },
+            },
+          },
+        },
+        preOrderItems: {
+          include: {
+            menuItem: true,
+          },
+        },
+        payments: true,
       },
     });
     if (!booking) {
@@ -298,7 +318,7 @@ export class BookingService {
     return this.prisma.booking.update({
       where: { id },
       data: { depositStatus: DepositStatus.REFUNDED, depositAmount: 0 },
-      include: { bookingTables: true, preOrderItems: true },
+      include: { bookingTables: true, preOrderItems: true, payments: true },
     });
   }
 
@@ -413,15 +433,17 @@ export class BookingService {
 
   /**
    * Handles the return from VNPay after payment attempt.
+   * Creates a Payment record for successful or failed transactions.
    */
-  async handleVnpayReturn(params: VnpayReturnParams): Promise<Booking> {
+  async handleVnpayReturn(params: VnpayReturnParams): Promise<{responseCode: string, bookingId: string}> {
     const isValidSignature = this.vnpayService.verifyResponse(params);
 
     if (!isValidSignature) {
       throw new ConflictException('Invalid VNPay signature');
     }
 
-    const { vnp_TxnRef, vnp_TransactionStatus } = params;
+    const { vnp_TxnRef, vnp_TransactionStatus, vnp_Amount, vnp_TransactionNo } =
+      params;
 
     const booking = await this.prisma.booking.findUnique({
       where: { id: vnp_TxnRef },
@@ -431,14 +453,47 @@ export class BookingService {
       throw new NotFoundException(`Booking with id ${vnp_TxnRef} not found`);
     }
 
+    // Calculate actual amount from VNPay (amount is multiplied by 100)
+    const actualAmount = vnp_Amount
+      ? Number(vnp_Amount) / 100
+      : Number(booking.depositAmount);
+
+    // Generate transaction code from VNPay or create one
+    const transactionCode =
+      vnp_TransactionNo || `VNP_${Date.now()}_${vnp_TxnRef}`;
+
     if (vnp_TransactionStatus === '00') {
-      // Update deposit status to PAID
-      return this.prisma.booking.update({
-        where: { id: vnp_TxnRef },
-        data: { depositStatus: DepositStatus.PAID },
-      });
+      // Payment successful - Create SUCCESS payment record and update booking
+      const [updatedBooking] = await this.prisma.$transaction([
+        this.prisma.booking.update({
+          where: { id: vnp_TxnRef },
+          data: {
+            depositStatus: DepositStatus.PAID,
+            status: BookingStatus.CONFIRMED,
+          },
+        }),
+        this.prisma.payment.create({
+          data: {
+            bookingId: vnp_TxnRef,
+            transactionCode,
+            amount: actualAmount,
+            status: PaymentStatus.SUCCESS,
+          },
+        }),
+      ]);
+
+      return {responseCode: vnp_TransactionStatus, bookingId:vnp_TxnRef };
     } else {
-      // Handle failed transaction
+      // Payment failed - Create FAILED payment record
+      await this.prisma.payment.create({
+        data: {
+          bookingId: vnp_TxnRef,
+          transactionCode,
+          amount: actualAmount,
+          status: PaymentStatus.FAILED,
+        },
+      });
+
       throw new ConflictException(
         `VNPay transaction failed with status: ${vnp_TransactionStatus}`,
       );

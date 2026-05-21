@@ -8,7 +8,9 @@ import {
   Param,
   Delete,
   Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -34,9 +36,19 @@ export class BookingController {
     description: 'Booking updated',
     type: BookingDto,
   })
-  async handleVnpayReturn(@Query() query: any): Promise<BookingDto> {
+  async handleVnpayReturn(
+    @Query() query: any,
+    @Res() res: Response,
+  ): Promise<void> {
     const booking = await this.bookingService.handleVnpayReturn(query);
-    return booking as unknown as BookingDto;
+    const status = booking.responseCode === '00' ? 'success' : 'failed';
+
+    const feUrl = process.env.PUBLIC_WEB_URL ?? 'http://localhost:3000';
+
+    return res.redirect(
+      `${feUrl}/reservation/payment-result?payment_status=${status}` +
+        `&booking_id=${booking.bookingId ?? ''}`,
+    );
   }
 
   @Post()

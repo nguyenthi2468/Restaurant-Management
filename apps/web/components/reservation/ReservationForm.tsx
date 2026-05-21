@@ -31,10 +31,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { formatCurrency } from '@/utils/currency';
+import { useRouter } from 'next/navigation';
+import { Booking } from '@/features/booking/types';
 
 export function ReservationForm() {
   const [loading, setLoading] = useState(false);
   const [selectedFloorId, setSelectedFloorId] = useState<string>('');
+  const router = useRouter();
   const createBookingMutation = useCreateBookingMutation();
   const createVnpayPaymentMutation = useCreateVnpayPaymentMutation();
   const { data: floors = [], isLoading: floorsLoading } = useFloorsQuery();
@@ -85,8 +88,19 @@ export function ReservationForm() {
   const onSubmit = async (data: BookingFormValues) => {
     setLoading(true);
     try {
-      const booking = await createBookingMutation.mutateAsync(data);
-      await createVnpayPaymentMutation.mutateAsync(booking.id);
+      const booking: Booking = await createBookingMutation.mutateAsync(data);
+
+      // Check if depositAmount > 0, redirect to confirm-payment page
+      const depositAmount =
+        typeof booking.depositAmount === 'string'
+          ? parseFloat(booking.depositAmount)
+          : booking.depositAmount;
+
+      if (depositAmount > 0) {
+        router.push(`/reservation/confirm-payment?bookingId=${booking.id}`);
+      } else {
+        router.push('/reservation/success');
+      }
     } catch (error) {
       console.error('Booking error:', error);
       setLoading(false);

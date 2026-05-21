@@ -1,3 +1,5 @@
+import { Floor } from "../floor";
+
 export enum BookingStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
@@ -20,7 +22,7 @@ export interface BookingTable {
   table?: {
     id: string;
     name: string;
-    floor: string;
+    floor: Floor;
     seats: number;
   };
 }
