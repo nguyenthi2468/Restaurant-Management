@@ -13,8 +13,9 @@ import {
 import { MenuItemService } from './menu-item.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorator/roles.decorator';
+import { Action } from '../auth/decorator/action.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActionGuard } from '../auth/guards/action.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageService } from '../image/image.service';
 import {
@@ -27,7 +28,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 
-@ApiTags('menu-items')
+@ApiTags('Menu Items Management')
 @ApiBearerAuth()
 @Controller('menu-items')
 export class MenuItemController {
@@ -37,8 +38,8 @@ export class MenuItemController {
   ) {}
 
   @Post()
-  // @Roles('admin', 'manager')
-  // @UseGuards(RolesGuard)
+  @Action('menu-item:create')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: 'Tạo món ăn mới' })
   @ApiConsumes('multipart/form-data')
@@ -150,8 +151,8 @@ export class MenuItemController {
   }
 
   @Patch(':id')
-  @Roles('admin', 'manager')
-  @UseGuards(RolesGuard)
+  @Action('menu-item:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: 'Cập nhật món ăn' })
   @ApiConsumes('multipart/form-data')
@@ -240,8 +241,8 @@ export class MenuItemController {
   }
 
   @Delete(':id')
-  @Roles('admin', 'manager')
-  @UseGuards(RolesGuard)
+  @Action('menu-item:delete')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Xóa món ăn' })
   @ApiResponse({
     status: 200,

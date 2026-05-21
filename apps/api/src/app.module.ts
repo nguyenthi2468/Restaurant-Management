@@ -18,6 +18,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { TableModule } from './modules/table/table.module';
 import { OrderModule } from './modules/order/order.module';
 import { OrderItemModule } from './modules/order-item/order-item.module';
+import { BookingModule } from './modules/booking/booking.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { OrderItemModule } from './modules/order-item/order-item.module';
     TableModule,
     OrderModule,
     OrderItemModule,
+    BookingModule,
   ],
   controllers: [AppController],
   providers: [

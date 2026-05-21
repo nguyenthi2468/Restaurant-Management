@@ -72,7 +72,7 @@ function MenuCategoryPage() {
       <div className="w-full">
         <MenuCategoryForm
           menuCategory={initialData}
-          initialImageUrl={menuCategory?.image?.url}
+          initialImageUrl={menuCategory?.image?.secureUrl}
           onSubmit={onSubmit}
           isSubmitting={isSaving}
         />

@@ -7,6 +7,7 @@ import {
   IsBoolean,
   IsArray,
   ValidateNested,
+  IsNumber,
 } from 'class-validator';
 import {
   ApiPropertyOptional,
@@ -37,7 +38,7 @@ export class UpdateMenuItemDto {
     example: 15.99,
     minimum: 0,
   })
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 3 })
   @Min(0)
   @IsOptional()
   price?: number;

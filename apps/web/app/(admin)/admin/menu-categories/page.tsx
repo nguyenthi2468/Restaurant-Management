@@ -13,8 +13,7 @@ import {
 } from '@/features/menu-categories';
 import { ApiError } from '@/types';
 import { Plus, Search } from 'lucide-react';
-import React, { useState } from 'react';
-import toast from 'react-hot-toast';
+import  { useState } from 'react';
 import { ROUTES } from '@/constants';
 import Link from 'next/link';
 
@@ -35,15 +34,12 @@ function MenuCategoriesPage() {
     if (deleteId) {
       deleteMenuCategoryMutation.mutate(deleteId, {
         onSuccess: () => {
-          toast.success('Menu category deleted successfully');
           setOpenDeleteDialog(false);
           setDeleteId(null);
         },
         onError: (error: any) => {
           const err = error as ApiError;
-          toast.error(
-            err?.response?.data.message || 'Failed to delete menu category',
-          );
+         console.error(err);
         },
       });
     }

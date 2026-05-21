@@ -20,16 +20,19 @@ import {
   ApiCreatedResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Action } from '../auth/decorator/action.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActionGuard } from '../auth/guards/action.guard';
 
-@ApiTags('menu-categories')
+@ApiTags('Menu Categories Management')
 @ApiBearerAuth()
 @Controller('menu-categories')
 export class MenuCategoryController {
   constructor(private readonly menuCategoryService: MenuCategoryService) {}
 
   @Post()
-  @Roles('admin', 'manager')
-  @UseGuards(RolesGuard)
+  @Action('menu-category:create')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Tạo danh mục menu mới' })
   @ApiCreatedResponse({
     description: 'Danh mục menu đã được tạo thành công',
@@ -67,8 +70,8 @@ export class MenuCategoryController {
   }
 
   @Patch(':id')
-  @Roles('admin', 'manager')
-  @UseGuards(RolesGuard)
+  @Action('menu-category:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Cập nhật danh mục menu' })
   @ApiResponse({
     status: 200,
@@ -86,8 +89,8 @@ export class MenuCategoryController {
   }
 
   @Delete(':id')
-  @Roles('admin', 'manager')
-  @UseGuards(RolesGuard)
+  @Action('menu-category:delete')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Xóa danh mục menu' })
   @ApiResponse({
     status: 200,
