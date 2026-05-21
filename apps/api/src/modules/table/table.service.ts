@@ -86,7 +86,7 @@ export class TableService {
   }
 
   async update(id: string, dto: UpdateTableDto): Promise<Table> {
-    await this.findOne(id); // throws 404 if not found
+    await this.findOne(id);
 
     if (dto.name) {
       const existing = await this.prisma.table.findUnique({
@@ -110,7 +110,23 @@ export class TableService {
   }
 
   async remove(id: string): Promise<Table> {
-    await this.findOne(id); // throws 404 if not found
+    await this.findOne(id);
+
+    // Ensure no bookings exist for this table in the future
+    const now = new Date();
+    const futureBookings = await this.prisma.bookingTable.findMany({
+      where: {
+        tableId: id,
+        booking: {
+          AND: [{ bookingTime: { lte: now } }, { endTime: { gte: now } }],
+        },
+      },
+    });
+    if (futureBookings.length > 0) {
+      throw new ConflictException(
+        'Không thể xóa bàn vì có đặt bàn đang tồn tại',
+      );
+    }
 
     const orderCount = await this.prisma.order.count({
       where: { tableId: id },
@@ -122,5 +138,30 @@ export class TableService {
     }
 
     return this.prisma.table.delete({ where: { id } });
+  }
+
+  /**
+   * Check if a set of tables are available for a given time range.
+   * Throws ConflictException if any table is already booked.
+   */
+  async checkAvailability(
+    tableIds: string[],
+    start: Date,
+    end: Date,
+  ): Promise<void> {
+    const overlapping = await this.prisma.bookingTable.findMany({
+      where: {
+        tableId: { in: tableIds },
+        booking: {
+          AND: [{ bookingTime: { lt: end } }, { endTime: { gt: start } }],
+        },
+      },
+    });
+    if (overlapping.length > 0) {
+      const conflictedTableIds = overlapping.map((b) => b.tableId).join(', ');
+      throw new ConflictException(
+        `Bàn(s) ${conflictedTableIds} không khả dụng trong khoảng thời gian đã chọn`,
+      );
+    }
   }
 }

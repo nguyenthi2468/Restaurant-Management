@@ -36,6 +36,7 @@ model User {
   resetTokens      PasswordResetToken[]
   galleries        ImageGallery[]
   folderGalleries  FolderGallery[]
+  bookings         Booking[] // Added for Booking relation
 
 }
 model Role {
@@ -191,6 +192,7 @@ model Table {
   updatedAt DateTime    @updatedAt
 
   orders    Order[]
+  bookings  BookingTable[] // Added for BookingTable relation
 
   @@index([status])
 }
@@ -295,6 +297,7 @@ model MenuItem {
   ingredients   MenuItemIngredient[]
   options       MenuItemOption[] @relation("MenuItemOptions")
   orderItems    OrderItem[]
+  bookingItems  BookingMenuItem[] // Added for BookingMenuItem relation
 
   @@index([categoryId])
   @@index([isAvailable])
@@ -371,4 +374,68 @@ enum ImageKind {
   COVER // ảnh bìa/cover
   GALLERY // ảnh trong bộ sưu tập
   DOC // tài liệu/biên lai nếu cần
+}
+
+// ==================== BOOKING MODELS ====================
+
+model Booking {
+  id               String        @id @default(cuid())
+  customerId       String?
+  customer         User?         @relation(fields: [customerId], references: [id])
+  customerName     String
+  customerPhone    String
+  bookingTime      DateTime
+  endTime          DateTime
+  numberOfGuests   Int
+  numberOfChildren Int           @default(0)
+  note             String?
+  depositAmount    Decimal       @default(0) @db.Decimal(12, 3)
+  depositStatus    DepositStatus @default(PENDING)
+  status           BookingStatus @default(PENDING)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  bookingTables BookingTable[]
+  preOrderItems BookingMenuItem[]
+
+  @@index([bookingTime, endTime])
+}
+
+model BookingTable {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  tableId   String
+  table     Table    @relation(fields: [tableId], references: [id])
+
+  @@unique([bookingId, tableId])
+  @@index([tableId])
+}
+
+model BookingMenuItem {
+  id         String   @id @default(cuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity   Int
+  price      Decimal  @db.Decimal(12, 3)
+
+  @@unique([bookingId, menuItemId])
+  @@index([menuItemId])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum DepositStatus {
+  PENDING
+  PAID
+  REFUNDED
+  WAIVED
 }
