@@ -8,7 +8,7 @@ export const bookingTableSchema = z.object({
 export const bookingMenuItemSchema = z.object({
   menuItemId: z.string().min(1, 'Menu Item ID là bắt buộc'),
   quantity: z.number().int().min(1, 'Số lượng phải lớn hơn 0'),
-  price: z.number().min(0, 'Giá phải lớn hơn hoặc bằng 0'),
+  price: z.coerce.number().min(0, 'Giá phải lớn hơn hoặc bằng 0'),
 });
 
 export const bookingFormSchema = z

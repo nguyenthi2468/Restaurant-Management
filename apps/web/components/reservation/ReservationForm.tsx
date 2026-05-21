@@ -12,20 +12,40 @@ import {
   bookingFormSchema,
   BookingFormValues,
 } from '@/features/booking/validator';
-import { useCreateBookingMutation } from '@/features/booking/mutations';
+import {
+  useCreateBookingMutation,
+  useCreateVnpayPaymentMutation,
+} from '@/features/booking/mutations';
 import { useTablesQuery } from '@/features/tables/queries';
-import { useState } from 'react';
+import { useFloorsQuery } from '@/features/floor/queries';
+import { useMenuItemsQuery } from '@/features/menu-items/queries';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { formatCurrency } from '@/utils/currency';
 
 export function ReservationForm() {
   const [loading, setLoading] = useState(false);
+  const [selectedFloorId, setSelectedFloorId] = useState<string>('');
   const createBookingMutation = useCreateBookingMutation();
-  const { data: tables = [], isLoading: tablesLoading } = useTablesQuery();
+  const createVnpayPaymentMutation = useCreateVnpayPaymentMutation();
+  const { data: floors = [], isLoading: floorsLoading } = useFloorsQuery();
+  const { data: allTables = [], isLoading: tablesLoading } = useTablesQuery({
+    floorId: selectedFloorId,
+  });
+  const { data: menuItems = [], isLoading: menuItemsLoading } =
+    useMenuItemsQuery();
 
   const form = useForm<BookingFormValues>({
-    resolver: zodResolver(bookingFormSchema),
+    resolver: zodResolver(bookingFormSchema) as never,
     defaultValues: {
       customerName: '',
       customerPhone: '',
@@ -39,14 +59,36 @@ export function ReservationForm() {
     },
   });
 
+  useEffect(() => {
+    if (floors.length > 0 && !selectedFloorId) {
+      setSelectedFloorId(floors[0].id);
+    }
+  }, [floors, selectedFloorId]);
+
+  const numberOfGuests = form.watch('numberOfGuests') || 1;
+  const numberOfChildren = form.watch('numberOfChildren') || 0;
+  const totalPersons = numberOfGuests + numberOfChildren;
+
+  const tables = useMemo(() => {
+    return allTables.filter((table) => table.seats >= totalPersons);
+  }, [allTables, totalPersons]);
+
+  const preOrderItems = form.watch('preOrderItems') || [];
+
+  const totalAmount = useMemo(() => {
+    return preOrderItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+  }, [preOrderItems]);
+
   const onSubmit = async (data: BookingFormValues) => {
     setLoading(true);
     try {
-      await createBookingMutation.mutateAsync(data);
-      form.reset();
+      const booking = await createBookingMutation.mutateAsync(data);
+      await createVnpayPaymentMutation.mutateAsync(booking.id);
     } catch (error) {
       console.error('Booking error:', error);
-    } finally {
       setLoading(false);
     }
   };
@@ -65,6 +107,33 @@ export function ReservationForm() {
     } else {
       form.setValue('tables', [...currentTables, { tableId }]);
     }
+  };
+
+  const handleMenuItemToggle = (menuItemId: string, price: number) => {
+    const currentItems = form.getValues('preOrderItems') || [];
+    const existingItem = currentItems.find(
+      (item) => item.menuItemId === menuItemId,
+    );
+
+    if (existingItem) {
+      form.setValue(
+        'preOrderItems',
+        currentItems.filter((item) => item.menuItemId !== menuItemId),
+      );
+    } else {
+      form.setValue('preOrderItems', [
+        ...currentItems,
+        { menuItemId, quantity: 1, price },
+      ]);
+    }
+  };
+
+  const handleQuantityChange = (menuItemId: string, quantity: number) => {
+    const currentItems = form.getValues('preOrderItems') || [];
+    const updatedItems = currentItems.map((item) =>
+      item.menuItemId === menuItemId ? { ...item, quantity } : item,
+    );
+    form.setValue('preOrderItems', updatedItems);
   };
 
   return (
@@ -289,6 +358,30 @@ export function ReservationForm() {
 
       <FieldGroup>
         <Field>
+          <FieldLabel>Chọn tầng</FieldLabel>
+          {floorsLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <Select value={selectedFloorId} onValueChange={setSelectedFloorId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn tầng" />
+              </SelectTrigger>
+              <SelectContent>
+                {floors.map((floor) => (
+                  <SelectItem key={floor.id} value={floor.id}>
+                    {floor.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </Field>
+      </FieldGroup>
+
+      <FieldGroup>
+        <Field>
           <FieldLabel>Chọn bàn</FieldLabel>
           {tablesLoading ? (
             <div className="flex items-center justify-center py-4">
@@ -322,15 +415,97 @@ export function ReservationForm() {
         </Field>
       </FieldGroup>
 
+      <FieldGroup>
+        <Field>
+          <FieldLabel>Đặt món trước (tùy chọn)</FieldLabel>
+          {menuItemsLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border border-input rounded-md max-h-96 overflow-y-auto">
+                {menuItems
+                  .filter((item) => item.isAvailable)
+                  .map((menuItem) => {
+                    const selectedItem = preOrderItems.find(
+                      (item) => item.menuItemId === menuItem.id,
+                    );
+                    const isSelected = !!selectedItem;
+
+                    return (
+                      <div
+                        key={menuItem.id}
+                        className="flex flex-col space-y-2 p-3 border border-input rounded-md"
+                      >
+                        <div className="flex items-start space-x-2">
+                          <Checkbox
+                            id={`menu-${menuItem.id}`}
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              handleMenuItemToggle(menuItem.id, menuItem.price)
+                            }
+                            disabled={loading}
+                          />
+                          <div className="flex-1">
+                            <Label
+                              htmlFor={`menu-${menuItem.id}`}
+                              className="text-sm font-medium cursor-pointer"
+                            >
+                              {menuItem.name}
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {menuItem.description}
+                            </p>
+                            <p className="text-sm font-semibold text-primary mt-1">
+                              {menuItem.price.toLocaleString('vi-VN')} đ
+                            </p>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <div className="flex items-center space-x-2 ml-6">
+                            <Label
+                              htmlFor={`quantity-${menuItem.id}`}
+                              className="text-xs"
+                            >
+                              Số lượng:
+                            </Label>
+                            <Input
+                              id={`quantity-${menuItem.id}`}
+                              type="number"
+                              min="1"
+                              value={selectedItem.quantity}
+                              onChange={(e) =>
+                                handleQuantityChange(
+                                  menuItem.id,
+                                  parseInt(e.target.value) || 1,
+                                )
+                              }
+                              className="w-20 h-8 text-sm"
+                              disabled={loading}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+              {preOrderItems.length > 0 && (
+                <div className="p-4 bg-muted rounded-md">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Tổng tiền đặt trước:</span>
+                    <span className="text-lg font-bold text-primary">
+                      {formatCurrency(totalAmount)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </Field>
+      </FieldGroup>
+
       <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => form.reset()}
-          disabled={loading}
-        >
-          Đặt lại
-        </Button>
         <Button type="submit" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Đặt bàn
