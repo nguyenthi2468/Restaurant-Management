@@ -1,4 +1,5 @@
 import { GalleryImages } from "../gallery";
+import { MenuCategory } from "../menu-categories";
 
 export interface MenuItem {
   id: string;
@@ -6,6 +7,7 @@ export interface MenuItem {
   description: string | null;
   price: number; // Decimal in Prisma, but number in JS/TS
   categoryId: string;
+  category: MenuCategory | null;
   imageId: string | null;
   image: GalleryImages | null;
   position: number;

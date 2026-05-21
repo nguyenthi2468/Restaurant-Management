@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card';
 import { MenuCategory } from '@/features/menu-categories';
 import Link from 'next/link';
 import { ROUTES } from '@/constants';
+import Image from 'next/image';
 interface MenuCategoryTableProps {
   menuCategories: MenuCategory[];
   onDelete: (id: string) => void;
@@ -36,10 +37,12 @@ function MenuCategoryManagementTable({ menuCategories, onDelete }: MenuCategoryT
                 <TableCell className="text-foreground font-medium">
                   <div className="flex items-center gap-2">
                     {menuCategory.image ? (
-                      <img 
-                        src={menuCategory.image.url} 
-                        alt={menuCategory.name} 
-                        className="h-6 w-6 object-cover rounded"
+                      <Image 
+                        src={menuCategory.image.secureUrl} 
+                        alt={menuCategory.name}
+                        width={200}
+                        height={200}
+                        className="h-30 w-30 object-cover rounded"
                       />
                     ) : (
                       <div className="h-6 w-6 bg-secondary/50 rounded flex items-center justify-center">

@@ -18,6 +18,12 @@ export class MenuCategoryService {
       where: { isActive: true },
       orderBy: { position: 'asc' },
       include: {
+        image: {
+          select: {
+            id: true,
+            secureUrl: true,
+          },
+        },
         menuItems: {
           where: { isAvailable: true },
           orderBy: { position: 'asc' },
@@ -30,6 +36,12 @@ export class MenuCategoryService {
     const menuCategory = await this.prisma.menuCategory.findUnique({
       where: { id },
       include: {
+         image: {
+          select: {
+            id: true,
+            secureUrl: true,
+          },
+        },
         menuItems: {
           where: { isAvailable: true },
           orderBy: { position: 'asc' },

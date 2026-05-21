@@ -74,7 +74,7 @@ function MenuItemManagementTable({ menuItems, onDelete }: MenuItemTableProps) {
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground text-sm">
-                {menuItem.categoryId}
+                {menuItem.category?.name || 'Không có danh mục'}
               </TableCell>
               <TableCell className="text-foreground font-semibold">
                 {formatPrice(menuItem.price)}
