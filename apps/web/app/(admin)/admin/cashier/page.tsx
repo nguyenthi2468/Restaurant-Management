@@ -62,14 +62,14 @@ export default function CashierPage() {
   );
 
   const floors = useMemo(() => {
-    const set = new Set(tables.map((t) => t.floor.name));
+    const set = new Set(tables.map((t) => t.floor));
     return ['Tất cả', ...Array.from(set).filter((f) => f !== 'Tất cả')];
   }, [tables]);
 
   const filteredTables = useMemo(() => {
     let result = tables;
     if (floorFilter !== 'Tất cả') {
-      result = result.filter((t) => t.floor.name === floorFilter);
+      result = result.filter((t) => t.floor === floorFilter);
     }
     if (statusFilter === 'occupied') {
       result = result.filter((t) => t.status === 'occupied');
