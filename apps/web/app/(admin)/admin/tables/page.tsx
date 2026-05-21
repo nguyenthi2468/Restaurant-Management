@@ -20,6 +20,7 @@ import {
   TableStatus,
   SearchTablesParams,
 } from '@/features/tables';
+import { useFloorsQuery } from '@/features/floor';
 import TableManagementTable from '@/components/tables/TableManagementTable';
 import TableFormDialog from '@/components/tables/TableFormDialog';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -35,17 +36,17 @@ function TablesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
 
   const debouncedNameFilter = useDebounce(nameFilter, 300);
-  const debouncedFloorFilter = useDebounce(floorFilter, 300);
 
   const searchParams: SearchTablesParams = useMemo(() => {
     const params: SearchTablesParams = {};
     if (debouncedNameFilter) params.name = debouncedNameFilter;
-    if (debouncedFloorFilter) params.floor = debouncedFloorFilter;
+    if (floorFilter) params.floorId = floorFilter;
     if (statusFilter) params.status = statusFilter;
     return params;
-  }, [debouncedNameFilter, debouncedFloorFilter, statusFilter]);
+  }, [debouncedNameFilter, floorFilter, statusFilter]);
 
   const { data, isLoading, isError } = useTablesQuery(searchParams);
+  const { data: floorsData } = useFloorsQuery();
   const [tableToEdit, setTableToEdit] = useState<Table | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -158,16 +159,25 @@ function TablesPage() {
                 className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
-            {/* Floor search */}
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Lọc theo tầng..."
-                value={floorFilter}
-                onChange={(e) => setFloorFilter(e.target.value)}
-                className="w-full pr-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
+            {/* Floor filter */}
+            <Select
+              value={floorFilter || 'ALL'}
+              onValueChange={(value) =>
+                setFloorFilter(value === 'ALL' ? '' : value)
+              }
+            >
+              <SelectTrigger className="bg-input border-border">
+                <SelectValue placeholder="Lọc theo tầng" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Tất cả tầng</SelectItem>
+                {floorsData?.map((floor) => (
+                  <SelectItem key={floor.id} value={floor.id}>
+                    {floor.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {/* Status filter */}
             <Select
               value={statusFilter || 'ALL'}

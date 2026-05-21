@@ -180,11 +180,18 @@ model FolderGallery {
 }
 
 // ==================== TABLE MODELS ====================
+model Floor {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
 
+  tables    Table[]
+}
 model Table {
   id        String      @id @default(cuid())
   name      String      @unique
-  floor     String      
+  floorId   String
+  floor     Floor       @relation(fields: [floorId], references: [id])
   area      TableArea   @default(NORMAL)
   seats  Int
   status    TableStatus @default(AVAILABLE)

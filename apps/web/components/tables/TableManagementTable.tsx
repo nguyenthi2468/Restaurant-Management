@@ -60,7 +60,7 @@ function TableManagementTable({ tables, onEdit, onDelete }: TableManagementTable
                   {table.name}
                 </div>
               </TableCell>
-              <TableCell className="text-muted-foreground">{table.floor}</TableCell>
+              <TableCell className="text-muted-foreground">{table.floor.name}</TableCell>
               <TableCell className="text-foreground">
                 <Badge variant={table.area === TableArea.VIP ? 'default' : 'secondary'}>
                   {areaLabels[table.area]}

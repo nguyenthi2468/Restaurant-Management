@@ -25,7 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Table, TableArea, TableStatus, tableSchema, TableFormValues } from '@/features/tables';
+import {
+  Table,
+  TableArea,
+  TableStatus,
+  tableSchema,
+  TableFormValues,
+} from '@/features/tables';
+import { useFloorsQuery } from '@/features/floor';
 
 interface TableFormDialogProps {
   open: boolean;
@@ -54,11 +61,12 @@ function TableFormDialog({
   onSubmit,
   isSubmitting,
 }: TableFormDialogProps) {
+  const { data: floors } = useFloorsQuery();
   const form = useForm<TableFormValues>({
     resolver: zodResolver(tableSchema) as never,
     defaultValues: {
       name: table?.name || '',
-      floor: table?.floor || '',
+      floorId: table?.floorId || '',
       area: table?.area || TableArea.NORMAL,
       seats: table?.seats || 4,
       status: table?.status || TableStatus.AVAILABLE,
@@ -69,7 +77,7 @@ function TableFormDialog({
     if (table) {
       form.reset({
         name: table.name || '',
-        floor: table.floor || '',
+        floorId: table.floorId || '',
         area: table.area || TableArea.NORMAL,
         seats: table.seats || 4,
         status: table.status || TableStatus.AVAILABLE,
@@ -77,7 +85,7 @@ function TableFormDialog({
     } else {
       form.reset({
         name: '',
-        floor: '',
+        floorId: '',
         area: TableArea.NORMAL,
         seats: 4,
         status: TableStatus.AVAILABLE,
@@ -131,11 +139,22 @@ function TableFormDialog({
             <FieldGroup>
               <Controller
                 control={form.control}
-                name="floor"
+                name="floorId"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>Tầng</FieldLabel>
-                    <Input {...field} placeholder="Nhập tầng (vd: 1, 2, Tầng 1)" />
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn tầng" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {floors?.map((floor) => (
+                          <SelectItem key={floor.id} value={floor.id}>
+                            {floor.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {fieldState.invalid && (
                       <span className="text-xs text-destructive mt-1 block">
                         {fieldState.error?.message}
@@ -193,7 +212,9 @@ function TableFormDialog({
                         type="number"
                         min={1}
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 1)
+                        }
                         placeholder="Số ghế"
                       />
                       {fieldState.invalid && (
@@ -215,10 +236,7 @@ function TableFormDialog({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>Trạng thái</FieldLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn trạng thái" />
                       </SelectTrigger>

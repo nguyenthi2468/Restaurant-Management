@@ -13,13 +13,13 @@ export class UpdateTableDto {
   name?: string;
 
   @ApiPropertyOptional({
-    description: 'Tầng/khu vực vật lý (ví dụ: Tầng 1, Tầng 2)',
-    example: 'Tầng 1',
+    description: 'ID của tầng',
+    example: 'clxxx123456789',
   })
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  floor?: string;
+  floorId?: string;
 
   @ApiPropertyOptional({
     description: 'Khu vực bàn',

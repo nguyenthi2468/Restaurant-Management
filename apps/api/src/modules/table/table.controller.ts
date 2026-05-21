@@ -56,9 +56,9 @@ export class TableController {
     description: 'Tìm kiếm theo tên bàn (tìm kiếm gần đúng)',
   })
   @ApiQuery({
-    name: 'floor',
+    name: 'floorId',
     required: false,
-    description: 'Tìm kiếm theo tầng (tìm kiếm gần đúng)',
+    description: 'Lọc bàn theo ID tầng',
   })
   @ApiQuery({
     name: 'status',
@@ -70,12 +70,11 @@ export class TableController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll(
     @Query('name') name?: string,
-    @Query('floor') floor?: string,
+    @Query('floorId') floorId?: string,
     @Query('status') status?: TableStatus,
   ) {
-    // Nếu có name hoặc floor hoặc status, sử dụng search
-    if (name || floor || status) {
-      return this.tableService.search({ name, floor, status });
+    if (name || floorId || status) {
+      return this.tableService.search({ name, floorId, status });
     }
     return this.tableService.findAll();
   }

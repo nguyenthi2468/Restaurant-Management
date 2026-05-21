@@ -6,7 +6,7 @@ import type { TableFormValues } from './validator';
 // Search params interface
 export interface SearchTablesParams {
   name?: string;
-  floor?: string;
+  floorId?: string;
   status?: string;
 }
 
@@ -14,7 +14,7 @@ export interface SearchTablesParams {
 const buildQueryString = (params: SearchTablesParams): string => {
   const queryParams = new URLSearchParams();
   if (params.name) queryParams.append('name', params.name);
-  if (params.floor) queryParams.append('floor', params.floor);
+  if (params.floorId) queryParams.append('floorId', params.floorId);
   if (params.status) queryParams.append('status', params.status);
   const queryString = queryParams.toString();
   return queryString ? `?${queryString}` : '';

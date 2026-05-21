@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
   MENU_CATEGORIES: '/menu-categories',
   MENU_ITEMS: '/menu-items',
   TABLES: '/tables',
+  FLOORS: '/floors',
   GALLERY: {
     FOLDERS: '/upload/db-folders',
     CREATE_FOLDER: '/upload/create-folder',

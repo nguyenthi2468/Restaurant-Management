@@ -68,6 +68,10 @@ export const navItems: NavItem[] = [
     href: ROUTES.ADMIN_TABLES,
     icon: Armchair,
     action: 'tables.read',
+      submenu: [
+      { title: 'Floors', href: ROUTES.ADMIN_FLOORS, action: 'tables.read' },
+      { title: 'Tables', href: ROUTES.ADMIN_TABLES, action: 'tables.read' },
+    ],
   },
   {
     title: 'Cashier',

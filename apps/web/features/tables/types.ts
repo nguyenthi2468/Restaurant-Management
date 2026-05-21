@@ -1,3 +1,5 @@
+import { Floor } from '../floor';
+
 export enum TableArea {
   NORMAL = 'NORMAL',
   VIP = 'VIP',
@@ -13,7 +15,8 @@ export enum TableStatus {
 export interface Table {
   id: string;
   name: string;
-  floor: string;
+  floorId: string;
+  floor: Floor;
   area: TableArea;
   seats: number;
   status: TableStatus;
@@ -24,7 +27,7 @@ export interface Table {
 // DTOs for API requests
 export interface CreateTableDto {
   name: string;
-  floor: string;
+  floorId: string;
   area?: TableArea;
   seats: number;
   status?: TableStatus;
@@ -32,7 +35,7 @@ export interface CreateTableDto {
 
 export interface UpdateTableDto {
   name?: string;
-  floor?: string;
+  floorId?: string;
   area?: TableArea;
   seats?: number;
   status?: TableStatus;

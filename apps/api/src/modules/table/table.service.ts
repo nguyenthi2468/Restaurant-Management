@@ -10,7 +10,7 @@ import { UpdateTableDto } from './dto/update-table.dto';
 
 export interface SearchTablesFilters {
   name?: string;
-  floor?: string;
+  floorId?: string;
   status?: TableStatus;
 }
 
@@ -26,13 +26,23 @@ export class TableService {
       throw new ConflictException(`Bàn với tên "${dto.name}" đã tồn tại`);
     }
 
+    const floor = await this.prisma.floor.findUnique({
+      where: { id: dto.floorId },
+    });
+    if (!floor) {
+      throw new NotFoundException(`Không tìm thấy tầng với ID: ${dto.floorId}`);
+    }
+
     return this.prisma.table.create({
       data: {
         name: dto.name,
-        floor: dto.floor,
+        floorId: dto.floorId,
         area: dto.area,
         seats: dto.seats,
         status: dto.status,
+      },
+      include: {
+        floor: true,
       },
     });
   }
@@ -40,13 +50,19 @@ export class TableService {
   async findAll(): Promise<Table[]> {
     return this.prisma.table.findMany({
       orderBy: [{ name: 'asc' }],
+      include: {
+        floor: true,
+      },
     });
   }
 
   async findByStatus(status: TableStatus): Promise<Table[]> {
     return this.prisma.table.findMany({
       where: { status },
-      orderBy: [{ floor: 'asc' }, { name: 'asc' }],
+      orderBy: [{ name: 'asc' }],
+      include: {
+        floor: true,
+      },
     });
   }
 
@@ -60,11 +76,8 @@ export class TableService {
       };
     }
 
-    if (filters.floor) {
-      where.floor = {
-        contains: filters.floor,
-        mode: 'insensitive',
-      };
+    if (filters.floorId) {
+      where.floorId = filters.floorId;
     }
 
     if (filters.status) {
@@ -73,12 +86,20 @@ export class TableService {
 
     return this.prisma.table.findMany({
       where,
-      orderBy: [{ floor: 'asc' }, { name: 'asc' }],
+      orderBy: [{ name: 'asc' }],
+      include: {
+        floor: true,
+      },
     });
   }
 
   async findOne(id: string): Promise<Table> {
-    const table = await this.prisma.table.findUnique({ where: { id } });
+    const table = await this.prisma.table.findUnique({
+      where: { id },
+      include: {
+        floor: true,
+      },
+    });
     if (!table) {
       throw new NotFoundException(`Không tìm thấy bàn với ID: ${id}`);
     }
@@ -97,14 +118,28 @@ export class TableService {
       }
     }
 
+    if (dto.floorId) {
+      const floor = await this.prisma.floor.findUnique({
+        where: { id: dto.floorId },
+      });
+      if (!floor) {
+        throw new NotFoundException(
+          `Không tìm thấy tầng với ID: ${dto.floorId}`,
+        );
+      }
+    }
+
     return this.prisma.table.update({
       where: { id },
       data: {
         name: dto.name,
-        floor: dto.floor,
+        floorId: dto.floorId,
         area: dto.area,
         seats: dto.seats,
         status: dto.status,
+      },
+      include: {
+        floor: true,
       },
     });
   }

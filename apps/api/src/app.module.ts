@@ -15,6 +15,7 @@ import { ImageModule } from './modules/image/image.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { FloorModule } from './modules/floor/floor.module';
 import { TableModule } from './modules/table/table.module';
 import { OrderModule } from './modules/order/order.module';
 import { OrderItemModule } from './modules/order-item/order-item.module';
@@ -43,6 +44,7 @@ import { BookingModule } from './modules/booking/booking.module';
     CloudinaryModule,
     ImageModule,
     MenuModule,
+    FloorModule,
     TableModule,
     OrderModule,
     OrderItemModule,
