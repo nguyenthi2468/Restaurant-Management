@@ -39,6 +39,13 @@ export class BookingService {
   async create(createBookingDto: CreateBookingDto): Promise<Booking> {
     const { tables, preOrderItems, ...bookingData } = createBookingDto;
 
+    if (!bookingData.endTime) {
+      bookingData.endTime = this.calculateEndTime(
+        bookingData.bookingTime,
+        bookingData.numberOfGuests,
+      );
+    }
+
     // 1. Kiểm tra tính khả dụng của các bàn
     if (tables && tables.length > 0) {
       const tableIds = tables.map((t) => t.tableId);
@@ -101,6 +108,7 @@ export class BookingService {
     const booking = await this.prisma.booking.create({
       data: {
         ...bookingData,
+        endTime: bookingData.endTime,
         depositAmount,
         depositStatus,
         bookingTables: {
@@ -221,6 +229,22 @@ export class BookingService {
     return this.prisma.booking.delete({
       where: { id },
     });
+  }
+
+  private calculateEndTime(bookingTime: Date, numberOfGuests: number): Date {
+    const endTime = new Date(bookingTime);
+    let durationMinutes: number;
+
+    if (numberOfGuests >= 1 && numberOfGuests <= 4) {
+      durationMinutes = 90;
+    } else if (numberOfGuests >= 5 && numberOfGuests <= 8) {
+      durationMinutes = 120;
+    } else {
+      durationMinutes = 180;
+    }
+
+    endTime.setMinutes(endTime.getMinutes() + durationMinutes);
+    return endTime;
   }
 
   /**
@@ -482,7 +506,7 @@ export class BookingService {
         }),
       ]);
 
-      return {responseCode: vnp_TransactionStatus, bookingId:vnp_TxnRef };
+      return { responseCode: vnp_TransactionStatus, bookingId: vnp_TxnRef };
     } else {
       // Payment failed - Create FAILED payment record
       await this.prisma.payment.create({

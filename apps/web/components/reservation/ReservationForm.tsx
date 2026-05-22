@@ -1,5 +1,6 @@
 'use client';
 
+import toast from 'react-hot-toast';
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -12,10 +13,7 @@ import {
   bookingFormSchema,
   BookingFormValues,
 } from '@/features/booking/validator';
-import {
-  useCreateBookingMutation,
-  useCreateVnpayPaymentMutation,
-} from '@/features/booking/mutations';
+import { useCreateBookingMutation } from '@/features/booking/mutations';
 import { useTablesQuery } from '@/features/tables/queries';
 import { useFloorsQuery } from '@/features/floor/queries';
 import { useMenuItemsQuery } from '@/features/menu-items/queries';
@@ -39,7 +37,6 @@ export function ReservationForm() {
   const [selectedFloorId, setSelectedFloorId] = useState<string>('');
   const router = useRouter();
   const createBookingMutation = useCreateBookingMutation();
-  const createVnpayPaymentMutation = useCreateVnpayPaymentMutation();
   const { data: floors = [], isLoading: floorsLoading } = useFloorsQuery();
   const { data: allTables = [], isLoading: tablesLoading } = useTablesQuery({
     floorId: selectedFloorId,
@@ -52,8 +49,7 @@ export function ReservationForm() {
     defaultValues: {
       customerName: '',
       customerPhone: '',
-      bookingTime: new Date(),
-      endTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
+      bookingTime: undefined,
       numberOfGuests: 1,
       numberOfChildren: 0,
       note: '',
@@ -99,7 +95,7 @@ export function ReservationForm() {
       if (depositAmount > 0) {
         router.push(`/reservation/confirm-payment?bookingId=${booking.id}`);
       } else {
-        router.push('/reservation/success');
+        router.push(`/reservation/success?bookingId=${booking.id}`);
       }
     } catch (error) {
       console.error('Booking error:', error);
@@ -119,6 +115,21 @@ export function ReservationForm() {
         currentTables.filter((t) => t.tableId !== tableId),
       );
     } else {
+      const newTable = allTables.find((t) => t.id === tableId);
+      if (!newTable) return;
+
+      const currentSeats = currentTables.reduce((sum, t) => {
+        const table = allTables.find((at) => at.id === t.tableId);
+        return sum + (table?.seats || 0);
+      }, 0);
+
+      if (currentTables.length > 0 && currentSeats + newTable.seats > totalPersons) {
+        toast.error(
+          `Không thể chọn thêm bàn ${newTable.seats} chỗ vì vượt quá số người (${totalPersons} người)`,
+        );
+        return;
+      }
+
       form.setValue('tables', [...currentTables, { tableId }]);
     }
   };
@@ -220,39 +231,6 @@ export function ReservationForm() {
                   <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="bookingTime"
-                    type="datetime-local"
-                    className="pl-10"
-                    disabled={loading}
-                    value={
-                      field.value
-                        ? format(field.value, "yyyy-MM-dd'T'HH:mm")
-                        : ''
-                    }
-                    onChange={(e) => field.onChange(new Date(e.target.value))}
-                    aria-invalid={fieldState.invalid}
-                  />
-                </div>
-                {fieldState.invalid && (
-                  <span className="text-xs text-destructive mt-1 block">
-                    {fieldState.error?.message}
-                  </span>
-                )}
-              </Field>
-            )}
-          />
-        </FieldGroup>
-
-        <FieldGroup>
-          <Controller
-            name="endTime"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="endTime">Thời gian kết thúc</FieldLabel>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="endTime"
                     type="datetime-local"
                     className="pl-10"
                     disabled={loading}
@@ -472,7 +450,7 @@ export function ReservationForm() {
                               {menuItem.description}
                             </p>
                             <p className="text-sm font-semibold text-primary mt-1">
-                              {menuItem.price.toLocaleString('vi-VN')} đ
+                              {formatCurrency(menuItem.price)} đ
                             </p>
                           </div>
                         </div>

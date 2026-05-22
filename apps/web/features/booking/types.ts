@@ -74,7 +74,7 @@ export interface CreateBookingData {
   customerName: string;
   customerPhone: string;
   bookingTime: Date | string;
-  endTime: Date | string;
+  endTime?: Date | string;
   numberOfGuests: number;
   numberOfChildren?: number;
   note?: string;

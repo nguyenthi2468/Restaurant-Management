@@ -27,9 +27,10 @@ export class CreateBookingDto {
   @Type(() => Date)
   bookingTime!: Date;
 
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
-  endTime!: Date;
+  endTime?: Date;
 
   @IsInt()
   numberOfGuests!: number;

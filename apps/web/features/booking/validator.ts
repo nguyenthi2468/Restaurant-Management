@@ -19,9 +19,6 @@ export const bookingFormSchema = z
     bookingTime: z.date({
       message: 'Ngày đến là bắt buộc',
     }),
-    endTime: z.date({
-      message: 'Giờ kết thúc là bắt buộc',
-    }),
     numberOfGuests: z.number().int().min(1, 'Số lượng khách phải lớn hơn 0'),
     numberOfChildren: z
       .number()
@@ -36,10 +33,6 @@ export const bookingFormSchema = z
     tables: z.array(bookingTableSchema).min(1, 'Phải chọn ít nhất một bàn'),
     preOrderItems: z.array(bookingMenuItemSchema).optional(),
   })
-  .refine((data) => data.endTime > data.bookingTime, {
-    message: 'Giờ kết thúc phải sau giờ đến',
-    path: ['endTime'],
-  });
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
 export type BookingTableFormValues = z.infer<typeof bookingTableSchema>;
