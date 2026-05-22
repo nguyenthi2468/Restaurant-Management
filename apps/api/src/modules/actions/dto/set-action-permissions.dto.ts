@@ -4,5 +4,5 @@ export class SetActionPermissionsDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  permissionIds: string[]; 
+  permissionIds: string[];
 }

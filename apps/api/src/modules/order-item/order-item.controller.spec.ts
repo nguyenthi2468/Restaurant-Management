@@ -37,7 +37,11 @@ describe('OrderItemController', () => {
   });
 
   it('should find all order items', async () => {
-    mockOrderItemService.findAll.mockResolvedValue([{ id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 }]);
-    expect(await controller.findAll()).toEqual([{ id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 }]);
+    mockOrderItemService.findAll.mockResolvedValue([
+      { id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 },
+    ]);
+    expect(await controller.findAll()).toEqual([
+      { id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 },
+    ]);
   });
 });

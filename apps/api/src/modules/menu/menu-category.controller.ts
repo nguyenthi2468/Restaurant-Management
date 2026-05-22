@@ -58,7 +58,9 @@ export class MenuCategoryController {
   }
 
   @Get('with-menu-items')
-  @ApiOperation({ summary: 'Lấy danh sách tất cả danh mục menu với danh sách menu con' })
+  @ApiOperation({
+    summary: 'Lấy danh sách tất cả danh mục menu với danh sách menu con',
+  })
   @ApiResponse({
     status: 200,
     description: 'Danh sách danh mục menu',

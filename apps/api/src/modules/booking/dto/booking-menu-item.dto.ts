@@ -2,7 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNumber, IsString, IsUUID, Min } from 'class-validator';
 
 export class BookingMenuItemDto {
-  @ApiProperty({ description: 'The unique identifier of the booking menu item entry' })
+  @ApiProperty({
+    description: 'The unique identifier of the booking menu item entry',
+  })
   @IsUUID()
   id: string;
 
@@ -19,13 +21,19 @@ export class BookingMenuItemDto {
   @Min(1)
   quantity: number;
 
-  @ApiProperty({ description: 'The price of the menu item at the time of booking' })
+  @ApiProperty({
+    description: 'The price of the menu item at the time of booking',
+  })
   @IsNumber()
   price: number;
 
-  @ApiProperty({ description: 'The creation timestamp of the booking menu item entry' })
+  @ApiProperty({
+    description: 'The creation timestamp of the booking menu item entry',
+  })
   createdAt: Date;
 
-  @ApiProperty({ description: 'The last update timestamp of the booking menu item entry' })
+  @ApiProperty({
+    description: 'The last update timestamp of the booking menu item entry',
+  })
   updatedAt: Date;
 }

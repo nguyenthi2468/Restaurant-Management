@@ -17,7 +17,10 @@ export class BookingDto {
   @IsUUID()
   id: string;
 
-  @ApiProperty({ description: 'The ID of the customer who made the booking', required: false })
+  @ApiProperty({
+    description: 'The ID of the customer who made the booking',
+    required: false,
+  })
   @IsOptional()
   @IsUUID()
   customerId?: string;
@@ -34,7 +37,9 @@ export class BookingDto {
   @IsDateString()
   bookingTime: Date;
 
-  @ApiProperty({ description: 'The estimated end time of the booking (ISO 8601 format)' })
+  @ApiProperty({
+    description: 'The estimated end time of the booking (ISO 8601 format)',
+  })
   @IsDateString()
   endTime: Date;
 
@@ -48,19 +53,33 @@ export class BookingDto {
   @Min(0)
   numberOfChildren: number;
 
-  @ApiProperty({ description: 'Additional notes for the booking', required: false })
+  @ApiProperty({
+    description: 'Additional notes for the booking',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   note?: string;
 
-  @ApiProperty({ description: 'The deposit amount required for the booking', type: Number })
+  @ApiProperty({
+    description: 'The deposit amount required for the booking',
+    type: Number,
+  })
   depositAmount: number;
 
-  @ApiProperty({ description: 'The status of the deposit', enum: DepositStatus, default: DepositStatus.PENDING })
+  @ApiProperty({
+    description: 'The status of the deposit',
+    enum: DepositStatus,
+    default: DepositStatus.PENDING,
+  })
   @IsEnum(DepositStatus)
   depositStatus: DepositStatus;
 
-  @ApiProperty({ description: 'The current status of the booking', enum: BookingStatus, default: BookingStatus.PENDING })
+  @ApiProperty({
+    description: 'The current status of the booking',
+    enum: BookingStatus,
+    default: BookingStatus.PENDING,
+  })
   @IsEnum(BookingStatus)
   status: BookingStatus;
 
@@ -70,9 +89,15 @@ export class BookingDto {
   @ApiProperty({ description: 'The last update timestamp of the booking' })
   updatedAt: Date;
 
-  @ApiProperty({ type: [BookingTableDto], description: 'List of tables associated with this booking' })
+  @ApiProperty({
+    type: [BookingTableDto],
+    description: 'List of tables associated with this booking',
+  })
   bookingTables: BookingTableDto[];
 
-  @ApiProperty({ type: [BookingMenuItemDto], description: 'List of pre-ordered menu items for this booking' })
+  @ApiProperty({
+    type: [BookingMenuItemDto],
+    description: 'List of pre-ordered menu items for this booking',
+  })
   preOrderItems: BookingMenuItemDto[];
 }

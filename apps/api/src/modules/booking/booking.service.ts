@@ -8,6 +8,8 @@ import { TableService } from '../table/table.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { CreateBookingMenuItemDto } from './dto/create-booking-menu-item.dto';
+import { QueryBookingDto } from './dto/query-booking.dto';
+import { PaginatedBookingResponseDto } from './dto/paginated-booking-response.dto';
 import {
   Booking,
   BookingStatus,
@@ -144,6 +146,78 @@ export class BookingService {
         payments: true,
       },
     });
+  }
+
+  async findAllWithPagination(
+    queryDto: QueryBookingDto,
+  ): Promise<PaginatedBookingResponseDto> {
+    const { search, status, page = 1, limit = 10 } = queryDto;
+
+    const where: Prisma.BookingWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        {
+          customerName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          customerPhone: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          bookingTables: {
+            include: {
+              table: {
+                include: {
+                  floor: true,
+                },
+              },
+            },
+          },
+          preOrderItems: {
+            include: {
+              menuItem: true,
+            },
+          },
+          payments: true,
+        },
+        orderBy: {
+          bookingTime: 'desc',
+        },
+      }),
+      this.prisma.booking.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: bookings as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 
   async findOne(id: string): Promise<Booking> {
@@ -459,7 +533,9 @@ export class BookingService {
    * Handles the return from VNPay after payment attempt.
    * Creates a Payment record for successful or failed transactions.
    */
-  async handleVnpayReturn(params: VnpayReturnParams): Promise<{responseCode: string, bookingId: string}> {
+  async handleVnpayReturn(
+    params: VnpayReturnParams,
+  ): Promise<{ responseCode: string; bookingId: string }> {
     const isValidSignature = this.vnpayService.verifyResponse(params);
 
     if (!isValidSignature) {

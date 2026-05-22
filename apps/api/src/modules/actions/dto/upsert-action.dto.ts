@@ -20,7 +20,7 @@ export class UpsertActionDto {
 
   @IsEnum(['ANY', 'ALL'] as const)
   mode: 'ANY' | 'ALL' = 'ANY';
-  
+
   @IsOptional()
   @IsBoolean()
   enabled?: boolean = true;

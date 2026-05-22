@@ -109,8 +109,6 @@ export class MenuItemController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async create(@Body() createMenuItemDto: CreateMenuItemDto) {
-  
-
     return this.menuItemService.create(createMenuItemDto);
   }
 
@@ -214,7 +212,6 @@ export class MenuItemController {
     @Param('id') id: string,
     @Body() updateMenuItemDto: UpdateMenuItemDto,
   ) {
-
     return this.menuItemService.update(id, updateMenuItemDto);
   }
 

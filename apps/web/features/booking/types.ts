@@ -1,4 +1,4 @@
-import { Floor } from "../floor";
+import { Floor } from '../floor';
 
 export enum BookingStatus {
   PENDING = 'PENDING',
@@ -103,4 +103,23 @@ export interface UpdateBookingData {
 
 export interface VnpayPaymentResponse {
   paymentUrl: string;
+}
+
+export interface BookingQueryParams {
+  search?: string;
+  status?: BookingStatus;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedBookingResponse {
+  data: Booking[];
+  meta: PaginationMeta;
 }

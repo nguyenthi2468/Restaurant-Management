@@ -9,6 +9,7 @@ import {
   Delete,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -21,7 +22,11 @@ import {
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+import { QueryBookingDto } from './dto/query-booking.dto';
+import { PaginatedBookingResponseDto } from './dto/paginated-booking-response.dto';
 import { Action } from '../auth/decorator/action.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActionGuard } from '../auth/guards/action.guard';
 
 @ApiTags('bookings')
 @Controller('bookings')
@@ -68,20 +73,21 @@ export class BookingController {
   }
 
   @Get()
-  @Action('booking:read')
-  @ApiOperation({ summary: 'Get all bookings' })
+  @Action('reservation:read')
+  @ApiOperation({ summary: 'Get all bookings with search and pagination' })
   @ApiResponse({
     status: 200,
-    description: 'List of bookings',
-    type: [BookingDto],
+    description: 'Paginated list of bookings',
+    type: PaginatedBookingResponseDto,
   })
-  async findAll(): Promise<BookingDto[]> {
-    const bookings = await this.bookingService.findAll();
-    return bookings as unknown as BookingDto[];
+  async findAll(
+    @Query() queryDto: QueryBookingDto,
+  ): Promise<PaginatedBookingResponseDto> {
+    return this.bookingService.findAllWithPagination(queryDto);
   }
 
   @Get(':id')
-  @Action('booking:read')
+  @Action('reservation:read')
   @ApiOperation({ summary: 'Get a booking by ID' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({ status: 200, description: 'Booking found', type: BookingDto })
@@ -91,7 +97,8 @@ export class BookingController {
   }
 
   @Patch(':id')
-  @Action('booking:update')
+  @Action('reservation:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Update a booking' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiBody({ type: UpdateBookingDto })
@@ -112,7 +119,7 @@ export class BookingController {
   }
 
   @Delete(':id')
-  @Action('booking:delete')
+  @Action('reservation:delete')
   @ApiOperation({ summary: 'Delete a booking' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({
@@ -128,7 +135,8 @@ export class BookingController {
   // ----- Deposit and status management -----
 
   @Post(':id/approve-deposit')
-  @Action('booking:approve_deposit')
+  @Action('reservation:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Approve deposit payment manually' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({
@@ -142,7 +150,8 @@ export class BookingController {
   }
 
   @Post(':id/refund-deposit')
-  @Action('booking:refund_deposit')
+  @Action('reservation:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Refund deposit for a booking' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({
@@ -156,7 +165,8 @@ export class BookingController {
   }
 
   @Post(':id/arrive')
-  @Action('booking:mark_arrived')
+  @Action('reservation:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Mark booking as arrived (confirm)' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({
@@ -170,7 +180,8 @@ export class BookingController {
   }
 
   @Post(':id/complete')
-  @Action('booking:complete')
+  @Action('reservation:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Complete a booking' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({
@@ -184,7 +195,8 @@ export class BookingController {
   }
 
   @Post(':id/cancel')
-  @Action('booking:cancel')
+  @Action('reservation:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({ summary: 'Cancel a booking' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({
@@ -200,7 +212,6 @@ export class BookingController {
   // ----- VNPay payment integration -----
 
   @Post(':id/pay')
-  @Action('booking:create_vnpay_payment')
   @ApiOperation({ summary: 'Create VNPay payment URL for deposit' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({

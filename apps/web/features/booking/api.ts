@@ -2,13 +2,25 @@ import { API_ENDPOINTS } from '@/constants';
 import api from '@/lib/axios';
 import {
   Booking,
+  BookingQueryParams,
   CreateBookingData,
+  PaginatedBookingResponse,
   UpdateBookingData,
   VnpayPaymentResponse,
 } from './types';
 
 export const getBookings = async () => {
   const response = await api.get<Booking[]>(API_ENDPOINTS.BOOKINGS.BASE);
+  return response.data;
+};
+
+export const getBookingsWithPagination = async (
+  params?: BookingQueryParams,
+) => {
+  const response = await api.get<PaginatedBookingResponse>(
+    API_ENDPOINTS.BOOKINGS.BASE,
+    { params },
+  );
   return response.data;
 };
 

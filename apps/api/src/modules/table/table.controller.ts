@@ -135,7 +135,11 @@ export class TableController {
     const bookingTime = new Date(dto.bookingTime);
     const endTime = dto.endTime ? new Date(dto.endTime) : undefined;
 
-    return this.tableService.getAvailableTables(bookingTime, endTime, dto.floorId);
+    return this.tableService.getAvailableTables(
+      bookingTime,
+      endTime,
+      dto.floorId,
+    );
   }
 
   @Get('available/count')

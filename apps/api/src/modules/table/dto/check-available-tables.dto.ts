@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CheckAvailableTablesDto {
   @ApiProperty({
@@ -17,7 +23,8 @@ export class CheckAvailableTablesDto {
   @IsNotEmpty()
   floorId: string;
   @ApiProperty({
-    description: 'Thời gian kết thúc đặt bàn (tùy chọn, sẽ tự động tính nếu không cung cấp)',
+    description:
+      'Thời gian kết thúc đặt bàn (tùy chọn, sẽ tự động tính nếu không cung cấp)',
     example: '2026-05-22T20:00:00.000Z',
     required: false,
   })

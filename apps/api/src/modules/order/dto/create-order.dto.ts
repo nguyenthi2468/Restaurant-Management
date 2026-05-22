@@ -1,9 +1,13 @@
-import { IsString, IsNumber, IsArray, ValidateNested, IsOptional, Min } from 'class-validator';
-import { Type } from 'class-transformer';
 import {
-  ApiProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+  IsString,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  IsOptional,
+  Min,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class CreateOrderItemDto {
   @ApiProperty({

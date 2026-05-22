@@ -30,13 +30,29 @@ describe('OrderService', () => {
   });
 
   it('should create an order', async () => {
-    const dto = { tableId: '1', total: 100, items: [{ menuItemId: '1', quantity: 1, price: 100 }] };
-    mockPrisma.order.create.mockResolvedValue({ id: '1', ...dto, status: 'PENDING' });
-    expect(await service.create(dto as any)).toEqual({ id: '1', ...dto, status: 'PENDING' });
+    const dto = {
+      tableId: '1',
+      total: 100,
+      items: [{ menuItemId: '1', quantity: 1, price: 100 }],
+    };
+    mockPrisma.order.create.mockResolvedValue({
+      id: '1',
+      ...dto,
+      status: 'PENDING',
+    });
+    expect(await service.create(dto as any)).toEqual({
+      id: '1',
+      ...dto,
+      status: 'PENDING',
+    });
   });
 
   it('should find all orders', async () => {
-    mockPrisma.order.findMany.mockResolvedValue([{ id: '1', tableId: '1', total: 100, status: 'PENDING' }]);
-    expect(await service.findAll()).toEqual([{ id: '1', tableId: '1', total: 100, status: 'PENDING' }]);
+    mockPrisma.order.findMany.mockResolvedValue([
+      { id: '1', tableId: '1', total: 100, status: 'PENDING' },
+    ]);
+    expect(await service.findAll()).toEqual([
+      { id: '1', tableId: '1', total: 100, status: 'PENDING' },
+    ]);
   });
 });

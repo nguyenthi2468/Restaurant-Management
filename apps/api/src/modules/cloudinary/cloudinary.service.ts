@@ -105,7 +105,7 @@ export class CloudinaryService {
                   url: result.url,
                   secureUrl: result.secure_url,
                   userId,
-                  folderId: folder!.id,
+                  folderId: folder.id,
                 },
               });
               resolve(image);

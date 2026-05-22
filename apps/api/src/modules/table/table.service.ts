@@ -209,7 +209,7 @@ export class TableService {
 
     if (!calculatedEndTime) {
       calculatedEndTime = new Date(bookingTime);
-      let durationMinutes = 180;
+      const durationMinutes = 180;
 
       calculatedEndTime.setMinutes(
         calculatedEndTime.getMinutes() + durationMinutes,
@@ -256,7 +256,7 @@ export class TableService {
 
     if (!calculatedEndTime) {
       calculatedEndTime = new Date(bookingTime);
-      let durationMinutes = 180;
+      const durationMinutes = 180;
 
       calculatedEndTime.setMinutes(
         calculatedEndTime.getMinutes() + durationMinutes,

@@ -9,9 +9,7 @@ import {
   ValidateNested,
   IsNumber,
 } from 'class-validator';
-import {
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IngredientDto } from './create-menu-item.dto';
 import { OptionDto } from './create-menu-item.dto';
@@ -27,7 +25,8 @@ export class UpdateMenuItemDto {
 
   @ApiPropertyOptional({
     description: 'Mô tả món ăn',
-    example: 'Pizza truyền thống với sốt cà chua, phô mai mozzarella và lá húng quế - phiên bản mới',
+    example:
+      'Pizza truyền thống với sốt cà chua, phô mai mozzarella và lá húng quế - phiên bản mới',
   })
   @IsString()
   @IsOptional()
