@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '@/constants';
 import api from '@/lib/axios';
-import type { Table } from './types';
+import type { CheckAvailableTablesDto, Table } from './types';
 import type { TableFormValues } from './validator';
 
 // Search params interface
@@ -58,5 +58,22 @@ export const updateTable = async (id: string, data: TableFormValues) => {
 // Delete table
 export const deleteTable = async (id: string) => {
   const response = await api.delete<Table>(`${API_ENDPOINTS.TABLES}/${id}`);
+  return response.data;
+};
+
+// Check available tables
+export const checkAvailableTables = async (params: CheckAvailableTablesDto) => {
+  const response = await api.get<Table[]>(
+    `${API_ENDPOINTS.TABLES}/available/tables`,
+    { params },
+  );
+  return response.data;
+};
+
+export const countAvailableTables = async (params: CheckAvailableTablesDto) => {
+  const response = await api.get<{ count: number }>(
+    `${API_ENDPOINTS.TABLES}/available/count`,
+    { params },
+  );
   return response.data;
 };

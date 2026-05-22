@@ -14,7 +14,11 @@ import {
   BookingFormValues,
 } from '@/features/booking/validator';
 import { useCreateBookingMutation } from '@/features/booking/mutations';
-import { useTablesQuery } from '@/features/tables/queries';
+import {
+  useTablesQuery,
+  useCountAvailableTablesQuery,
+  useCheckAvailableTablesQuery,
+} from '@/features/tables/queries';
 import { useFloorsQuery } from '@/features/floor/queries';
 import { useMenuItemsQuery } from '@/features/menu-items/queries';
 import { useState, useEffect, useMemo } from 'react';
@@ -35,14 +39,12 @@ import { Booking } from '@/features/booking/types';
 export function ReservationForm() {
   const [loading, setLoading] = useState(false);
   const [selectedFloorId, setSelectedFloorId] = useState<string>('');
+  const [showTableSelection, setShowTableSelection] = useState(false);
   const router = useRouter();
   const createBookingMutation = useCreateBookingMutation();
   const { data: floors = [], isLoading: floorsLoading } = useFloorsQuery();
-  const { data: allTables = [], isLoading: tablesLoading } = useTablesQuery({
-    floorId: selectedFloorId,
-  });
   const { data: menuItems = [], isLoading: menuItemsLoading } =
-    useMenuItemsQuery();
+  useMenuItemsQuery();
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema) as never,
@@ -57,6 +59,14 @@ export function ReservationForm() {
       preOrderItems: [],
     },
   });
+  const numberOfGuests = form.watch('numberOfGuests') || 1;
+  const numberOfChildren = form.watch('numberOfChildren') || 0;
+  const totalPersons = numberOfGuests + numberOfChildren;
+  const bookingTime = form.watch('bookingTime');
+  const { data: allTables = [], isLoading: tablesLoading } = useCheckAvailableTablesQuery({
+    floorId: selectedFloorId,
+    bookingTime: bookingTime?.toISOString() || '',
+  });
 
   useEffect(() => {
     if (floors.length > 0 && !selectedFloorId) {
@@ -64,13 +74,30 @@ export function ReservationForm() {
     }
   }, [floors, selectedFloorId]);
 
-  const numberOfGuests = form.watch('numberOfGuests') || 1;
-  const numberOfChildren = form.watch('numberOfChildren') || 0;
-  const totalPersons = numberOfGuests + numberOfChildren;
 
-  const tables = useMemo(() => {
-    return allTables.filter((table) => table.seats >= totalPersons);
-  }, [allTables, totalPersons]);
+  const { data: availableTablesCount, isSuccess: isCountSuccess } =
+    useCountAvailableTablesQuery(
+      {
+        floorId: selectedFloorId,
+        bookingTime: bookingTime?.toISOString() || '',
+      },
+      {
+        enabled: !!bookingTime,
+      },
+    );
+  useEffect(() => {
+    if (bookingTime && isCountSuccess && availableTablesCount) {
+      const count = (availableTablesCount as { count: number }).count || 0;
+      if (count === 0) {
+        toast.error('Không có bàn nào khả dụng cho thời gian này');
+        setShowTableSelection(false);
+      } else {
+        setShowTableSelection(true);
+      }
+    } else if (!bookingTime) {
+      setShowTableSelection(false);
+    }
+  }, [bookingTime, isCountSuccess, availableTablesCount]);
 
   const preOrderItems = form.watch('preOrderItems') || [];
 
@@ -123,7 +150,10 @@ export function ReservationForm() {
         return sum + (table?.seats || 0);
       }, 0);
 
-      if (currentTables.length > 0 && currentSeats + newTable.seats > totalPersons) {
+      if (
+        currentTables.length > 0 &&
+        currentSeats + newTable.seats > totalPersons
+      ) {
         toast.error(
           `Không thể chọn thêm bàn ${newTable.seats} chỗ vì vượt quá số người (${totalPersons} người)`,
         );
@@ -348,154 +378,168 @@ export function ReservationForm() {
         />
       </FieldGroup>
 
-      <FieldGroup>
-        <Field>
-          <FieldLabel>Chọn tầng</FieldLabel>
-          {floorsLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            </div>
-          ) : (
-            <Select value={selectedFloorId} onValueChange={setSelectedFloorId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn tầng" />
-              </SelectTrigger>
-              <SelectContent>
-                {floors.map((floor) => (
-                  <SelectItem key={floor.id} value={floor.id}>
-                    {floor.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </Field>
-      </FieldGroup>
-
-      <FieldGroup>
-        <Field>
-          <FieldLabel>Chọn bàn</FieldLabel>
-          {tablesLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4 border border-input rounded-md">
-              {tables.map((table) => (
-                <div key={table.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`table-${table.id}`}
-                    checked={selectedTables.some((t) => t.tableId === table.id)}
-                    onCheckedChange={() => handleTableToggle(table.id)}
-                    disabled={loading || table.status !== 'AVAILABLE'}
-                  />
-                  <Label
-                    htmlFor={`table-${table.id}`}
-                    className="text-sm font-normal cursor-pointer"
-                  >
-                    {table.name} ({table.seats} chỗ)
-                  </Label>
+      {showTableSelection && (
+        <>
+          <FieldGroup>
+            <Field>
+              <FieldLabel>Chọn tầng</FieldLabel>
+              {floorsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
                 </div>
-              ))}
-            </div>
-          )}
-          {form.formState.errors.tables && (
-            <span className="text-xs text-destructive mt-1 block">
-              {form.formState.errors.tables.message}
-            </span>
-          )}
-        </Field>
-      </FieldGroup>
+              ) : (
+                <Select
+                  value={selectedFloorId}
+                  onValueChange={setSelectedFloorId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn tầng" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {floors.map((floor) => (
+                      <SelectItem key={floor.id} value={floor.id}>
+                        {floor.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </Field>
+          </FieldGroup>
 
-      <FieldGroup>
-        <Field>
-          <FieldLabel>Đặt món trước (tùy chọn)</FieldLabel>
-          {menuItemsLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border border-input rounded-md max-h-96 overflow-y-auto">
-                {menuItems
-                  .filter((item) => item.isAvailable)
-                  .map((menuItem) => {
-                    const selectedItem = preOrderItems.find(
-                      (item) => item.menuItemId === menuItem.id,
-                    );
-                    const isSelected = !!selectedItem;
-
-                    return (
-                      <div
-                        key={menuItem.id}
-                        className="flex flex-col space-y-2 p-3 border border-input rounded-md"
-                      >
-                        <div className="flex items-start space-x-2">
-                          <Checkbox
-                            id={`menu-${menuItem.id}`}
-                            checked={isSelected}
-                            onCheckedChange={() =>
-                              handleMenuItemToggle(menuItem.id, menuItem.price)
-                            }
-                            disabled={loading}
-                          />
-                          <div className="flex-1">
-                            <Label
-                              htmlFor={`menu-${menuItem.id}`}
-                              className="text-sm font-medium cursor-pointer"
-                            >
-                              {menuItem.name}
-                            </Label>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {menuItem.description}
-                            </p>
-                            <p className="text-sm font-semibold text-primary mt-1">
-                              {formatCurrency(menuItem.price)} đ
-                            </p>
-                          </div>
-                        </div>
-                        {isSelected && (
-                          <div className="flex items-center space-x-2 ml-6">
-                            <Label
-                              htmlFor={`quantity-${menuItem.id}`}
-                              className="text-xs"
-                            >
-                              Số lượng:
-                            </Label>
-                            <Input
-                              id={`quantity-${menuItem.id}`}
-                              type="number"
-                              min="1"
-                              value={selectedItem.quantity}
-                              onChange={(e) =>
-                                handleQuantityChange(
-                                  menuItem.id,
-                                  parseInt(e.target.value) || 1,
-                                )
-                              }
-                              className="w-20 h-8 text-sm"
-                              disabled={loading}
-                            />
-                          </div>
+          <FieldGroup>
+            <Field>
+              <FieldLabel>Chọn bàn</FieldLabel>
+              {tablesLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4 border border-input rounded-md">
+                  {allTables.map((table) => (
+                    <div key={table.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`table-${table.id}`}
+                        checked={selectedTables.some(
+                          (t) => t.tableId === table.id,
                         )}
-                      </div>
-                    );
-                  })}
-              </div>
-              {preOrderItems.length > 0 && (
-                <div className="p-4 bg-muted rounded-md">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold">Tổng tiền đặt trước:</span>
-                    <span className="text-lg font-bold text-primary">
-                      {formatCurrency(totalAmount)}
-                    </span>
-                  </div>
+                        onCheckedChange={() => handleTableToggle(table.id)}
+                        disabled={loading || table.status !== 'AVAILABLE'}
+                      />
+                      <Label
+                        htmlFor={`table-${table.id}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {table.name} ({table.seats} chỗ)
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               )}
-            </div>
-          )}
-        </Field>
-      </FieldGroup>
+              {form.formState.errors.tables && (
+                <span className="text-xs text-destructive mt-1 block">
+                  {form.formState.errors.tables.message}
+                </span>
+              )}
+            </Field>
+          </FieldGroup>
+
+          <FieldGroup>
+            <Field>
+              <FieldLabel>Đặt món trước (tùy chọn)</FieldLabel>
+              {menuItemsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border border-input rounded-md max-h-96 overflow-y-auto">
+                    {menuItems
+                      .filter((item) => item.isAvailable)
+                      .map((menuItem) => {
+                        const selectedItem = preOrderItems.find(
+                          (item) => item.menuItemId === menuItem.id,
+                        );
+                        const isSelected = !!selectedItem;
+
+                        return (
+                          <div
+                            key={menuItem.id}
+                            className="flex flex-col space-y-2 p-3 border border-input rounded-md"
+                          >
+                            <div className="flex items-start space-x-2">
+                              <Checkbox
+                                id={`menu-${menuItem.id}`}
+                                checked={isSelected}
+                                onCheckedChange={() =>
+                                  handleMenuItemToggle(
+                                    menuItem.id,
+                                    menuItem.price,
+                                  )
+                                }
+                                disabled={loading}
+                              />
+                              <div className="flex-1">
+                                <Label
+                                  htmlFor={`menu-${menuItem.id}`}
+                                  className="text-sm font-medium cursor-pointer"
+                                >
+                                  {menuItem.name}
+                                </Label>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {menuItem.description}
+                                </p>
+                                <p className="text-sm font-semibold text-primary mt-1">
+                                  {formatCurrency(menuItem.price)} đ
+                                </p>
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <div className="flex items-center space-x-2 ml-6">
+                                <Label
+                                  htmlFor={`quantity-${menuItem.id}`}
+                                  className="text-xs"
+                                >
+                                  Số lượng:
+                                </Label>
+                                <Input
+                                  id={`quantity-${menuItem.id}`}
+                                  type="number"
+                                  min="1"
+                                  value={selectedItem.quantity}
+                                  onChange={(e) =>
+                                    handleQuantityChange(
+                                      menuItem.id,
+                                      parseInt(e.target.value) || 1,
+                                    )
+                                  }
+                                  className="w-20 h-8 text-sm"
+                                  disabled={loading}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                  {preOrderItems.length > 0 && (
+                    <div className="p-4 bg-muted rounded-md">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold">
+                          Tổng tiền đặt trước:
+                        </span>
+                        <span className="text-lg font-bold text-primary">
+                          {formatCurrency(totalAmount)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </Field>
+          </FieldGroup>
+        </>
+      )}
 
       <div className="flex justify-end gap-4">
         <Button type="submit" disabled={loading}>

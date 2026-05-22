@@ -199,4 +199,97 @@ export class TableService {
       );
     }
   }
+
+  async getAvailableTables(
+    bookingTime: Date,
+    endTime?: Date,
+    floorId?: string,
+  ): Promise<Table[]> {
+    let calculatedEndTime = endTime;
+
+    if (!calculatedEndTime) {
+      calculatedEndTime = new Date(bookingTime);
+      let durationMinutes = 180;
+
+      calculatedEndTime.setMinutes(
+        calculatedEndTime.getMinutes() + durationMinutes,
+      );
+    }
+
+    const bookedTableIds = await this.prisma.bookingTable.findMany({
+      where: {
+        booking: {
+          AND: [
+            { bookingTime: { lt: calculatedEndTime } },
+            { endTime: { gt: bookingTime } },
+          ],
+        },
+      },
+      select: {
+        tableId: true,
+      },
+    });
+
+    const bookedIds = bookedTableIds.map((bt) => bt.tableId);
+
+    const availableTables = await this.prisma.table.findMany({
+      where: {
+        id: {
+          notIn: bookedIds,
+        },
+        floorId: floorId,
+        status: {
+          in: ['AVAILABLE', 'RESERVED'],
+        },
+      },
+      orderBy: [{ name: 'asc' }],
+    });
+
+    return availableTables;
+  }
+
+  async getAvailableTablesCount(
+    bookingTime: Date,
+    endTime?: Date,
+  ): Promise<number> {
+    let calculatedEndTime = endTime;
+
+    if (!calculatedEndTime) {
+      calculatedEndTime = new Date(bookingTime);
+      let durationMinutes = 180;
+
+      calculatedEndTime.setMinutes(
+        calculatedEndTime.getMinutes() + durationMinutes,
+      );
+    }
+
+    const bookedTableIds = await this.prisma.bookingTable.findMany({
+      where: {
+        booking: {
+          AND: [
+            { bookingTime: { lt: calculatedEndTime } },
+            { endTime: { gt: bookingTime } },
+          ],
+        },
+      },
+      select: {
+        tableId: true,
+      },
+    });
+
+    const bookedIds = bookedTableIds.map((bt) => bt.tableId);
+
+    const count = await this.prisma.table.count({
+      where: {
+        id: {
+          notIn: bookedIds,
+        },
+        status: {
+          in: ['AVAILABLE', 'RESERVED'],
+        },
+      },
+    });
+
+    return count;
+  }
 }

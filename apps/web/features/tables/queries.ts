@@ -1,5 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { getTables, getTableById, getTablesByStatus, SearchTablesParams } from './api';
+import {
+  getTables,
+  getTableById,
+  getTablesByStatus,
+  SearchTablesParams,
+  checkAvailableTables,
+  countAvailableTables,
+} from './api';
+import { CheckAvailableTablesDto } from './types';
 
 export const useTablesQuery = (params?: SearchTablesParams) => {
   return useQuery({
@@ -21,5 +29,26 @@ export const useTableQuery = (id: string) => {
     queryKey: ['table', id],
     queryFn: () => getTableById(id),
     enabled: !!id,
+  });
+};
+
+export const useCheckAvailableTablesQuery = (
+  params: CheckAvailableTablesDto,
+) => {
+  return useQuery({
+    queryKey: ['availableTables', params],
+    queryFn: () => checkAvailableTables(params),
+    enabled: !!params.floorId && !!params.bookingTime,
+  });
+};
+
+export const useCountAvailableTablesQuery = (
+  params: CheckAvailableTablesDto,
+  options?: any,
+) => {
+  return useQuery({
+    queryKey: ['availableTablesCount', params],
+    queryFn: () => countAvailableTables(params),
+    ...options,
   });
 };

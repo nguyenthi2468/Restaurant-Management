@@ -40,3 +40,9 @@ export interface UpdateTableDto {
   seats?: number;
   status?: TableStatus;
 }
+
+export interface CheckAvailableTablesDto {
+  bookingTime: string;
+  floorId: string;
+  endTime?: string;
+}

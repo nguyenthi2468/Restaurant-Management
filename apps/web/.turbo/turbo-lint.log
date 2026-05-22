@@ -195,20 +195,20 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\component
   52:61  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationForm.tsx
-  42:9   warning  'createVnpayPaymentMutation' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
-  71:26  warning  Compilation Skipped: Use of incompatible library
+  11:29  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  67:26  warning  Compilation Skipped: Use of incompatible library
 
 This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
 
-D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationForm.tsx:71:26
-  69 |   }, [floors, selectedFloorId]);
-  70 |
-> 71 |   const numberOfGuests = form.watch('numberOfGuests') || 1;
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationForm.tsx:67:26
+  65 |   }, [floors, selectedFloorId]);
+  66 |
+> 67 |   const numberOfGuests = form.watch('numberOfGuests') || 1;
      |                          ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
-  72 |   const numberOfChildren = form.watch('numberOfChildren') || 0;
-  73 |   const totalPersons = numberOfGuests + numberOfChildren;
-  74 |  react-hooks/incompatible-library
-  79:9   warning  The 'preOrderItems' logical expression could make the dependencies of useMemo Hook (at line 86) change on every render. To fix this, wrap the initialization of 'preOrderItems' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+  68 |   const numberOfChildren = form.watch('numberOfChildren') || 0;
+  69 |   const totalPersons = numberOfGuests + numberOfChildren;
+  70 |  react-hooks/incompatible-library
+  75:9   warning  The 'preOrderItems' logical expression could make the dependencies of useMemo Hook (at line 82) change on every render. To fix this, wrap the initialization of 'preOrderItems' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\roles\PermissionAssignRoleDialog.tsx
   24:3  warning  'Popover' is defined but never used                                                                      @typescript-eslint/no-unused-vars
