@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuCategoryDto } from './dto/create-menu-category.dto';
 import { UpdateMenuCategoryDto } from './dto/update-menu-category.dto';
@@ -15,6 +19,20 @@ export class MenuCategoryService {
 
   async findAll() {
     return this.prisma.menuCategory.findMany({
+      orderBy: { position: 'asc' },
+      include: {
+        image: {
+          select: {
+            id: true,
+            secureUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findAllWithMenuItems() {
+    return this.prisma.menuCategory.findMany({
       where: { isActive: true },
       orderBy: { position: 'asc' },
       include: {
@@ -27,6 +45,7 @@ export class MenuCategoryService {
         menuItems: {
           where: { isAvailable: true },
           orderBy: { position: 'asc' },
+          take: 3,
         },
       },
     });
@@ -36,7 +55,7 @@ export class MenuCategoryService {
     const menuCategory = await this.prisma.menuCategory.findUnique({
       where: { id },
       include: {
-         image: {
+        image: {
           select: {
             id: true,
             secureUrl: true,
@@ -74,16 +93,24 @@ export class MenuCategoryService {
   async remove(id: string) {
     const menuCategory = await this.prisma.menuCategory.findUnique({
       where: { id },
+      include: {
+        menuItems: {
+          orderBy: { position: 'asc' },
+        },
+      },
     });
 
     if (!menuCategory) {
       throw new NotFoundException(`Menu category with ID ${id} not found`);
     }
-
+    if (menuCategory.menuItems.length > 0) {
+      throw new BadRequestException(
+        'Không thể xóa danh mục menu có chứa món ăn',
+      );
+    }
     // Soft delete: set isActive to false
-    return this.prisma.menuCategory.update({
+    return this.prisma.menuCategory.delete({
       where: { id },
-      data: { isActive: false },
     });
   }
 }

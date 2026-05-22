@@ -1,10 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMenuCategories, getMenuCategoryById } from './api';
+import { getMenuCategories, getMenuCategoriesWithMenuItems, getMenuCategoryById } from './api';
 
 export const useMenuCategoriesQuery = () => {
   return useQuery({
     queryKey: ['menu-categories'],
     queryFn: () => getMenuCategories(),
+  });
+};
+
+// Get all menu categories with menu items
+export const useMenuCategoriesWithMenuItemsQuery = () => {
+  return useQuery({
+    queryKey: ['menu-categories-with-menu-items'],
+    queryFn: () => getMenuCategoriesWithMenuItems(),
   });
 };
 

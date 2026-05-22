@@ -57,6 +57,17 @@ export class MenuCategoryController {
     return this.menuCategoryService.findAll();
   }
 
+  @Get('with-menu-items')
+  @ApiOperation({ summary: 'Lấy danh sách tất cả danh mục menu với danh sách menu con' })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách danh mục menu',
+    isArray: true,
+  })
+  findAllWithMenuItems() {
+    return this.menuCategoryService.findAllWithMenuItems();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy danh mục menu theo ID' })
   @ApiResponse({
