@@ -1,5 +1,5 @@
-import { GalleryImages } from "../gallery";
-import { MenuCategory } from "../menu-categories";
+import { GalleryImages } from '../gallery';
+import { MenuCategory } from '../menu-categories';
 
 export interface MenuItem {
   id: string;
@@ -21,6 +21,7 @@ export interface MenuItem {
   updatedAt: string;
   ingredients: MenuItemIngredient[];
 }
+
 export interface MenuItemIngredient {
   id: string;
   menuItemId: string;
@@ -30,4 +31,23 @@ export interface MenuItemIngredient {
   isAllergen: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface MenuItemQueryParams {
+  search?: string;
+  isAvailable?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedMenuItem {
+  data: MenuItem[];
+  meta: PaginationMeta;
 }

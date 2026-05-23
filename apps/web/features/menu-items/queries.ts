@@ -1,5 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMenuItems, getMenuItemById } from './api';
+import {
+  getMenuItems,
+  getMenuItemById,
+  getMenuItemsWithPagination,
+} from './api';
+import type { PaginatedMenuItem, MenuItemQueryParams } from './types';
 
 export const useMenuItemsQuery = () => {
   return useQuery({
@@ -13,5 +18,14 @@ export const useMenuItemQuery = (id: string) => {
     queryKey: ['menu-item', id],
     queryFn: () => getMenuItemById(id),
     enabled: !!id && id !== 'new',
+  });
+};
+
+export const useMenuItemsWithPaginationQuery = (
+  params?: MenuItemQueryParams,
+) => {
+  return useQuery({
+    queryKey: ['menu-items', 'pagination', params],
+    queryFn: () => getMenuItemsWithPagination(params),
   });
 };

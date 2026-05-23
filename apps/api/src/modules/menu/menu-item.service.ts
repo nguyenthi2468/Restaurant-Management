@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { QueryMenuItemDto } from './dto/query-menu-item.dto';
+import { PaginatedMenuItemResponseDto } from './dto/paginated-menu-item-response.dto';
 
 @Injectable()
 export class MenuItemService {
@@ -78,6 +84,54 @@ export class MenuItemService {
       },
       orderBy: { position: 'asc' },
     });
+  }
+
+  async findAllWithPagination(
+    queryDto: QueryMenuItemDto,
+  ): Promise<PaginatedMenuItemResponseDto> {
+    const { search, isAvailable, page = 1, limit = 10 } = queryDto;
+
+    const where: any = {};
+
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
+    if (isAvailable !== undefined) {
+      where.isAvailable = isAvailable;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [menuItems, total] = await Promise.all([
+      this.prisma.menuItem.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          category: true,
+          image: true,
+          ingredients: true,
+        },
+        orderBy: { position: 'asc' },
+      }),
+      this.prisma.menuItem.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: menuItems as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 
   async findAll() {
@@ -180,9 +234,22 @@ export class MenuItemService {
       throw new NotFoundException(`Menu item with ID ${id} not found`);
     }
 
-    return this.prisma.menuItem.update({
+    const hasOrderItems = await this.prisma.orderItem.count({
+      where: { menuItemId: id },
+    });
+
+    const hasBookingItems = await this.prisma.bookingMenuItem.count({
+      where: { menuItemId: id },
+    });
+
+    if (hasOrderItems > 0 || hasBookingItems > 0) {
+      throw new ConflictException(
+        'Cannot delete menu item. It is referenced in orders or bookings.',
+      );
+    }
+
+    return this.prisma.menuItem.delete({
       where: { id },
-      data: { isAvailable: false },
     });
   }
 }
