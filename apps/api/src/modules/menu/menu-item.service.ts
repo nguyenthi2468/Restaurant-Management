@@ -89,6 +89,37 @@ export class MenuItemService {
     });
   }
 
+  async findByCategory(categoryId: string) {
+    const category = await this.prisma.menuCategory.findUnique({
+      where: { id: categoryId },
+    });
+
+    if (!category) {
+      throw new NotFoundException(
+        `Menu category with ID ${categoryId} not found`,
+      );
+    }
+
+    return this.prisma.menuItem.findMany({
+      where: {
+        categoryId,
+        isAvailable: true,
+      },
+      include: {
+        category: true,
+        image: true,
+        ingredients: true,
+        options: {
+          include: {
+            values: true,
+          },
+          orderBy: { position: 'asc' },
+        },
+      },
+      orderBy: { position: 'asc' },
+    });
+  }
+
   async findAll() {
     return this.prisma.menuItem.findMany({
       where: { isAvailable: true },
