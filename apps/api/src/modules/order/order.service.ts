@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { TableStatus } from '@prisma/client';
+import { OrderStatus, TableStatus } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -79,6 +79,28 @@ export class OrderService {
   async findOne(id: string) {
     return this.prisma.order.findUnique({
       where: { id },
+      include: {
+        items: true,
+        orderTables: {
+          include: {
+            table: true,
+          },
+        },
+        payments: true,
+      },
+    });
+  }
+
+  async findServedOrderByTableId(tableId: string) {
+    return this.prisma.order.findFirst({
+      where: {
+        status: OrderStatus.SERVED,
+        orderTables: {
+          some: {
+            tableId: tableId,
+          },
+        },
+      },
       include: {
         items: true,
         orderTables: {

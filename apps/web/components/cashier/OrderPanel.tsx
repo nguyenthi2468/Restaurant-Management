@@ -20,10 +20,12 @@ import {
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
+import { Order } from '@/features/orders';
+import { formatCurrency } from '@/utils/currency';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
-  orderItems: OrderItem[];
+  order: Order | null;
   totalAmount: number;
   onUpdateQuantity: (itemId: string, delta: number) => void;
   onRemoveItem: (itemId: string) => void;
@@ -33,7 +35,7 @@ interface OrderPanelProps {
 
 export function OrderPanel({
   selectedTable,
-  orderItems,
+  order,
   totalAmount,
   onUpdateQuantity,
   onRemoveItem,
@@ -95,7 +97,25 @@ export function OrderPanel({
       </div>
     );
   }
-
+  if (!order) {
+    return (
+      <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col items-center justify-center p-8">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400">
+            <LayoutGrid size={32} />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-slate-900">
+              Không có đơn cho bàn này
+            </h3>
+            <p className="text-sm text-slate-500">
+              {selectedTable?.name} hiện chưa có đơn hàng
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
@@ -123,28 +143,22 @@ export function OrderPanel({
       </div>
 
       <div className="px-4 py-2 border-b border-slate-200">
-        <div className="relative">
-          <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <Input
-            placeholder="Tìm khách hàng (F4)"
-            className="pl-9 h-8 text-sm bg-slate-50"
-            value={customerSearch}
-            onChange={(e) => setCustomerSearch(e.target.value)}
-          />
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-slate-500">Mã đơn:</span>
+          <span className="font-mono text-slate-900 bg-slate-100 px-2 py-1 rounded text-xs">
+            {order?.id}
+          </span>
         </div>
       </div>
 
       <ScrollArea className="flex-1 px-4 py-2">
         <div className="space-y-3">
-          {orderItems.length === 0 ? (
+          {order?.items?.length === 0 ? (
             <div className="text-center py-8 text-slate-400 text-sm">
               Chưa có món nào. Chọn thực đơn để thêm món.
             </div>
           ) : (
-            orderItems.map((item, idx) => (
+            order?.items?.map((item, idx) => (
               <OrderItemRow
                 key={item.id}
                 item={item}
@@ -181,10 +195,10 @@ export function OrderPanel({
           <div className="flex items-center gap-1 text-sm font-semibold text-slate-800">
             Tổng tiền
             <span className="ml-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {orderItems.length}
+              {order?.items?.length || 0}
             </span>
             <span className="ml-2 text-blue-600 text-base">
-              {totalAmount.toLocaleString('vi-VN')}
+              {formatCurrency(totalAmount)}
             </span>
           </div>
         </div>

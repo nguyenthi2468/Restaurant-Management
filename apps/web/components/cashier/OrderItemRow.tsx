@@ -1,4 +1,6 @@
-import type { OrderItem } from '@/features/cashier';
+
+import { OrderItem } from '@/features/order-items';
+import { formatCurrency } from '@/utils/currency';
 import { Minus, Plus, Trash2, Edit3 } from 'lucide-react';
 
 interface OrderItemRowProps {
@@ -20,7 +22,7 @@ export function OrderItemRow({
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-blue-600">{index + 1}.</span>
           <span className="text-sm font-medium text-slate-800 truncate">
-            {item.name}
+            {item.menuItem?.name || 'Món không có tên'}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
@@ -51,10 +53,10 @@ export function OrderItemRow({
 
       <div className="text-right w-20">
         <div className="text-sm font-medium text-slate-700">
-          {item.price.toLocaleString('vi-VN')}
+          {formatCurrency(Number(item.price))}
         </div>
         <div className="text-xs font-semibold text-slate-900">
-          {(item.price * item.quantity).toLocaleString('vi-VN')}
+          {formatCurrency((Number(item.price) * item.quantity))}
         </div>
       </div>
 

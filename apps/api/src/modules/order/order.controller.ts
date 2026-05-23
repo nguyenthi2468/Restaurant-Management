@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Action } from '../auth/decorator/action.decorator';
@@ -89,5 +97,27 @@ export class OrderController {
   })
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
+  }
+
+  @Get('table/:tableId/served')
+  @ApiOperation({
+    summary: 'Lấy chi tiết đơn hàng SERVED theo ID bàn',
+    description:
+      'Lấy thông tin chi tiết đơn hàng có trạng thái SERVED liên kết với một bàn cụ thể',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin chi tiết đơn hàng SERVED',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy đơn hàng với bàn được cung cấp',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  findServedOrderByTableId(@Param('tableId') tableId: string) {
+    return this.orderService.findServedOrderByTableId(tableId);
   }
 }

@@ -22,6 +22,7 @@ import {
   useMenuItemsWithPaginationQuery,
 } from '@/features/menu-items';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useGetServedOrderByTableIdQuery } from '@/features/orders';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -51,7 +52,7 @@ export default function CashierPage() {
       limit: 20,
     });
   const { data: floors = [] } = useFloorsQuery();
-  const { data: orderData } = useCashierOrderQuery(selectedTableId ?? '');
+  const { data: orderData } = useGetServedOrderByTableIdQuery(selectedTableId ?? '');
   const { data: menuCategories = [] } = useMenuCategoriesQuery();
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
@@ -92,7 +93,7 @@ export default function CashierPage() {
 
   const totalAmount = useMemo(
     () =>
-      displayItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      displayItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0),
     [displayItems],
   );
 
@@ -231,7 +232,7 @@ export default function CashierPage() {
 
       <OrderPanel
         selectedTable={selectedTable}
-        orderItems={displayItems}
+        order={orderData || null}
         totalAmount={totalAmount}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
