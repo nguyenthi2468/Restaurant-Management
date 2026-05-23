@@ -1,6 +1,9 @@
 import { Table, TableStatus } from '@/features/tables';
 import { Clock, ShoppingBag, Bike } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { calculateMinutesAgo } from '@/utils/time';
+import { useInterval } from '@/hooks/useInterval';
+import { useState } from 'react';
 
 interface TableCardProps {
   table: Table;
@@ -10,6 +13,18 @@ interface TableCardProps {
 
 export function TableCard({ table, isSelected, onSelect }: TableCardProps) {
   const isOccupied = table.status === TableStatus.OCCUPIED;
+  let [minutesUsed, setMinutesUsed] = useState(() =>
+    calculateMinutesAgo(table.updatedAt),
+  );
+
+  useInterval(
+    () => {
+      if (isOccupied) {
+        setMinutesUsed(calculateMinutesAgo(table.updatedAt));
+      }
+    },
+    isOccupied ? 60000 : null,
+  );
 
   return (
     <button
@@ -25,7 +40,7 @@ export function TableCard({ table, isSelected, onSelect }: TableCardProps) {
       {isOccupied && (
         <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] text-blue-600">
           <Clock size={10} />
-          <span>{123}</span>
+          <span>{minutesUsed} phút</span>
         </div>
       )}
       <div

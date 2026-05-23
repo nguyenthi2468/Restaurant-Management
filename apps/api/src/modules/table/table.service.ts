@@ -111,6 +111,21 @@ export class TableService {
   async update(id: string, dto: UpdateTableDto): Promise<Table> {
     await this.findOne(id);
 
+    const orderCount = await this.prisma.orderTable.count({
+      where: {
+        tableId: id,
+        order: {
+          status: 'SERVED',
+        },
+      },
+    });
+
+    if (orderCount > 0) {
+      throw new ConflictException(
+        'Không thể cập nhật bàn vì đang được phục vụ (SERVED)',
+      );
+    }
+
     if (dto.name) {
       const existing = await this.prisma.table.findUnique({
         where: { name: dto.name },
@@ -164,7 +179,7 @@ export class TableService {
         'Không thể xóa bàn vì có đặt bàn đang tồn tại',
       );
     }
-
+    
     // Ensure no orders exist for this table
     const orderCount = await this.prisma.orderTable.count({
       where: { tableId: id },

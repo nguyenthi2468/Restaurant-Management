@@ -29,8 +29,6 @@ import {
   useMenuItemsWithPaginationQuery,
 } from '@/features/menu-items';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');

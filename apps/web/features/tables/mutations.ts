@@ -6,6 +6,7 @@ import {
 } from './api';
 import { toast } from 'react-hot-toast';
 import { TableFormValues } from './validator';
+import { ApiError } from '@/types';
 
 export const useCreateTableMutation = () => {
   const queryClient = useQueryClient();
@@ -32,8 +33,8 @@ export const useUpdateTableMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['table', id] });
       toast.success('Bàn đã được cập nhật thành công');
     },
-    onError: (error) => {
-      toast.error('Không thể cập nhật bàn');
+    onError: (error: ApiError) => {
+      toast.error(error?.response?.data.message || 'Không thể cập nhật bàn');
       console.error(error);
     },
   });
@@ -47,8 +48,8 @@ export const useDeleteTableMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['tables'] });
       toast.success('Bàn đã được xóa thành công');
     },
-    onError: (error) => {
-      toast.error('Không thể xóa bàn');
+    onError: (error: ApiError) => {
+      toast.error(error?.response?.data.message || 'Không thể xóa bàn');
       console.error(error);
     },
   });

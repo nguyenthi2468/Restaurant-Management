@@ -222,7 +222,7 @@ enum TableStatus {
 
 model Order {
   id        String      @id @default(cuid())
-  status    OrderStatus @default(PENDING)
+  status    OrderStatus @default(SERVED)
   total     Decimal     @db.Decimal(12, 3) @default(0)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
