@@ -7,6 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Table, TableStatus, Prisma } from '@prisma/client';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
+import { QueryTableDto } from './dto/query-table.dto';
+import { PaginatedTableResponseDto } from './dto/paginated-table-response.dto';
 
 export interface SearchTablesFilters {
   name?: string;
@@ -292,5 +294,55 @@ export class TableService {
     });
 
     return count;
+  }
+
+  async findAllWithPagination(
+    queryDto: QueryTableDto,
+  ): Promise<PaginatedTableResponseDto> {
+    const { search, floorId, status, page = 1, limit = 10 } = queryDto;
+
+    const where: Prisma.TableWhereInput = {};
+
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
+    if (floorId) {
+      where.floorId = floorId;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [tables, total] = await Promise.all([
+      this.prisma.table.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [{ name: 'asc' }],
+        include: {
+          floor: true,
+        },
+      }),
+      this.prisma.table.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: tables as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 }

@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsInt, Min, IsDecimal, IsBoolean, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  IsDecimal,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class IngredientDto {
@@ -234,4 +244,3 @@ export class MenuItemDto {
   @IsOptional()
   ingredients?: IngredientDto[];
 }
-

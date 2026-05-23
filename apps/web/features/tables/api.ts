@@ -1,6 +1,11 @@
 import { API_ENDPOINTS } from '@/constants';
 import api from '@/lib/axios';
-import type { CheckAvailableTablesDto, Table } from './types';
+import type {
+  CheckAvailableTablesDto,
+  Table,
+  PaginatedTableResponse,
+  QueryTableDto,
+} from './types';
 import type { TableFormValues } from './validator';
 
 // Search params interface
@@ -27,6 +32,27 @@ export const getTables = async (params?: SearchTablesParams) => {
     `${API_ENDPOINTS.TABLES}${queryString}`,
   );
   return response.data;
+};
+
+// Get all tables with pagination
+export const getTablesWithPagination = async (params?: QueryTableDto) => {
+  const queryString = buildPaginationQuery(params);
+  const response = await api.get<PaginatedTableResponse>(
+    `${API_ENDPOINTS.TABLES}${queryString}`,
+  );
+  return response.data;
+};
+
+// Build pagination query string
+const buildPaginationQuery = (params?: QueryTableDto): string => {
+  const queryParams = new URLSearchParams();
+  if (params?.search) queryParams.append('search', params.search);
+  if (params?.floorId) queryParams.append('floorId', params.floorId);
+  if (params?.status) queryParams.append('status', params.status);
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  const queryString = queryParams.toString();
+  return queryString ? `?${queryString}` : '';
 };
 
 // Get tables by status (legacy, use getTables with params instead)

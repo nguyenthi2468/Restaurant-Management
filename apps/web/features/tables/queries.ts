@@ -3,16 +3,24 @@ import {
   getTables,
   getTableById,
   getTablesByStatus,
+  getTablesWithPagination,
   SearchTablesParams,
   checkAvailableTables,
   countAvailableTables,
 } from './api';
-import { CheckAvailableTablesDto } from './types';
+import { CheckAvailableTablesDto, QueryTableDto } from './types';
 
 export const useTablesQuery = (params?: SearchTablesParams) => {
   return useQuery({
     queryKey: ['tables', params],
     queryFn: () => getTables(params),
+  });
+};
+
+export const useTablesQueryWithPagination = (params?: QueryTableDto) => {
+  return useQuery({
+    queryKey: ['tables', 'pagination', params],
+    queryFn: () => getTablesWithPagination(params),
   });
 };
 

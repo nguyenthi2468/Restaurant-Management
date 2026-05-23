@@ -75,7 +75,8 @@ export class OrderController {
   @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({
     summary: 'Lấy chi tiết đơn hàng theo ID',
-    description: 'Lấy thông tin chi tiết của một đơn hàng bao gồm món ăn, bàn và thanh toán',
+    description:
+      'Lấy thông tin chi tiết của một đơn hàng bao gồm món ăn, bàn và thanh toán',
   })
   @ApiResponse({
     status: 200,

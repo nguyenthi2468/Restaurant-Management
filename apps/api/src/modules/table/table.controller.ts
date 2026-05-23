@@ -21,6 +21,9 @@ import {
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
 import { CheckAvailableTablesDto } from './dto/check-available-tables.dto';
+import { QueryTableDto } from './dto/query-table.dto';
+import { PaginatedTableResponseDto } from './dto/paginated-table-response.dto';
+import { TableDto } from './dto/table.dto';
 
 @ApiTags('tables')
 @ApiBearerAuth()
@@ -47,12 +50,12 @@ export class TableController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lấy danh sách tất cả bàn',
+    summary: 'Lấy danh sách bàn với phân trang',
     description:
-      'Lấy danh sách tất cả các bàn, có thể tìm kiếm theo tên, tầng và lọc theo trạng thái',
+      'Lấy danh sách bàn với khả năng tìm kiếm, lọc và phân trang. Hỗ trợ tìm kiếm theo tên, lọc theo tầng và trạng thái.',
   })
   @ApiQuery({
-    name: 'name',
+    name: 'search',
     required: false,
     description: 'Tìm kiếm theo tên bàn (tìm kiếm gần đúng)',
   })
@@ -67,17 +70,24 @@ export class TableController {
     enum: TableStatus,
     description: 'Lọc bàn theo trạng thái',
   })
-  @ApiResponse({ status: 200, description: 'Danh sách bàn', isArray: true })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Số trang (bắt đầu từ 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bàn với metadata phân trang',
+    type: PaginatedTableResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findAll(
-    @Query('name') name?: string,
-    @Query('floorId') floorId?: string,
-    @Query('status') status?: TableStatus,
-  ) {
-    if (name || floorId || status) {
-      return this.tableService.search({ name, floorId, status });
-    }
-    return this.tableService.findAll();
+  findAll(@Query() queryDto: QueryTableDto) {
+    return this.tableService.findAllWithPagination(queryDto);
   }
 
   @Get(':id')

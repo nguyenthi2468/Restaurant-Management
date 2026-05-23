@@ -24,11 +24,34 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admi
   40:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\menu-items\page.tsx
-  39:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:7   error  'limit' is never reassigned. Use 'const' instead  prefer-const
+  52:26  error  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\page.tsx
   5:3  warning  'ChartTooltip' is defined but never used  @typescript-eslint/no-unused-vars
   6:3  warning  'ChartLegend' is defined but never used   @typescript-eslint/no-unused-vars
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\reservations\[id]\page.tsx
+  26:3  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  99:7  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\reservations\[id]\page.tsx:99:7
+   97 |
+   98 |       const tableIds = booking.bookingTables?.map((bt) => bt.tableId) || [];
+>  99 |       setSelectedTables(tableIds);
+      |       ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  100 |       form.setValue('tables', tableIds);
+  101 |
+  102 |       const items =  react-hooks/set-state-in-effect
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\reservations\page.tsx
+  3:10  warning  'Button' is defined but never used  @typescript-eslint/no-unused-vars
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\tables\page.tsx
   12:10  warning  'MESSAGES' is defined but never used      @typescript-eslint/no-unused-vars
@@ -195,20 +218,24 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\component
   52:61  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationForm.tsx
-  11:29  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
-  67:26  warning  Compilation Skipped: Use of incompatible library
+   11:29  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   18:3   warning  'useTablesQuery' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   62:26  warning  Compilation Skipped: Use of incompatible library
 
 This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
 
-D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationForm.tsx:67:26
-  65 |   }, [floors, selectedFloorId]);
-  66 |
-> 67 |   const numberOfGuests = form.watch('numberOfGuests') || 1;
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationForm.tsx:62:26
+  60 |     },
+  61 |   });
+> 62 |   const numberOfGuests = form.watch('numberOfGuests') || 1;
      |                          ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
-  68 |   const numberOfChildren = form.watch('numberOfChildren') || 0;
-  69 |   const totalPersons = numberOfGuests + numberOfChildren;
-  70 |  react-hooks/incompatible-library
-  75:9   warning  The 'preOrderItems' logical expression could make the dependencies of useMemo Hook (at line 82) change on every render. To fix this, wrap the initialization of 'preOrderItems' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+  63 |   const numberOfChildren = form.watch('numberOfChildren') || 0;
+  64 |   const totalPersons = numberOfGuests + numberOfChildren;
+  65 |   const bookingTime = form.watch('bookingTime');  react-hooks/incompatible-library
+  102:9   warning  The 'preOrderItems' logical expression could make the dependencies of useMemo Hook (at line 109) change on every render. To fix this, wrap the initialization of 'preOrderItems' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationManagementTable.tsx
+  101:9  warning  'handleCloseDialog' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\roles\PermissionAssignRoleDialog.tsx
   24:3  warning  'Popover' is defined but never used                                                                      @typescript-eslint/no-unused-vars
@@ -285,7 +312,7 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\component
   101 |  react-hooks/set-state-in-effect
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\booking\api.ts
-  49:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  61:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\booking\mutations.ts
    24:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -298,8 +325,14 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\
   139:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   157:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\menu-items\queries.ts
+  7:15  warning  'PaginatedMenuItem' is defined but never used  @typescript-eslint/no-unused-vars
+
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\permissions\mutations.ts
   3:10  warning  'Permission' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\tables\queries.ts
+  47:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\hooks\use-mobile.ts
   14:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
@@ -308,6 +341,7 @@ Effects are intended to synchronize state between React and external systems suc
 * Update external systems with the latest state from React.
 * Subscribe for updates from some external system, calling setState in a callback function when external state changes.
 
+npm error Lifecycle script `lint` failed with error:
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\hooks\use-mobile.ts:14:5
@@ -319,10 +353,12 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\hooks\use
   16 |   }, [])
   17 |  react-hooks/set-state-in-effect
 
+npm error code 1
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\providers\AuthProvider.tsx
   64:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+npm error path D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web
 * Update external systems with the latest state from React.
 * Subscribe for updates from some external system, calling setState in a callback function when external state changes.
 
@@ -330,6 +366,7 @@ Calling setState synchronously within an effect body causes cascading renders th
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\providers\AuthProvider.tsx:64:5
   62 |   // Load user on mount
+npm error workspace web@0.1.0
   63 |   useEffect(() => {
 > 64 |     loadUser();
      |     ^^^^^^^^ Avoid calling setState() directly within an effect
@@ -337,12 +374,9 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\providers
   66 |   const login = async (email: string, password: string) => {
   67 |     try {  react-hooks/set-state-in-effect
 
-✖ 92 problems (27 errors, 65 warnings)
+✖ 100 problems (30 errors, 70 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
 
-npm error Lifecycle script `lint` failed with error:
-npm error code 1
-npm error path D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web
-npm error workspace web@0.1.0
 npm error location D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web
 npm error command failed
 npm error command C:\Windows\system32\cmd.exe /d /s /c eslint
