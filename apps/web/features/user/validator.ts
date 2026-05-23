@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const userFormSchema = z.object({
+  phone: z.string().min(1, 'Phone number is required').max(15, 'Phone number must not exceed 15 characters.'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
 });

@@ -166,6 +166,7 @@ export class AuthService {
     const user = await this.users.createLocalUser(
       input.email.toLowerCase().trim(),
       input.password,
+      input.phone,
       input.firstName,
       input.lastName,
     );

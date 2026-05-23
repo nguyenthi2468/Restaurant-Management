@@ -11,6 +11,7 @@ export interface Role {
 export interface User {
   id: string;
   firstName: string;
+  phone?:string;
   lastName: string;
   email: string;
   roles: Role[];

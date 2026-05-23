@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Table } from '@/features/tables';
+import { TableStatus, type Table} from '@/features/tables';
 import type { OrderItem } from '@/features/cashier';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import {
   Edit3,
   Phone,
   Printer,
+  ClipboardList,
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
 
@@ -48,6 +49,32 @@ export function OrderPanel({
             <LayoutGrid size={48} className="mx-auto mb-2 opacity-50" />
             <p className="text-sm">Chọn bàn để xem chi tiết đơn hàng</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedTable.status === TableStatus.AVAILABLE) {
+    return (
+      <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col items-center justify-center p-8">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600">
+            <LayoutGrid size={32} />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-slate-900">
+              Bàn trống - {selectedTable.name}
+            </h3>
+            <p className="text-sm text-slate-500">
+              {selectedTable.seats > 0
+                ? `${selectedTable.seats} người`
+                : 'Không giới hạn'}
+            </p>
+          </div>
+          <Button onClick={onNotify} className="w-full max-w-[200px]" size="lg">
+            <ClipboardList size={16} className="mr-2" />
+            Tạo đơn cho bàn này
+          </Button>
         </div>
       </div>
     );

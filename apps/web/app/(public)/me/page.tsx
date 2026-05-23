@@ -46,6 +46,7 @@ const Profile = () => {
   const profileForm = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
+      phone: user?.phone || '',
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
     },
@@ -229,7 +230,7 @@ const Profile = () => {
                 />
               </FieldGroup>
             </div>
-
+                   
             <Separator />
 
             <div className="flex justify-end gap-4 mt-5">

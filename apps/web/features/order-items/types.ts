@@ -1,5 +1,4 @@
 import { MenuItem } from "../menu-items";
-import { Order } from "../orders";
 
 export interface OrderItem {
   id: string;
@@ -9,7 +8,7 @@ export interface OrderItem {
   price: string | number;
   createdAt: string;
   updatedAt: string;
-  order?: Order;
+  notes: string;
   menuItem?: MenuItem;
 }
 

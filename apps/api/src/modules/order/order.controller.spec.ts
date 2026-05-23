@@ -34,8 +34,9 @@ describe('OrderController', () => {
       ...dto,
       status: 'PENDING',
     });
-    expect(await controller.create(dto as any)).toEqual({
+    expect(await controller.create({ ...dto } as any, '1')).toEqual({
       id: '1',
+      createdById: '1',
       ...dto,
       status: 'PENDING',
     });

@@ -20,6 +20,7 @@ model User {
   passwordHash  String?
   firstName     String?
   lastName      String?
+  phone         String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -31,13 +32,14 @@ model User {
   provider   AuthProvider @default(LOCAL)
   providerId String?      @unique
 
+  ordersCreated  Order[] @relation("OrderCreatedBy")  // Đơn nhân viên tạo
+  ordersAsCustomer Order[] @relation("OrderCustomer") // Đơn với tư cách khách
   sessions         AuthSession[]
   verifyTokens     EmailVerifyToken[]
   resetTokens      PasswordResetToken[]
   galleries        ImageGallery[]
   folderGalleries  FolderGallery[]
   bookings         Booking[] // Added for Booking relation
-
 }
 model Role {
   id          String           @id @default(cuid())
@@ -225,13 +227,25 @@ model Order {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   note    String?
-  customerName    String?
-  customerPhone    String?
+  // 👇 Nhân viên tạo order (bắt buộc)
+  createdById String
+  createdBy   User   @relation("OrderCreatedBy", fields: [createdById], references: [id])
+
+  // 👇 Khách đã có tài khoản (optional)
+  customerId  String?
+  customer    User?  @relation("OrderCustomer", fields: [customerId], references: [id])
+
+  // 👇 Khách vãng lai (optional, dùng khi customer = null)
+  customerName  String?
+  customerPhone String?
+
   items     OrderItem[]
   payments  Payment[]
   orderTables OrderTable[] // Many-to-many relation with Table
 
   @@index([status])
+  @@index([createdById])
+  @@index([customerId])
 }
 
 model OrderItem {

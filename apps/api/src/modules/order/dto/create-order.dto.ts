@@ -38,6 +38,13 @@ class CreateOrderItemDto {
 
 export class CreateOrderDto {
   @ApiProperty({
+    description: 'ID khách hàng',
+    example: 'customer_123abc',
+  })
+  @IsString()
+  customerId: string;
+
+  @ApiProperty({
     description: 'Danh sách ID bàn cho đơn hàng (có thể nhiều bàn)',
     example: ['table_456def', 'table_789ghi'],
     type: [String],
@@ -69,8 +76,9 @@ export class CreateOrderDto {
   })
   @IsArray()
   @ValidateNested({ each: true })
+  @IsOptional()
   @Type(() => CreateOrderItemDto)
-  items: CreateOrderItemDto[];
+  items?: CreateOrderItemDto[];
 
   @ApiProperty({
     description: 'Ghi chú cho đơn hàng',

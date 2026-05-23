@@ -41,6 +41,7 @@ const RegisterForm = () => {
       lastName: '',
       email: '',
       password: '',
+      phone: '',
       confirmPassword: '',
     },
   });

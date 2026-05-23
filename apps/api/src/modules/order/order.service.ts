@@ -6,13 +6,15 @@ import { CreateOrderDto } from './dto/create-order.dto';
 export class OrderService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto, userId: string) {
     const { tableIds, items, ...orderData } = createOrderDto;
 
     return this.prisma.order.create({
       data: {
         total: orderData.total,
         note: orderData.note,
+        createdById: userId,
+        customerId: orderData.customerId,
         customerName: orderData.customerName,
         customerPhone: orderData.customerPhone,
         // Tạo liên kết với bàn qua OrderTable junction table
@@ -26,7 +28,7 @@ export class OrderService {
             }
           : undefined,
         items: {
-          create: items.map((item) => ({
+          create: items?.map((item) => ({
             menuItemId: item.menuItemId,
             quantity: item.quantity,
             price: item.price,

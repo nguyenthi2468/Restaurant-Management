@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Action } from '../auth/decorator/action.decorator';
@@ -44,8 +44,9 @@ export class OrderController {
     description:
       'Bàn không tồn tại - ID bàn được cung cấp không tìm thấy trong hệ thống',
   })
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  create(@Body() createOrderDto: CreateOrderDto, @Request() req: any) {
+    const userId = req.user?.userId;
+    return this.orderService.create(createOrderDto, userId);
   }
 
   @Get()
