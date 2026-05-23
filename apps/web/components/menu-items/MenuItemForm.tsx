@@ -12,7 +12,6 @@ import { Switch } from '@/components/ui/switch';
 import { menuItemSchema, MenuItemFormValues } from '@/features/menu-items';
 import { useMenuCategoriesQuery } from '@/features/menu-categories';
 import MenuItemIngredientsSection from './MenuItemIngredientsSection';
-import MenuItemOptionsSection from './MenuItemOptionsSection';
 import { formatNumber, parseCurrency } from '@/utils/currency';
 
 interface MenuItemFormProps {
@@ -44,7 +43,6 @@ function MenuItemForm({
       isSpicy: false,
       preparationTime: undefined,
       ingredients: [],
-      options: [],
     },
   });
 
@@ -426,7 +424,6 @@ function MenuItemForm({
       </div>
 
       <MenuItemIngredientsSection control={form.control} />
-      <MenuItemOptionsSection control={form.control} />
 
       <div className="flex items-center justify-end pt-6 border-t gap-3 mt-8">
         <Button

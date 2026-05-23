@@ -198,7 +198,7 @@ model Table {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
-  orders    Order[]
+  orderTables OrderTable[] // Many-to-many relation with Order
   bookings  BookingTable[] // Added for BookingTable relation
 
   @@index([status])
@@ -220,8 +220,6 @@ enum TableStatus {
 
 model Order {
   id        String      @id @default(cuid())
-  tableId   String
-  table     Table       @relation(fields: [tableId], references: [id])
   status    OrderStatus @default(PENDING)
   total     Decimal     @db.Decimal(12, 3) @default(0)
   createdAt DateTime    @default(now())
@@ -231,8 +229,8 @@ model Order {
   customerPhone    String?
   items     OrderItem[]
   payments  Payment[]
+  orderTables OrderTable[] // Many-to-many relation with Table
 
-  @@index([tableId])
   @@index([status])
 }
 
@@ -246,7 +244,7 @@ model OrderItem {
   price      Decimal  @db.Decimal(12, 3)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
+  note       String?
   @@index([orderId])
   @@index([menuItemId])
 }
@@ -256,6 +254,19 @@ enum OrderStatus {
   SERVED
   COMPLETED
   CANCELLED
+}
+
+// Junction table for many-to-many relationship between Order and Table
+model OrderTable {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tableId   String
+  table     Table    @relation(fields: [tableId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([orderId, tableId])
+  @@index([tableId])
 }
 
 // ==================== MENU MODELS ====================
@@ -303,7 +314,6 @@ model MenuItem {
 
   // Relations for ingredients and options
   ingredients   MenuItemIngredient[]
-  options       MenuItemOption[] @relation("MenuItemOptions")
   orderItems    OrderItem[]
   bookingItems  BookingMenuItem[] // Added for BookingMenuItem relation
 
@@ -325,44 +335,6 @@ model MenuItemIngredient {
 
   @@index([menuItemId])
   @@index([isAllergen])
-}
-
-model MenuItemOption {
-  id            String   @id @default(cuid())
-  menuItemId    String
-  menuItem      MenuItem @relation("MenuItemOptions", fields: [menuItemId], references: [id], onDelete: Cascade)
-  name          String   // e.g., "Extra cheese", "Spice level"
-  description   String?
-  // For grouping options (e.g., "Size", "Toppings", "Cooking level")
-  group         String?
-  isRequired    Boolean  @default(false)
-  // For ordering options
-  position      Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relation to option values
-  values        MenuItemOptionValue[] @relation("MenuItemOptionValues")
-
-  @@index([menuItemId])
-  @@index([position])
-}
-
-model MenuItemOptionValue {
-  id            String   @id @default(cuid())
-  optionId      String
-  option        MenuItemOption @relation("MenuItemOptionValues", fields: [optionId], references: [id], onDelete: Cascade)
-  name          String   // e.g., "Small", "Medium", "Large" or "Mild", "Medium", "Hot"
-  description   String?
-  // Additional price for this option value
-  priceAdjustment Decimal @db.Decimal(12, 3) @default(0) // Can be positive or negative
-  // For ordering values within an option
-  position      Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@index([optionId])
-  @@index([position])
 }
 
 // ==================== ENUM ====================

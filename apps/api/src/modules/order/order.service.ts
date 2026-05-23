@@ -7,16 +7,38 @@ export class OrderService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createOrderDto: CreateOrderDto) {
+    const { tableIds, items, ...orderData } = createOrderDto;
+
     return this.prisma.order.create({
       data: {
-        tableId: createOrderDto.tableId,
-        total: createOrderDto.total,
+        total: orderData.total,
+        note: orderData.note,
+        customerName: orderData.customerName,
+        customerPhone: orderData.customerPhone,
+        // Tạo liên kết với bàn qua OrderTable junction table
+        orderTables: tableIds?.length
+          ? {
+              create: tableIds.map((tableId) => ({
+                table: {
+                  connect: { id: tableId },
+                },
+              })),
+            }
+          : undefined,
         items: {
-          create: createOrderDto.items.map((item) => ({
+          create: items.map((item) => ({
             menuItemId: item.menuItemId,
             quantity: item.quantity,
             price: item.price,
           })),
+        },
+      },
+      include: {
+        items: true,
+        orderTables: {
+          include: {
+            table: true,
+          },
         },
       },
     });
@@ -26,6 +48,26 @@ export class OrderService {
     return this.prisma.order.findMany({
       include: {
         items: true,
+        orderTables: {
+          include: {
+            table: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    return this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        orderTables: {
+          include: {
+            table: true,
+          },
+        },
+        payments: true,
       },
     });
   }

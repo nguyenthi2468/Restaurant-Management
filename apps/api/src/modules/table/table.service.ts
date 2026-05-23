@@ -163,7 +163,8 @@ export class TableService {
       );
     }
 
-    const orderCount = await this.prisma.order.count({
+    // Ensure no orders exist for this table
+    const orderCount = await this.prisma.orderTable.count({
       where: { tableId: id },
     });
     if (orderCount > 0) {

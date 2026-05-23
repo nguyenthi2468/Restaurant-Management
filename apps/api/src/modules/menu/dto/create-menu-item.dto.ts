@@ -48,91 +48,6 @@ export class IngredientDto {
   }
 }
 
-export class OptionValueDto {
-  @ApiProperty({
-    description: 'Tên giá trị',
-    example: 'Nhỏ',
-  })
-  @IsString()
-  name: string;
-
-  @ApiPropertyOptional({
-    description: 'Mô tả giá trị',
-    example: 'Pizza kích thước nhỏ',
-  })
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  @ApiProperty({
-    description: 'Số tiền điều chỉnh giá',
-    example: 0,
-  })
-  @IsDecimal()
-  priceAdjustment: number;
-
-  constructor(partial: Partial<OptionValueDto>) {
-    Object.assign(this, partial);
-  }
-}
-
-export class OptionDto {
-  @ApiProperty({
-    description: 'Tên tùy chọn',
-    example: 'Kích thước',
-  })
-  @IsString()
-  name: string;
-
-  @ApiPropertyOptional({
-    description: 'Mô tả tùy chọn',
-    example: 'Chọn kích thước pizza',
-  })
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  @ApiPropertyOptional({
-    description: 'Nhóm tùy chọn',
-    example: 'Size',
-  })
-  @IsString()
-  @IsOptional()
-  group?: string;
-
-  @ApiPropertyOptional({
-    description: 'Có phải tùy chọn bắt buộc',
-    example: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  isRequired?: boolean;
-
-  @ApiProperty({
-    description: 'Danh sách giá trị của tùy chọn',
-    example: [
-      {
-        name: 'Nhỏ',
-        description: 'Pizza kích thước nhỏ',
-        priceAdjustment: 0,
-      },
-      {
-        name: 'Vừa',
-        description: 'Pizza kích thước vừa',
-        priceAdjustment: 2,
-      },
-    ],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OptionValueDto)
-  values: OptionValueDto[];
-
-  constructor(partial: Partial<OptionDto>) {
-    Object.assign(this, partial);
-  }
-}
-
 export class CreateMenuItemDto {
   @ApiProperty({
     description: 'Tên món ăn',
@@ -256,40 +171,6 @@ export class CreateMenuItemDto {
   @Type(() => IngredientDto)
   @IsOptional()
   ingredients?: IngredientDto[];
-
-  @ApiPropertyOptional({
-    description: 'Danh sách tùy chọn (size, topping, etc.)',
-    example: [
-      {
-        name: 'Kích thước',
-        description: 'Chọn kích thước pizza',
-        group: 'Size',
-        isRequired: true,
-        values: [
-          {
-            name: 'Nhỏ',
-            description: 'Pizza kích thước nhỏ',
-            priceAdjustment: 0,
-          },
-          {
-            name: 'Vừa',
-            description: 'Pizza kích thước vừa',
-            priceAdjustment: 2,
-          },
-          {
-            name: 'Lớn',
-            description: 'Pizza kích thước lớn',
-            priceAdjustment: 4,
-          },
-        ],
-      },
-    ],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OptionDto)
-  @IsOptional()
-  options?: OptionDto[];
 
   constructor(partial: Partial<CreateMenuItemDto>) {
     Object.assign(this, partial);

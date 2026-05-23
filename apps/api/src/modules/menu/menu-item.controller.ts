@@ -75,29 +75,6 @@ export class MenuItemController {
             },
           },
         },
-        options: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              description: { type: 'string' },
-              group: { type: 'string' },
-              isRequired: { type: 'boolean' },
-              values: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    description: { type: 'string' },
-                    priceAdjustment: { type: 'number' },
-                  },
-                },
-              },
-            },
-          },
-        },
       },
     },
   })
@@ -184,29 +161,6 @@ export class MenuItemController {
               quantity: { type: 'number' },
               unit: { type: 'string' },
               isAllergen: { type: 'boolean' },
-            },
-          },
-        },
-        options: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              description: { type: 'string' },
-              group: { type: 'string' },
-              isRequired: { type: 'boolean' },
-              values: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    description: { type: 'string' },
-                    priceAdjustment: { type: 'number' },
-                  },
-                },
-              },
             },
           },
         },

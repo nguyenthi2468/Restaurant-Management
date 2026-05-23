@@ -12,7 +12,6 @@ import {
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IngredientDto } from './create-menu-item.dto';
-import { OptionDto } from './create-menu-item.dto';
 
 export class UpdateMenuItemDto {
   @ApiPropertyOptional({
@@ -140,38 +139,4 @@ export class UpdateMenuItemDto {
   @Type(() => IngredientDto)
   @IsOptional()
   ingredients?: IngredientDto[];
-
-  @ApiPropertyOptional({
-    description: 'Danh sách tùy chọn (size, topping, etc.)',
-    example: [
-      {
-        name: 'Kích thước',
-        description: 'Chọn kích thước pizza',
-        group: 'Size',
-        isRequired: true,
-        values: [
-          {
-            name: 'Nhỏ',
-            description: 'Pizza kích thước nhỏ',
-            priceAdjustment: 0,
-          },
-          {
-            name: 'Vừa',
-            description: 'Pizza kích thước vừa',
-            priceAdjustment: 2,
-          },
-          {
-            name: 'Lớn',
-            description: 'Pizza kích thước lớn',
-            priceAdjustment: 4,
-          },
-        ],
-      },
-    ],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OptionDto)
-  @IsOptional()
-  options?: OptionDto[];
 }
