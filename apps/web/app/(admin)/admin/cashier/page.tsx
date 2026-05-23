@@ -167,9 +167,9 @@ export default function CashierPage() {
   }, [selectedTable, totalAmount]);
 
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-slate-100">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-slate-100">
       {/* Left Panel */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <TabNavigation
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -216,7 +216,6 @@ export default function CashierPage() {
                 setCurrentPageMenu(1);
               }}
             />
-          
 
             <MenuGrid
               menuItems={menuItems}

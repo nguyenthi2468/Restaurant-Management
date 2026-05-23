@@ -1,4 +1,4 @@
-import { TableStatus } from "@/features/tables";
+import { TableStatus } from '@/features/tables';
 
 interface StatusFiltersProps {
   selectedStatus: string;
@@ -16,12 +16,12 @@ export function StatusFilters({
   stats,
 }: StatusFiltersProps) {
   return (
-    <div className="flex items-center gap-4 px-4 py-1 text-xs text-slate-600">
+    <div className="flex flex-wrap items-center gap-2 sm:gap-4 px-2 sm:px-4 py-1 text-xs text-slate-600">
       <label className="flex items-center gap-1.5 cursor-pointer">
         <input
           type="radio"
           name="status"
-          checked={selectedStatus === ""}
+          checked={selectedStatus === ''}
           onChange={() => onStatusChange('')}
           className="text-blue-600"
         />

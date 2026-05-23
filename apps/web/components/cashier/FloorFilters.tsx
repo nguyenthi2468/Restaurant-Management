@@ -13,7 +13,7 @@ export function FloorFilters({
   onFloorChange,
 }: FloorFiltersProps) {
   return (
-    <div className="flex items-center gap-1 px-4 py-2">
+    <div className="flex items-center gap-1 px-2 sm:px-4 py-2 overflow-x-auto whitespace-nowrap">
       <button
         onClick={() =>
           onFloorChange({

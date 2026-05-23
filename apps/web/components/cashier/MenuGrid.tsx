@@ -33,7 +33,7 @@ export function MenuGrid({
   return (
     <>
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
+        <div className="p-2 sm:p-4 space-y-4">
           {menuItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 px-4">
               <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
@@ -47,7 +47,7 @@ export function MenuGrid({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {menuItems.map((item) => (
                 <button
                   key={item.id}

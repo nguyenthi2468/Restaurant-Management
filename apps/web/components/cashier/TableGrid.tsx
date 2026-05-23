@@ -30,7 +30,7 @@ export function TableGrid({
             Đang tải bàn...
           </div>
         ) : (
-          <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 py-4 px-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 py-3 sm:py-4 px-2 sm:px-3">
             {tables.map((table) => (
               <TableCard
                 key={table.id}

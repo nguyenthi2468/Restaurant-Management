@@ -19,7 +19,7 @@ export function TabNavigation({
   onSearchChange,
 }: TabNavigationProps) {
   return (
-    <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+    <div className="flex items-center gap-2 px-2 sm:px-4 pt-3 pb-2 overflow-x-auto">
       <button
         onClick={() => onTabChange('tables')}
         className={cn(
@@ -58,20 +58,19 @@ export function TabNavigation({
       </button> */}
 
       <div className="flex-1" />
-      {activeTab === 'menu' && 
-      (
-      <div className="relative w-64">
-        <Search
-          size={14}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-        />
-        <Input
-          placeholder="Tìm món"
-          className="pl-9 h-9 bg-white text-sm"
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-        />
-      </div>
+      {activeTab === 'menu' && (
+        <div className="relative w-full sm:w-48 md:w-56 lg:w-64">
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <Input
+            placeholder="Tìm món"
+            className="pl-9 h-9 bg-white text-sm"
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+        </div>
       )}
     </div>
   );

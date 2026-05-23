@@ -42,7 +42,7 @@ export function OrderPanel({
 
   if (!selectedTable) {
     return (
-      <div className="w-[480px] bg-white border-l border-slate-200 flex flex-col">
+      <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
         <div className="flex-1 flex items-center justify-center text-slate-400">
           <div className="text-center">
             <LayoutGrid size={48} className="mx-auto mb-2 opacity-50" />
@@ -54,7 +54,7 @@ export function OrderPanel({
   }
 
   return (
-    <div className="w-[480px] bg-white border-l border-slate-200 flex flex-col">
+    <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
