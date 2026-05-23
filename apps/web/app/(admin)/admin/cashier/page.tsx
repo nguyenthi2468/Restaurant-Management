@@ -3,16 +3,14 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   useCashierOrderQuery,
-  useCashierMenuItemsQuery,
 } from '@/features/cashier';
 import {
   Table,
   TableStatus,
-  useTablesQuery,
   useTablesQueryWithPagination,
 } from '@/features/tables';
 import { Floor, useFloorsQuery } from '@/features/floor';
-import type { OrderItem, CashierMenuItem } from '@/features/cashier';
+import type { OrderItem } from '@/features/cashier';
 import { TabNavigation } from '@/components/cashier/TabNavigation';
 import { FloorFilters } from '@/components/cashier/FloorFilters';
 import { StatusFilters } from '@/components/cashier/StatusFilters';
@@ -20,7 +18,6 @@ import { TableGrid } from '@/components/cashier/TableGrid';
 import { MenuGrid } from '@/components/cashier/MenuGrid';
 import { OrderPanel } from '@/components/cashier/OrderPanel';
 import {
-  MenuCategory,
   useMenuCategoriesQuery,
 } from '@/features/menu-categories';
 import { MenuCategoryFilters } from '@/components/cashier';

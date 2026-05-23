@@ -19,7 +19,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
-import { CreateOrderDialog } from '@/components/orders/CreateOrderDialog';
+import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
