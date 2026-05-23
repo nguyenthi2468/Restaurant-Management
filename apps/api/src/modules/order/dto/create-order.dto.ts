@@ -41,8 +41,8 @@ export class CreateOrderDto {
     description: 'ID khách hàng',
     example: 'customer_123abc',
   })
-  @IsString()
-  customerId: string;
+  @IsOptional()
+  customerId?: string;
 
   @ApiProperty({
     description: 'Danh sách ID bàn cho đơn hàng (có thể nhiều bàn)',
@@ -61,8 +61,9 @@ export class CreateOrderDto {
     minimum: 0,
   })
   @IsNumber()
+  @IsOptional()
   @Min(0)
-  total: number;
+  total?: number;
 
   @ApiProperty({
     description: 'Danh sách món ăn trong đơn hàng',

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { TableStatus } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -9,40 +10,56 @@ export class OrderService {
   async create(createOrderDto: CreateOrderDto, userId: string) {
     const { tableIds, items, ...orderData } = createOrderDto;
 
-    return this.prisma.order.create({
-      data: {
-        total: orderData.total,
-        note: orderData.note,
-        createdById: userId,
-        customerId: orderData.customerId,
-        customerName: orderData.customerName,
-        customerPhone: orderData.customerPhone,
-        // Tạo liên kết với bàn qua OrderTable junction table
-        orderTables: tableIds?.length
-          ? {
-              create: tableIds.map((tableId) => ({
-                table: {
-                  connect: { id: tableId },
-                },
-              })),
-            }
-          : undefined,
-        items: {
-          create: items?.map((item) => ({
-            menuItemId: item.menuItemId,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        },
-      },
-      include: {
-        items: true,
-        orderTables: {
-          include: {
-            table: true,
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          total: orderData.total || 0,
+          note: orderData.note,
+          createdById: userId,
+          customerId: orderData.customerId,
+          customerName: orderData.customerName,
+          customerPhone: orderData.customerPhone,
+          orderTables: tableIds?.length
+            ? {
+                create: tableIds.map((tableId) => ({
+                  table: {
+                    connect: { id: tableId },
+                  },
+                })),
+              }
+            : undefined,
+          items: {
+            create: items?.map((item) => ({
+              menuItemId: item.menuItemId,
+              quantity: item.quantity,
+              price: item.price,
+            })),
           },
         },
-      },
+        include: {
+          items: true,
+          orderTables: {
+            include: {
+              table: true,
+            },
+          },
+        },
+      });
+
+      if (tableIds?.length) {
+        await tx.table.updateMany({
+          where: {
+            id: {
+              in: tableIds,
+            },
+          },
+          data: {
+            status: TableStatus.OCCUPIED,
+          },
+        });
+      }
+
+      return order;
     });
   }
 

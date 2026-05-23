@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TableStatus, type Table} from '@/features/tables';
+import { TableStatus, type Table } from '@/features/tables';
 import type { OrderItem } from '@/features/cashier';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
+import { CreateOrderDialog } from '@/components/orders/CreateOrderDialog';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -40,6 +41,7 @@ export function OrderPanel({
   onPay,
 }: OrderPanelProps) {
   const [customerSearch, setCustomerSearch] = useState('');
+  const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
 
   if (!selectedTable) {
     return (
@@ -71,11 +73,25 @@ export function OrderPanel({
                 : 'Không giới hạn'}
             </p>
           </div>
-          <Button onClick={onNotify} className="w-full max-w-[200px]" size="lg">
+          <Button
+            onClick={() => setCreateOrderDialogOpen(true)}
+            className="w-full max-w-[200px]"
+            size="lg"
+          >
             <ClipboardList size={16} className="mr-2" />
             Tạo đơn cho bàn này
           </Button>
         </div>
+        {selectedTable && (
+          <CreateOrderDialog
+            open={createOrderDialogOpen}
+            onOpenChange={setCreateOrderDialogOpen}
+            selectedTable={selectedTable}
+            onSuccess={() => {
+              setCreateOrderDialogOpen(false);
+            }}
+          />
+        )}
       </div>
     );
   }

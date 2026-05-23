@@ -3,6 +3,32 @@
 > eslint
 
 
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\cashier\page.tsx
+   6:3   warning  'useCashierMenuItemsQuery' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  11:3   warning  'useTablesQuery' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  15:26  warning  'CashierMenuItem' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  23:3   warning  'MenuCategory' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  32:10  warning  'Input' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  33:10  warning  'Search' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+  52:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\cashier\page.tsx:52:7
+  50 |   useEffect(() => {
+  51 |     if (activeTab === 'menu') {
+> 52 |       setCurrentPageMenu(1);
+     |       ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  53 |     }
+  54 |   }, [debouncedSearchTerm, activeTab]);
+  55 |  react-hooks/set-state-in-effect
+  74:9   warning  The 'tables' logical expression could make the dependencies of useMemo Hook (at line 81) change on every render. To fix this, wrap the initialization of 'tables' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+  74:9   warning  The 'tables' logical expression could make the dependencies of useMemo Hook (at line 95) change on every render. To fix this, wrap the initialization of 'tables' in its own useMemo() Hook                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\floors\page.tsx
    3:10  warning  'Card' is defined but never used          @typescript-eslint/no-unused-vars
   57:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -54,8 +80,8 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admi
   3:10  warning  'Button' is defined but never used  @typescript-eslint/no-unused-vars
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\tables\page.tsx
-  12:10  warning  'MESSAGES' is defined but never used      @typescript-eslint/no-unused-vars
-  93:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   38:7   error  'limit' is never reassigned. Use 'const' instead  prefer-const
+  105:26  error  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(admin)\admin\users\page.tsx
     2:10  warning  'Button' is defined but never used                 @typescript-eslint/no-unused-vars
@@ -72,7 +98,7 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(publ
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(public)\me\page.tsx
   14:10  warning  'User' is defined but never used                                                                                @typescript-eslint/no-unused-vars
-  71:6   warning  React Hook useEffect has a missing dependency: 'profileForm'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  72:6   warning  React Hook useEffect has a missing dependency: 'profileForm'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\app\(public)\page.tsx
   4:8  warning  'Gallery' is defined but never used  @typescript-eslint/no-unused-vars
@@ -88,11 +114,16 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\component
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\auth\RegisterForm.tsx
   12:3   warning  'FieldError' is defined but never used  @typescript-eslint/no-unused-vars
-  54:14  warning  'error' is defined but never used       @typescript-eslint/no-unused-vars
+  55:14  warning  'error' is defined but never used       @typescript-eslint/no-unused-vars
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\auth\VerifyEmail.tsx
   13:13  warning  'set' is defined but never used                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
   57:6   warning  React Hook useEffect has an unnecessary dependency: 'verifyEmail'. Either exclude it or remove the dependency array. Outer scope values like 'verifyEmail' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\cashier\TabNavigation.tsx
+  1:10  warning  'Button' is defined but never used  @typescript-eslint/no-unused-vars
+  3:28  warning  'Bike' is defined but never used    @typescript-eslint/no-unused-vars
+  3:42  warning  'Plus' is defined but never used    @typescript-eslint/no-unused-vars
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\common\GalleryImageDialog.tsx
   49:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
@@ -217,6 +248,24 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\component
   52:44  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
   52:61  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
 
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\orders\CreateOrderDialog.tsx
+  85:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\orders\CreateOrderDialog.tsx:85:7
+  83 |         customerPhone: '',
+  84 |       });
+> 85 |       setInputValue('');
+     |       ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  86 |     }
+  87 |   }, [open, selectedTable, form]);
+  88 |  react-hooks/set-state-in-effect
+
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\components\reservation\ReservationForm.tsx
    11:29  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
    18:3   warning  'useTablesQuery' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
@@ -325,14 +374,11 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\
   139:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   157:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
-D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\menu-items\queries.ts
-  7:15  warning  'PaginatedMenuItem' is defined but never used  @typescript-eslint/no-unused-vars
-
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\permissions\mutations.ts
   3:10  warning  'Permission' is defined but never used  @typescript-eslint/no-unused-vars
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\features\tables\queries.ts
-  47:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  55:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\hooks\use-mobile.ts
   14:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
@@ -341,7 +387,6 @@ Effects are intended to synchronize state between React and external systems suc
 * Update external systems with the latest state from React.
 * Subscribe for updates from some external system, calling setState in a callback function when external state changes.
 
-npm error Lifecycle script `lint` failed with error:
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\hooks\use-mobile.ts:14:5
@@ -353,12 +398,10 @@ D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\hooks\use
   16 |   }, [])
   17 |  react-hooks/set-state-in-effect
 
-npm error code 1
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\providers\AuthProvider.tsx
   64:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-npm error path D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web
 * Update external systems with the latest state from React.
 * Subscribe for updates from some external system, calling setState in a callback function when external state changes.
 
@@ -366,7 +409,6 @@ Calling setState synchronously within an effect body causes cascading renders th
 
 D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web\providers\AuthProvider.tsx:64:5
   62 |   // Load user on mount
-npm error workspace web@0.1.0
   63 |   useEffect(() => {
 > 64 |     loadUser();
      |     ^^^^^^^^ Avoid calling setState() directly within an effect
@@ -374,9 +416,13 @@ npm error workspace web@0.1.0
   66 |   const login = async (email: string, password: string) => {
   67 |     try {  react-hooks/set-state-in-effect
 
-✖ 100 problems (30 errors, 70 warnings)
-  1 error and 0 warnings potentially fixable with the `--fix` option.
+✖ 112 problems (33 errors, 79 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
 
+npm error Lifecycle script `lint` failed with error:
+npm error code 1
+npm error path D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web
+npm error workspace web@0.1.0
 npm error location D:\Workspace\freelancer\websiteqlnhahang\restaurantmanagement\apps\web
 npm error command failed
 npm error command C:\Windows\system32\cmd.exe /d /s /c eslint

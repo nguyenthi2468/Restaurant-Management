@@ -28,7 +28,7 @@ const buildQueryString = (params: SearchTablesParams): string => {
 // Get all tables with optional search params
 export const getTables = async (params?: SearchTablesParams) => {
   const queryString = params ? buildQueryString(params) : '';
-  const response = await api.get<Table[]>(
+  const response = await api.get<PaginatedTableResponse>(
     `${API_ENDPOINTS.TABLES}${queryString}`,
   );
   return response.data;

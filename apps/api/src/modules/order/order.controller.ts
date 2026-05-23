@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Action } from '../auth/decorator/action.decorator';
@@ -44,14 +44,12 @@ export class OrderController {
     description:
       'Bàn không tồn tại - ID bàn được cung cấp không tìm thấy trong hệ thống',
   })
-  create(@Body() createOrderDto: CreateOrderDto, @Request() req: any) {
-    const userId = req.user?.userId;
+  create(@Body() createOrderDto: CreateOrderDto, @Req() req: any) {
+    const userId = req.user?.id;
     return this.orderService.create(createOrderDto, userId);
   }
 
   @Get()
-  @Action('order:read')
-  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({
     summary: 'Lấy danh sách tất cả đơn hàng',
     description:
@@ -72,8 +70,6 @@ export class OrderController {
   }
 
   @Get(':id')
-  @Action('order:read')
-  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({
     summary: 'Lấy chi tiết đơn hàng theo ID',
     description:

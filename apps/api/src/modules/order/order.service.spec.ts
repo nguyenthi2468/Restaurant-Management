@@ -40,7 +40,7 @@ describe('OrderService', () => {
       ...dto,
       status: 'PENDING',
     });
-    expect(await service.create(dto as any)).toEqual({
+    expect(await service.create(dto as any,'1')).toEqual({
       id: '1',
       ...dto,
       status: 'PENDING',
