@@ -45,6 +45,7 @@ export interface Booking {
   customerId?: string | null;
   customerName: string;
   customerPhone: string;
+  customerEmail: string;
   bookingTime: string;
   endTime: string;
   numberOfGuests: number;
@@ -73,6 +74,7 @@ export interface CreateBookingData {
   customerId?: string;
   customerName: string;
   customerPhone: string;
+  customerEmail: string;
   bookingTime: Date | string;
   endTime?: Date | string;
   numberOfGuests: number;
@@ -89,6 +91,7 @@ export interface UpdateBookingData {
   customerId?: string;
   customerName?: string;
   customerPhone?: string;
+  customerEmail?: string;
   bookingTime?: Date | string;
   endTime?: Date | string;
   numberOfGuests?: number;

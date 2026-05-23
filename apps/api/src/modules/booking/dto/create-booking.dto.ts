@@ -23,6 +23,9 @@ export class CreateBookingDto {
   @IsString()
   customerPhone!: string;
 
+  @IsString()
+  customerEmail!: string;
+
   @IsDate()
   @Type(() => Date)
   bookingTime!: Date;

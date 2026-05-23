@@ -8,19 +8,29 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Calendar, Clock, Users, User, Phone } from 'lucide-react';
+import {
+  Loader2,
+  Calendar,
+  Clock,
+  Users,
+  User,
+  Phone,
+  Mail,
+} from 'lucide-react';
 import {
   bookingFormSchema,
   BookingFormValues,
 } from '@/features/booking/validator';
 import { useCreateBookingMutation } from '@/features/booking/mutations';
 import {
-  useTablesQuery,
   useCountAvailableTablesQuery,
   useCheckAvailableTablesQuery,
 } from '@/features/tables/queries';
 import { useFloorsQuery } from '@/features/floor/queries';
-import { useMenuItemsQuery } from '@/features/menu-items/queries';
+import {
+  useMenuItemsQuery,
+  useMenuItemsWithPaginationQuery,
+} from '@/features/menu-items/queries';
 import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,6 +46,41 @@ import { formatCurrency } from '@/utils/currency';
 import { useRouter } from 'next/navigation';
 import { Booking } from '@/features/booking/types';
 
+const getMinimumBookingTime = (): Date => {
+  const now = new Date();
+  const minimumTime = new Date(
+    Math.max(
+      now.getTime() + 3 * 60 * 60 * 1000,
+      new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        8,
+        0,
+        0,
+      ).getTime(),
+    ),
+  );
+  if (minimumTime.getHours() >= 22) {
+    const nextDay = new Date(minimumTime);
+    nextDay.setDate(nextDay.getDate() + 1);
+    nextDay.setHours(8, 0, 0, 0);
+    return nextDay;
+  }
+  return minimumTime;
+};
+
+const isBookingTimeTooEarly = (date: Date): boolean => {
+  const now = new Date();
+  const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  return date < threeHoursLater;
+};
+
+const isBookingTimeAllowed = (date: Date): boolean => {
+  const hours = date.getHours();
+  return hours >= 8 && hours < 22;
+};
+
 export function ReservationForm() {
   const [loading, setLoading] = useState(false);
   const [selectedFloorId, setSelectedFloorId] = useState<string>('');
@@ -43,14 +88,19 @@ export function ReservationForm() {
   const router = useRouter();
   const createBookingMutation = useCreateBookingMutation();
   const { data: floors = [], isLoading: floorsLoading } = useFloorsQuery();
-  const { data: menuItems = [], isLoading: menuItemsLoading } =
-  useMenuItemsQuery();
+  const { data: menuItemsData, isLoading: menuItemsLoading } =
+    useMenuItemsWithPaginationQuery({
+      page: 1,
+      limit: 10,
+    });
+  const menuItems = menuItemsData?.data || [];
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema) as never,
     defaultValues: {
       customerName: '',
       customerPhone: '',
+      customerEmail: '',
       bookingTime: undefined,
       numberOfGuests: 1,
       numberOfChildren: 0,
@@ -63,17 +113,17 @@ export function ReservationForm() {
   const numberOfChildren = form.watch('numberOfChildren') || 0;
   const totalPersons = numberOfGuests + numberOfChildren;
   const bookingTime = form.watch('bookingTime');
-  const { data: allTables = [], isLoading: tablesLoading } = useCheckAvailableTablesQuery({
-    floorId: selectedFloorId,
-    bookingTime: bookingTime?.toISOString() || '',
-  });
+  const { data: allTables = [], isLoading: tablesLoading } =
+    useCheckAvailableTablesQuery({
+      floorId: selectedFloorId,
+      bookingTime: bookingTime?.toISOString() || '',
+    });
 
   useEffect(() => {
     if (floors.length > 0 && !selectedFloorId) {
       setSelectedFloorId(floors[0].id);
     }
   }, [floors, selectedFloorId]);
-
 
   const { data: availableTablesCount, isSuccess: isCountSuccess } =
     useCountAvailableTablesQuery(
@@ -252,6 +302,35 @@ export function ReservationForm() {
 
         <FieldGroup>
           <Controller
+            name="customerEmail"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="customerEmail">Email</FieldLabel>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="customerEmail"
+                    type="email"
+                    placeholder="Nhập email"
+                    className="pl-10"
+                    disabled={loading}
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                  />
+                </div>
+                {fieldState.invalid && (
+                  <span className="text-xs text-destructive mt-1 block">
+                    {fieldState.error?.message}
+                  </span>
+                )}
+              </Field>
+            )}
+          />
+        </FieldGroup>
+
+        <FieldGroup>
+          <Controller
             name="bookingTime"
             control={form.control}
             render={({ field, fieldState }) => (
@@ -264,12 +343,26 @@ export function ReservationForm() {
                     type="datetime-local"
                     className="pl-10"
                     disabled={loading}
+                    min={format(getMinimumBookingTime(), "yyyy-MM-dd'T'HH:mm")}
                     value={
                       field.value
                         ? format(field.value, "yyyy-MM-dd'T'HH:mm")
                         : ''
                     }
-                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                    onChange={(e) => {
+                      const selectedDate = new Date(e.target.value);
+                      if (isBookingTimeTooEarly(selectedDate)) {
+                        toast.error(
+                          'Không thể chọn thời gian quá sớm (phải ít nhất 3 tiếng nữa)',
+                        );
+                        return;
+                      }
+                      if (!isBookingTimeAllowed(selectedDate)) {
+                        toast.error('Chỉ có thể đặt bàn từ 8:00 đến 22:00');
+                        return;
+                      }
+                      field.onChange(selectedDate);
+                    }}
                     aria-invalid={fieldState.invalid}
                   />
                 </div>

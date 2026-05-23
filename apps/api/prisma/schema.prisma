@@ -378,6 +378,7 @@ model Booking {
   customer         User?         @relation(fields: [customerId], references: [id])
   customerName     String
   customerPhone    String
+  customerEmail    String
   bookingTime      DateTime
   endTime          DateTime
   numberOfGuests   Int

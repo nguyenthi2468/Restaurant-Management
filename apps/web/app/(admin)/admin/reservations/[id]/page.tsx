@@ -9,8 +9,8 @@ import {
   useCompleteBookingMutation,
   useCancelBookingMutation,
 } from '@/features/booking';
-import { useTablesQuery } from '@/features/tables/queries';
-import { useMenuItemsQuery } from '@/features/menu-items/queries';
+import { useTablesQueryWithPagination } from '@/features/tables/queries';
+import { useMenuItemsWithPaginationQuery } from '@/features/menu-items/queries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,7 @@ import { format } from 'date-fns';
 import { ROUTES } from '@/constants';
 import { BookingStatus, DepositStatus } from '@/features/booking';
 import { formatCurrency } from '@/utils/currency';
+import { TableStatus } from '@/features/tables';
 
 const updateBookingSchema = z.object({
   endTime: z.string().min(1, 'End time is required'),
@@ -56,9 +57,16 @@ export default function BookingEditPage() {
   const bookingId = params.id as string;
 
   const { data: booking, isLoading, isError } = useBookingQuery(bookingId);
-  const { data: tables } = useTablesQuery();
-  const { data: menuItems } = useMenuItemsQuery();
-
+  const { data: tablesData } = useTablesQueryWithPagination({
+    page: 1,
+    limit: 20,
+    status: TableStatus.AVAILABLE
+  });
+  const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
+    page: 1,
+    limit: 20,
+  });
+  
   const updateMutation = useUpdateBookingMutation();
   const approveDepositMutation = useApproveDepositMutation();
   const markArrivedMutation = useMarkArrivedMutation();
@@ -74,6 +82,8 @@ export default function BookingEditPage() {
     }>
   >([]);
 
+  const tables = tablesData?.data || [];
+  const menuItems = menuItemsData?.data || [];
   const form = useForm<UpdateBookingFormValues>({
     resolver: zodResolver(updateBookingSchema),
     defaultValues: {
@@ -497,7 +507,7 @@ export default function BookingEditPage() {
                   ) : (
                     <CheckCircle className="mr-2 h-4 w-4" />
                   )}
-                  Mark as Arrived
+                  Confirm Booking
                 </Button>
               )}
 
@@ -512,7 +522,7 @@ export default function BookingEditPage() {
                   ) : (
                     <CheckCircle className="mr-2 h-4 w-4" />
                   )}
-                  Complete Booking
+                  Mark as Completed
                 </Button>
               )}
 

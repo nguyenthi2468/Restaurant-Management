@@ -18,6 +18,7 @@ import {
 } from '@prisma/client';
 import { VnpayService } from './vnpay.service';
 import { Prisma } from '@prisma/client'; // Import Prisma types
+import { MailService } from '../mail/mail.service'; // Import MailService
 
 interface VnpayReturnParams {
   vnp_TxnRef: string;
@@ -31,6 +32,7 @@ export class BookingService {
     private readonly prisma: PrismaService,
     private readonly tableService: TableService,
     private readonly vnpayService: VnpayService,
+    private readonly mailService: MailService, // Inject MailService
   ) {}
 
   /**
@@ -129,11 +131,20 @@ export class BookingService {
           : undefined,
       },
       include: {
-        bookingTables: true,
+        bookingTables: {
+          include: {
+            table: true,
+          },
+        },
         preOrderItems: true,
         payments: true,
       },
     });
+
+    // Gửi email xác nhận khi tạo booking thành công
+    if (booking.customerEmail) {
+      await this.mailService.sendBookingConfirmationBookedEmail(booking);
+    }
 
     return booking;
   }
@@ -439,16 +450,22 @@ export class BookingService {
     }
 
     // Cập nhật trạng thái bàn thành RESERVED (hoặc OCCUPIED)
-    const tableIds = booking.bookingTables.map((bt) => bt.tableId);
-    await this.prisma.table.updateMany({
-      where: { id: { in: tableIds } },
-      data: { status: 'RESERVED' }, // Hoặc 'OCCUPIED' tùy theo nghiệp vụ
-    });
+    // const tableIds = booking.bookingTables.map((bt) => bt.tableId);
+    // await this.prisma.table.updateMany({
+    //   where: { id: { in: tableIds } },
+    //   data: { status: 'RESERVED' }, // Hoặc 'OCCUPIED' tùy theo nghiệp vụ
+    // });
 
-    return this.prisma.booking.update({
+    const updatedBooking = await this.prisma.booking.update({
       where: { id },
       data: { status: BookingStatus.CONFIRMED },
+      include: { bookingTables: { include: { table: true } } },
     });
+
+    // Gửi email xác nhận
+    await this.mailService.sendBookingConfirmationEmail(updatedBooking);
+
+    return updatedBooking;
   }
 
   /**
@@ -569,7 +586,7 @@ export class BookingService {
           where: { id: vnp_TxnRef },
           data: {
             depositStatus: DepositStatus.PAID,
-            status: BookingStatus.CONFIRMED,
+            // status: BookingStatus.CONFIRMED,
           },
         }),
         this.prisma.payment.create({

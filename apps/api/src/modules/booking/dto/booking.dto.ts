@@ -33,6 +33,10 @@ export class BookingDto {
   @IsString()
   customerPhone: string;
 
+  @ApiProperty({ description: 'The email of the customer', required: false })
+  @IsString()
+  customerEmail: string;
+
   @ApiProperty({ description: 'The scheduled booking time (ISO 8601 format)' })
   @IsDateString()
   bookingTime: Date;
