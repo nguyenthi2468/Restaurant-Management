@@ -34,6 +34,7 @@ export interface MenuItemIngredient {
 }
 
 export interface MenuItemQueryParams {
+  menuCategoryId?: string;
   search?: string;
   isAvailable?: boolean;
   page?: number;

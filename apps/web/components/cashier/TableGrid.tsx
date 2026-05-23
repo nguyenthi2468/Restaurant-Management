@@ -43,11 +43,7 @@ export function TableGrid({
         )}
       </ScrollArea>
 
-      <div className="flex items-center justify-between px-4 py-2 border-t border-slate-200 bg-white">
-        <label className="flex items-center gap-2 text-xs text-slate-600">
-          <input type="checkbox" className="rounded" />
-          Mở thực đơn khi chọn bàn
-        </label>
+      <div className="flex items-center justify-end px-4 py-2 border-t border-slate-200 bg-white">
         <div className="flex items-center gap-2">
           <button
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}

@@ -6,3 +6,4 @@ export { TableGrid } from './TableGrid';
 export { MenuGrid } from './MenuGrid';
 export { OrderPanel } from './OrderPanel';
 export { OrderItemRow } from './OrderItemRow';
+export { MenuCategoryFilters } from './MenuCateogryFilters';

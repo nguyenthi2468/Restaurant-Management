@@ -125,10 +125,6 @@ export function OrderPanel({
       <div className="px-4 py-3 border-t border-slate-200 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-xs h-8 px-2">
-              <Users size={14} className="mr-1" />
-              Nguyễn...
-            </Button>
             <Button size="icon-xs" variant="ghost">
               <Edit3 size={12} />
             </Button>

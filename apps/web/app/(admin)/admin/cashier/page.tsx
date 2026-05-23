@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   useCashierOrderQuery,
   useCashierMenuItemsQuery,
@@ -19,6 +19,18 @@ import { StatusFilters } from '@/components/cashier/StatusFilters';
 import { TableGrid } from '@/components/cashier/TableGrid';
 import { MenuGrid } from '@/components/cashier/MenuGrid';
 import { OrderPanel } from '@/components/cashier/OrderPanel';
+import {
+  MenuCategory,
+  useMenuCategoriesQuery,
+} from '@/features/menu-categories';
+import { MenuCategoryFilters } from '@/components/cashier';
+import {
+  MenuItem,
+  useMenuItemsWithPaginationQuery,
+} from '@/features/menu-items';
+import { useDebounce } from '@/hooks/useDebounce';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -29,18 +41,36 @@ export default function CashierPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageTable, setCurrentPageTable] = useState(1);
+  const [currentPageMenu, setCurrentPageMenu] = useState(1);
   const [localOrderItems, setLocalOrderItems] = useState<OrderItem[]>([]);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  useEffect(() => {
+    if (activeTab === 'menu') {
+      setCurrentPageMenu(1);
+    }
+  }, [debouncedSearchTerm, activeTab]);
 
   const { data: tablesData, isLoading: tablesLoading } =
     useTablesQueryWithPagination({
       floorId: floorFilter.id,
-      page: currentPage,
+      page: currentPageTable,
       limit: 20,
     });
   const { data: floors = [] } = useFloorsQuery();
-  const { data: menuItems = [] } = useCashierMenuItemsQuery();
   const { data: orderData } = useCashierOrderQuery(selectedTableId ?? '');
+  const { data: menuCategories = [] } = useMenuCategoriesQuery();
+  const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
+  const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
+    menuCategoryId: selectedMenuCategory,
+    search: debouncedSearchTerm,
+    page: currentPageMenu,
+    limit: 10,
+  });
+  const menuItems = menuItemsData?.data || [];
+  const metaMenuItems = menuItemsData?.meta;
   const tables = tablesData?.data || [];
   const meta = tablesData?.meta;
   const tablesFilter = tables.filter(
@@ -78,10 +108,10 @@ export default function CashierPage() {
   const handleSelectTable = useCallback((table: Table) => {
     setSelectedTableId(table.id);
     setLocalOrderItems([]);
-    setCurrentPage(1);
+    setCurrentPageTable(1);
   }, []);
 
-  const handleAddItem = useCallback((menuItem: CashierMenuItem) => {
+  const handleAddItem = useCallback((menuItem: MenuItem) => {
     setLocalOrderItems((prev) => {
       const existing = prev.find((i) => i.menuItemId === menuItem.id);
       if (existing) {
@@ -154,7 +184,7 @@ export default function CashierPage() {
               selectedFloor={floorFilter.id}
               onFloorChange={(f) => {
                 setFloorFilter(f);
-                setCurrentPage(1);
+                setCurrentPageTable(1);
               }}
             />
 
@@ -169,19 +199,34 @@ export default function CashierPage() {
               selectedTableId={selectedTableId}
               onSelectTable={handleSelectTable}
               isLoading={tablesLoading}
-              currentPage={currentPage}
+              currentPage={currentPageTable}
               totalPages={meta?.totalPages || 0}
-              onPageChange={setCurrentPage}
+              onPageChange={setCurrentPageTable}
             />
           </>
         )}
 
         {activeTab === 'menu' && (
-          <MenuGrid
-            menuItems={menuItems}
-            onAddItem={handleAddItem}
-            hasSelectedTable={!!selectedTable}
-          />
+          <>
+            <MenuCategoryFilters
+              menuCategories={menuCategories}
+              selectedMenuCategory={selectedMenuCategory}
+              onMenuCategoryChange={(c) => {
+                setSelectedMenuCategory(c);
+                setCurrentPageMenu(1);
+              }}
+            />
+          
+
+            <MenuGrid
+              menuItems={menuItems}
+              onAddItem={handleAddItem}
+              hasSelectedTable={!!selectedTable}
+              currentPage={currentPageMenu}
+              totalPages={metaMenuItems?.totalPages || 0}
+              onPageChange={setCurrentPageMenu}
+            />
+          </>
         )}
 
         {/* {activeTab === 'delivery' && (

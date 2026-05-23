@@ -4,7 +4,7 @@ import {
   getMenuItemById,
   getMenuItemsWithPagination,
 } from './api';
-import type { PaginatedMenuItem, MenuItemQueryParams } from './types';
+import type { MenuItemQueryParams } from './types';
 
 export const useMenuItemsQuery = () => {
   return useQuery({

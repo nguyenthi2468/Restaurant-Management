@@ -92,19 +92,6 @@ export class MenuItemController {
     return this.menuItemService.create(createMenuItemDto);
   }
 
-  @Get('category/:categoryId')
-  @ApiOperation({ summary: 'Lấy danh sách món ăn theo danh mục' })
-  @ApiResponse({
-    status: 200,
-    description: 'Danh sách món ăn của danh mục',
-    isArray: true,
-  })
-  @ApiResponse({ status: 404, description: 'Danh mục không tìm thấy' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findByCategory(@Param('categoryId') categoryId: string) {
-    return this.menuItemService.findByCategory(categoryId);
-  }
-
   @Get()
   @ApiOperation({
     summary: 'Lấy danh sách tất cả món ăn có sẵn với tìm kiếm và phân trang',

@@ -12,6 +12,14 @@ export class QueryMenuItemDto {
   search?: string;
 
   @ApiProperty({
+    description: 'Filter by menu category ID',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  menuCategoryId?: string;
+
+  @ApiProperty({
     description: 'Filter by availability status',
     required: false,
   })
