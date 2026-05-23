@@ -4,6 +4,7 @@ import {
   getTableById,
   getTablesByStatus,
   getTablesWithPagination,
+  getTablesWithBookings,
   SearchTablesParams,
   checkAvailableTables,
   countAvailableTables,
@@ -21,6 +22,13 @@ export const useTablesQueryWithPagination = (params?: QueryTableDto) => {
   return useQuery({
     queryKey: ['tables', 'pagination', params],
     queryFn: () => getTablesWithPagination(params),
+  });
+};
+
+export const useTablesWithBookingsQuery = (params?: QueryTableDto) => {
+  return useQuery({
+    queryKey: ['tables', 'with-bookings', params],
+    queryFn: () => getTablesWithBookings(params),
   });
 };
 

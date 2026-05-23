@@ -66,3 +66,21 @@ export interface CheckAvailableTablesDto {
   floorId: string;
   endTime?: string;
 }
+
+export interface BookingInfo {
+  id: string;
+  bookingTime: string;
+  endTime: string;
+  guestCount: number;
+  customerName: string;
+  customerPhone: string;
+}
+
+export interface TableWithBookings extends Table {
+  bookings: BookingInfo[];
+}
+
+export interface PaginatedTableWithBookingsResponse {
+  data: TableWithBookings[];
+  meta: TableMeta;
+}

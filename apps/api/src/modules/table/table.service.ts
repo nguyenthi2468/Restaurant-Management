@@ -4,11 +4,12 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Table, TableStatus, Prisma } from '@prisma/client';
+import { Table, TableStatus, Prisma, BookingStatus } from '@prisma/client';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
 import { QueryTableDto } from './dto/query-table.dto';
 import { PaginatedTableResponseDto } from './dto/paginated-table-response.dto';
+import { PaginatedTableWithBookingsResponseDto } from './dto/table-with-bookings.dto';
 
 export interface SearchTablesFilters {
   name?: string;
@@ -179,7 +180,7 @@ export class TableService {
         'Không thể xóa bàn vì có đặt bàn đang tồn tại',
       );
     }
-    
+
     // Ensure no orders exist for this table
     const orderCount = await this.prisma.orderTable.count({
       where: { tableId: id },
@@ -352,6 +353,77 @@ export class TableService {
 
     return {
       data: tables as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
+  }
+
+  async findAllWithBookingsAndPagination(
+    queryDto: QueryTableDto,
+  ): Promise<PaginatedTableWithBookingsResponseDto> {
+    const { search, floorId, status, page = 1, limit = 10 } = queryDto;
+
+    const where: Prisma.TableWhereInput = {};
+
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
+    if (floorId) {
+      where.floorId = floorId;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [tables, total] = await Promise.all([
+      this.prisma.table.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [{ name: 'asc' }],
+        include: {
+          floor: true,
+          bookings: {
+             where: {
+              booking: {
+                status: BookingStatus.CONFIRMED,
+              },
+            },
+            include: {
+              booking: true,
+            },
+          },
+        },
+      }),
+      this.prisma.table.count({ where }),
+    ]);
+
+    const tablesWithBookings = tables.map((table) => ({
+      ...table,
+      bookings: table.bookings.map((bt) => ({
+        id: bt.booking.id,
+        bookingTime: bt.booking.bookingTime,
+        endTime: bt.booking.endTime,
+        customerName: bt.booking.customerName,
+        customerPhone: bt.booking.customerPhone,
+      })),
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: tablesWithBookings as any,
       meta: {
         page,
         limit,

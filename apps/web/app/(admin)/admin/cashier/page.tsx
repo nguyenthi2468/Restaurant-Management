@@ -1,13 +1,11 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useCashierOrderQuery } from '@/features/cashier';
 import {
-  useCashierOrderQuery,
-} from '@/features/cashier';
-import {
-  Table,
+  TableWithBookings,
   TableStatus,
-  useTablesQueryWithPagination,
+  useTablesWithBookingsQuery,
 } from '@/features/tables';
 import { Floor, useFloorsQuery } from '@/features/floor';
 import type { OrderItem } from '@/features/cashier';
@@ -17,9 +15,7 @@ import { StatusFilters } from '@/components/cashier/StatusFilters';
 import { TableGrid } from '@/components/cashier/TableGrid';
 import { MenuGrid } from '@/components/cashier/MenuGrid';
 import { OrderPanel } from '@/components/cashier/OrderPanel';
-import {
-  useMenuCategoriesQuery,
-} from '@/features/menu-categories';
+import { useMenuCategoriesQuery } from '@/features/menu-categories';
 import { MenuCategoryFilters } from '@/components/cashier';
 import {
   MenuItem,
@@ -49,7 +45,7 @@ export default function CashierPage() {
   }, [debouncedSearchTerm, activeTab]);
 
   const { data: tablesData, isLoading: tablesLoading } =
-    useTablesQueryWithPagination({
+    useTablesWithBookingsQuery({
       floorId: floorFilter.id,
       page: currentPageTable,
       limit: 20,
@@ -100,7 +96,7 @@ export default function CashierPage() {
     [displayItems],
   );
 
-  const handleSelectTable = useCallback((table: Table) => {
+  const handleSelectTable = useCallback((table: TableWithBookings) => {
     setSelectedTableId(table.id);
     setLocalOrderItems([]);
     setCurrentPageTable(1);

@@ -1,12 +1,12 @@
-import { Table } from '@/features/tables';
+import { TableWithBookings } from '@/features/tables';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { TableCard } from './TableCard';
 
 interface TableGridProps {
-  tables: Table[];
+  tables: TableWithBookings[];
   selectedTableId: string | null;
-  onSelectTable: (table: Table) => void;
+  onSelectTable: (table: TableWithBookings) => void;
   isLoading: boolean;
   currentPage: number;
   totalPages: number;

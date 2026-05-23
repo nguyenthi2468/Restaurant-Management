@@ -1,9 +1,9 @@
-import { Table, TableStatus } from '@/features/tables';
-import { Clock, ShoppingBag, Bike, X } from 'lucide-react';
+import { TableWithBookings, TableStatus } from '@/features/tables';
+import { Clock, ShoppingBag, Bike, X, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { calculateMinutesAgo } from '@/utils/time';
+import { calculateMinutesAgo, calculateTimeUntilBooking } from '@/utils/time';
 import { useInterval } from '@/hooks/useInterval';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Tooltip,
   TooltipContent,
@@ -11,9 +11,9 @@ import {
 } from '@/components/ui/tooltip';
 
 interface TableCardProps {
-  table: Table;
+  table: TableWithBookings;
   isSelected: boolean;
-  onSelect: (table: Table) => void;
+  onSelect: (table: TableWithBookings) => void;
 }
 
 export function TableCard({ table, isSelected, onSelect }: TableCardProps) {
@@ -22,6 +22,7 @@ export function TableCard({ table, isSelected, onSelect }: TableCardProps) {
   let [minutesUsed, setMinutesUsed] = useState(() =>
     calculateMinutesAgo(table.updatedAt),
   );
+  const [bookingUpdateTrigger, setBookingUpdateTrigger] = useState(0);
 
   useEffect(() => {
     if (isOccupied) {
@@ -38,8 +39,31 @@ export function TableCard({ table, isSelected, onSelect }: TableCardProps) {
     isOccupied ? 60000 : null,
   );
 
+  useInterval(
+    () => {
+      setBookingUpdateTrigger((prev) => prev + 1);
+    },
+    table.bookings && table.bookings.length > 0 ? 60000 : null,
+  );
+
+  const soonestBooking = useMemo(() => {
+    if (!table.bookings || table.bookings.length === 0) return null;
+
+    return table.bookings.reduce((soonest, current) => {
+      const soonestTime = new Date(soonest.bookingTime).getTime();
+      const currentTime = new Date(current.bookingTime).getTime();
+      return currentTime < soonestTime ? current : soonest;
+    });
+  }, [table.bookings, bookingUpdateTrigger]);
+
   const renderTableContent = () => (
     <>
+      {soonestBooking && (
+        <div className="absolute top-2 left-2 flex items-center gap-1 text-[10px] text-orange-600">
+          <Calendar size={10} />
+          <span>{calculateTimeUntilBooking(soonestBooking.bookingTime)}</span>
+        </div>
+      )}
       {isOccupied && (
         <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] text-blue-600">
           <Clock size={10} />

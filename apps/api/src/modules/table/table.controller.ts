@@ -23,7 +23,8 @@ import { UpdateTableDto } from './dto/update-table.dto';
 import { CheckAvailableTablesDto } from './dto/check-available-tables.dto';
 import { QueryTableDto } from './dto/query-table.dto';
 import { PaginatedTableResponseDto } from './dto/paginated-table-response.dto';
-import { TableDto } from './dto/table.dto';
+import { PaginatedTableWithBookingsResponseDto } from './dto/table-with-bookings.dto';
+
 
 @ApiTags('tables')
 @ApiBearerAuth()
@@ -88,6 +89,48 @@ export class TableController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll(@Query() queryDto: QueryTableDto) {
     return this.tableService.findAllWithPagination(queryDto);
+  }
+
+  @Get('with-bookings')
+  @ApiOperation({
+    summary: 'Lấy danh sách bàn với thông tin đặt bàn',
+    description:
+      'Lấy danh sách bàn kèm theo thông tin đặt bàn (bookingTime, endTime, số khách, tên và số điện thoại khách hàng). Hỗ trợ tìm kiếm, lọc và phân trang.',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Tìm kiếm theo tên bàn (tìm kiếm gần đúng)',
+  })
+  @ApiQuery({
+    name: 'floorId',
+    required: false,
+    description: 'Lọc bàn theo ID tầng',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: TableStatus,
+    description: 'Lọc bàn theo trạng thái',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Số trang (bắt đầu từ 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bàn với thông tin đặt bàn và metadata phân trang',
+    type: PaginatedTableWithBookingsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  findAllWithBookings(@Query() queryDto: QueryTableDto) {
+    return this.tableService.findAllWithBookingsAndPagination(queryDto);
   }
 
   @Get(':id')

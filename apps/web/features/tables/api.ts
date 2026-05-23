@@ -4,6 +4,7 @@ import type {
   CheckAvailableTablesDto,
   Table,
   PaginatedTableResponse,
+  PaginatedTableWithBookingsResponse,
   QueryTableDto,
 } from './types';
 import type { TableFormValues } from './validator';
@@ -39,6 +40,14 @@ export const getTablesWithPagination = async (params?: QueryTableDto) => {
   const queryString = buildPaginationQuery(params);
   const response = await api.get<PaginatedTableResponse>(
     `${API_ENDPOINTS.TABLES}${queryString}`,
+  );
+  return response.data;
+};
+
+export const getTablesWithBookings = async (params?: QueryTableDto) => {
+  const queryString = buildPaginationQuery(params);
+  const response = await api.get<PaginatedTableWithBookingsResponse>(
+    `${API_ENDPOINTS.TABLES}/with-bookings${queryString}`,
   );
   return response.data;
 };
