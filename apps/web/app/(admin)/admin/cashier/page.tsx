@@ -84,6 +84,10 @@ export default function CashierPage() {
       queryClient.invalidateQueries({
         queryKey: ['order-items', 'order', orderData.id],
       });
+      const audio = new Audio('/audio/kichen_bell.mp3');
+      audio.play().catch((error) => {
+        console.error('Error playing audio:', error);
+      });
     }
   });
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');

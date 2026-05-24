@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, ChevronsRight, Bell } from 'lucide-react';
+import { ChevronRight, ChevronsRight, Bell, Volume2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { KitchenTicketPendingDrawer } from '@/components/kitchen/KitchenTicketPendingDrawer';
 import {
   KitchenTicketItem,
+  KitchenTicketStatus,
   useGetKitchenTicketsQuery,
   useUpdateKitchenTicketItemStatusMutation,
 } from '@/features/kitchen';
@@ -30,13 +32,6 @@ const transformKitchenTickets = (tickets: any[]): TransformationData => {
           quantity: item.quantity,
           tableName: `Bàn ${ticket.orderId}`,
           time: `${ticket.createdAt}`,
-          elapsedTime: item.completedAt
-            ? formatDistanceToNow(new Date(item.completedAt), {
-                addSuffix: true,
-              })
-            : formatDistanceToNow(new Date(ticket.createdAt), {
-                addSuffix: true,
-              }),
           status:
             item.status === KitchenItemStatus.READY ||
             item.status === KitchenItemStatus.SERVED
@@ -57,23 +52,41 @@ const transformKitchenTickets = (tickets: any[]): TransformationData => {
 };
 
 export default function KitchenPage() {
-  const { data: tickets, isLoading } = useGetKitchenTicketsQuery();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { data: tickets, isLoading } = useGetKitchenTicketsQuery(
+    KitchenTicketStatus.ACCEPTED,
+  );
+  const { data: ticketsPending, isLoading: isLoadingPending } =
+    useGetKitchenTicketsQuery(KitchenTicketStatus.PENDING);
   const mutation = useUpdateKitchenTicketItemStatusMutation();
   const queryClient = useQueryClient();
 
   usePusherChannel('kitchen-channel', 'ticket-created', () => {
     queryClient.invalidateQueries({ queryKey: ['kitchen-tickets'] });
-    new Audio('/audio/kichen_bell.mp3').play().catch(() => {});
+    const audio = new Audio('/audio/kichen_bell.mp3');
+    audio.play().catch((error) => {
+      console.error('Error playing audio:', error);
+    });
   });
 
   usePusherChannel('kitchen-channel', 'ticket-item-updated', () => {
     queryClient.invalidateQueries({ queryKey: ['kitchen-tickets'] });
-    new Audio('/audio/kichen_bell.mp3').play().catch(() => {});
+    const audio = new Audio('/audio/kichen_bell.mp3');
+    audio.play().catch((error) => {
+      console.error('Error playing audio:', error);
+    });
   });
 
   const { pendingItems, completedItems } = transformKitchenTickets(
     tickets || [],
   );
+
+  const playBellSound = () => {
+    const audio = new Audio('/audio/kichen_bell.mp3');
+    audio.play().catch((error) => {
+      console.error('Error playing audio:', error);
+    });
+  };
 
   const moveToCompleted = (item: KitchenTicketItem) => {
     mutation.mutate({
@@ -82,10 +95,17 @@ export default function KitchenPage() {
     });
   };
 
-  const moveToPending = (item: KitchenTicketItem) => {
+  const moveToServed = (item: KitchenTicketItem) => {
     mutation.mutate({
       itemId: item.id,
-      status: KitchenItemStatus.PENDING,
+      status: KitchenItemStatus.SERVED,
+    });
+  };
+
+  const moveToCancelled = (item: KitchenTicketItem) => {
+    mutation.mutate({
+      itemId: item.id,
+      status: KitchenItemStatus.CANCELLED,
     });
   };
 
@@ -97,10 +117,32 @@ export default function KitchenPage() {
           <h2 className="text-lg font-semibold">Chờ chế biến</h2>
         </div>
 
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={playBellSound}
+            className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+          >
+            <Volume2 className="size-4" />
+          </button>
+        </div>
+
         <div className="flex w-1/3 items-center justify-end gap-3">
           <h2 className="mr-auto text-lg font-semibold">
             Đã xong/ Chờ cung ứng
           </h2>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="relative rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+          >
+            <div className="relative">
+              <Bell className="size-5" />
+              {ticketsPending && ticketsPending.length > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white shadow-lg">
+                  {ticketsPending.length > 99 ? '99+' : ticketsPending.length}
+                </span>
+              )}
+            </div>
+          </button>
         </div>
       </div>
 
@@ -138,22 +180,28 @@ export default function KitchenPage() {
                       <div className="text-sm font-medium text-gray-700">
                         {item.tableName}
                       </div>
-                      <div className="text-xs text-gray-400">
-                        {item.elapsedTime}
-                      </div>
-                      <div className="flex items-center gap-2">
+
+                      <div className="flex items-center justify-between gap-2 w-full">
                         <button
-                          onClick={() => moveToCompleted(item)}
-                          className="flex size-8 items-center justify-center rounded-full border border-pink-500 text-pink-500 transition-colors hover:bg-pink-50"
+                          onClick={() => moveToCancelled(item)}
+                          className="flex items-center gap-2 rounded-full border border-red-500 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-100 hover:border-red-600 active:scale-95"
                         >
-                          <ChevronRight className="size-4" />
+                           Huỷ
                         </button>
-                        <button
-                          onClick={() => moveToCompleted(item)}
-                          className="flex size-8 items-center justify-center rounded-full bg-pink-500 text-white transition-colors hover:bg-pink-600"
-                        >
-                          <ChevronsRight className="size-4" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => moveToCompleted(item)}
+                            className="flex size-8 items-center justify-center rounded-full border border-pink-500 text-pink-500 transition-colors hover:bg-pink-50"
+                          >
+                            <ChevronRight className="size-4" />
+                          </button>
+                          <button
+                            onClick={() => moveToCompleted(item)}
+                            className="flex size-8 items-center justify-center rounded-full bg-pink-500 text-white transition-colors hover:bg-pink-600"
+                          >
+                            <ChevronsRight className="size-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -200,13 +248,13 @@ export default function KitchenPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => moveToPending(item)}
+                          onClick={() => moveToServed(item)}
                           className="flex size-8 items-center justify-center rounded-full border border-green-600 text-green-600 transition-colors hover:bg-green-50"
                         >
                           <ChevronRight className="size-4" />
                         </button>
                         <button
-                          onClick={() => moveToPending(item)}
+                          onClick={() => moveToServed(item)}
                           className="flex size-8 items-center justify-center rounded-full bg-green-600 text-white transition-colors hover:bg-green-700"
                         >
                           <ChevronsRight className="size-4" />
@@ -220,6 +268,13 @@ export default function KitchenPage() {
           </ScrollArea>
         </div>
       </div>
+
+      <KitchenTicketPendingDrawer
+        open={drawerOpen}
+        ticketsPending={ticketsPending}
+        onOpenChange={setDrawerOpen}
+        isLoading={isLoadingPending}
+      />
     </div>
   );
 }
