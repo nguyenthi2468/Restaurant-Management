@@ -29,6 +29,9 @@ export class OrderItemService {
       include: {
         menuItem: true,
       },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
   }
 

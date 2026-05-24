@@ -30,7 +30,7 @@ import { BookingModule } from './modules/booking/booking.module';
       throttlers: [
         {
           ttl: 60000,
-          limit: 10,
+          limit: 20,
         },
       ],
     }),

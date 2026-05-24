@@ -199,7 +199,6 @@ export default function CashierPage() {
     },
     [orderData, updateOrderItemMutation, deleteOrderItemMutation],
   );
-
   const handleRemoveItem = useCallback((itemId: string) => {
     setDeleteItemId(itemId);
   }, []);
@@ -304,6 +303,7 @@ export default function CashierPage() {
         selectedTable={selectedTable}
         order={orderData || null}
         isLoading={isLoadingOrderItems}
+        isUpdating={updateOrderItemMutation.isPending}
         orderItems={orderItems || []}
         totalAmount={totalAmount}
         onUpdateQuantity={handleUpdateQuantity}

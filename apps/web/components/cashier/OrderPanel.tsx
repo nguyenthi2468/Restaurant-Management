@@ -26,6 +26,7 @@ interface OrderPanelProps {
   selectedTable: Table | null;
   order: Order | null;
   isLoading: boolean;
+  isUpdating: boolean;
   orderItems: OrderItem[];
   totalAmount: number;
   onUpdateQuantity: (itemId: string, delta: number) => void;
@@ -38,6 +39,7 @@ export function OrderPanel({
   selectedTable,
   order,
   isLoading,
+  isUpdating,
   orderItems,
   totalAmount,
   onUpdateQuantity,
@@ -167,6 +169,7 @@ export function OrderPanel({
             orderItems?.map((item, idx) => (
               <OrderItemRow
                 key={item.id}
+                isUpdating={isUpdating}
                 item={item}
                 index={idx}
                 onUpdateQuantity={onUpdateQuantity}
