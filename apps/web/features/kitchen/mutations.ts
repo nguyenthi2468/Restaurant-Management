@@ -4,7 +4,6 @@ import {
   updateKitchenTicket,
   deleteKitchenTicket,
   acceptKitchenTicket,
-  completeKitchenTicket,
   updateKitchenTicketItemStatus,
 } from './api';
 import {
@@ -52,20 +51,10 @@ export const useAcceptKitchenTicketMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => acceptKitchenTicket(id),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kitchen-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['kitchen-ticket', data.id] });
-    },
-  });
-};
-
-export const useCompleteKitchenTicketMutation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => completeKitchenTicket(id),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['kitchen-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['kitchen-ticket', data.id] });
+      queryClient.invalidateQueries({ queryKey:  ['kitchen-ticket-items', KitchenItemStatus.COOKING] });
+      queryClient.invalidateQueries({ queryKey:  ['kitchen-ticket-items', KitchenItemStatus.READY]});
     },
   });
 };
@@ -81,10 +70,10 @@ export const useUpdateKitchenTicketItemStatusMutation = () => {
       status: KitchenItemStatus;
     }) => updateKitchenTicketItemStatus(itemId, status),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['kitchen-tickets'] });
-      queryClient.invalidateQueries({
-        queryKey: ['kitchen-ticket', data.id],
-      });
+      queryClient.invalidateQueries({ queryKey:  ['kitchen-ticket-items', KitchenItemStatus.COOKING] });
+     
+      queryClient.invalidateQueries({ queryKey:  ['kitchen-ticket-items', KitchenItemStatus.READY]});
+    
     },
   });
 };

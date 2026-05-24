@@ -500,7 +500,6 @@ model KitchenTicketItem {
 enum KitchenTicketStatus {
   PENDING     // Chờ bếp xác nhận
   ACCEPTED    // Bếp đã nhận
-  SERVED      // Đã mang ra bàn
   CANCELLED
 }
 

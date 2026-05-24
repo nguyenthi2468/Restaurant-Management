@@ -194,21 +194,36 @@ export class KitchenTicketService {
   }
 
   async acceptTicket(id: string, acceptedBy: string) {
-    return this.prisma.kitchenTicket.update({
-      where: { id },
-      data: {
-        status: KitchenTicketStatus.ACCEPTED,
-        acceptedAt: new Date(),
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const updatedTicket = await tx.kitchenTicket.update({
+        where: { id },
+        data: {
+          status: KitchenTicketStatus.ACCEPTED,
+          acceptedAt: new Date(),
+        },
+      });
+
+      await tx.kitchenTicketItem.updateMany({
+        where: { ticketId: id },
+        data: {
+          status: KitchenItemStatus.COOKING,
+        },
+      });
+
+      return updatedTicket;
     });
   }
 
-  async completeTicket(id: string) {
-    return this.prisma.kitchenTicket.update({
-      where: { id },
-      data: {
-        status: KitchenTicketStatus.SERVED,
-        completedAt: new Date(),
+  async findItemsByStatus(status?: KitchenItemStatus) {
+    return this.prisma.kitchenTicketItem.findMany({
+      where: status ? { status } : undefined,
+      include: {
+        orderItem: {
+          include: {
+            menuItem: true,
+          },
+        },
+        ticket: true,
       },
     });
   }

@@ -36,7 +36,12 @@ export class KitchenTicketController {
   findAll(@Query('status') status: KitchenTicketStatus) {
     return this.kitchenTicketService.findAll(status);
   }
-
+  @Get('items')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @Action('kitchen:ticket:update')
+  findItemsByStatus(@Query('status') status: KitchenItemStatus) {
+    return this.kitchenTicketService.findItemsByStatus(status);
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.kitchenTicketService.findOne(id);
@@ -71,12 +76,7 @@ export class KitchenTicketController {
     return this.kitchenTicketService.acceptTicket(id, 'user_id');
   }
 
-  @Patch(':id/complete')
-  @Action('kitchen:ticket:update')
-  @UseGuards(JwtAuthGuard, ActionGuard)
-  completeTicket(@Param('id') id: string) {
-    return this.kitchenTicketService.completeTicket(id);
-  }
+
 
   @Patch('items/:itemId/status')
   @Action('kitchen:ticket:update')

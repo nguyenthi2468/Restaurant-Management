@@ -13,6 +13,10 @@ export enum KitchenItemStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export interface KitchenTicketItemQueryParams {
+  status?: KitchenItemStatus;
+}
+
 export interface KitchenTicketItem {
   id: string;
   ticketId: string;

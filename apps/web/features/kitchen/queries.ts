@@ -3,6 +3,7 @@ import {
   getKitchenTickets,
   getKitchenTicketById,
   getKitchenTicketsByOrderId,
+  getKitchenTicketItemsByStatus,
 } from './api';
 
 export const useGetKitchenTicketsQuery = (status?: string) => {
@@ -26,5 +27,13 @@ export const useGetKitchenTicketsByOrderIdQuery = (orderId: number) => {
     queryKey: ['kitchen-tickets', 'order', orderId],
     queryFn: () => getKitchenTicketsByOrderId(orderId),
     enabled: !!orderId,
+  });
+};
+
+export const useGetKitchenTicketItemsByStatusQuery = (status?: string) => {
+  return useQuery({
+    queryKey: ['kitchen-ticket-items', status],
+    queryFn: () => getKitchenTicketItemsByStatus(status),
+    enabled: true,
   });
 };
