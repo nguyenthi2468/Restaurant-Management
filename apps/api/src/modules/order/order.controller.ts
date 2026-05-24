@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Req,
+  Patch,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -119,5 +120,32 @@ export class OrderController {
   })
   findServedOrderByTableId(@Param('tableId') tableId: string) {
     return this.orderService.findServedOrderByTableId(tableId);
+  }
+
+  @Patch(':id/cancel')
+  @Action('order:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @ApiOperation({
+    summary: 'Hủy đơn hàng',
+    description: 'Hủy đơn hàng bằng cách cập nhật trạng thái thành CANCELLED',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Đơn hàng đã được hủy thành công',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy đơn hàng với ID được cung cấp',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Đơn hàng đã ở trạng thái không thể hủy',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  cancel(@Param('id') id: number) {
+    return this.orderService.cancel(id);
   }
 }

@@ -101,15 +101,36 @@ export class OrderService {
           },
         },
       },
-      // include: {
-      //   items: true,
-      //   orderTables: {
-      //     include: {
-      //       table: true,
-      //     },
-      //   },
-      //   payments: true,
-      // },
+    });
+  }
+
+  async cancel(orderId: number) {
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.CANCELLED,
+        },
+        include: {
+          orderTables: true,
+        },
+      });
+
+      if (order.orderTables.length > 0) {
+        const tableIds = order.orderTables.map((ot) => ot.tableId);
+        await tx.table.updateMany({
+          where: {
+            id: {
+              in: tableIds,
+            },
+          },
+          data: {
+            status: TableStatus.AVAILABLE,
+          },
+        });
+      }
+
+      return order;
     });
   }
 }

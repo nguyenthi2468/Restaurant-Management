@@ -22,7 +22,7 @@ import {
   useMenuItemsWithPaginationQuery,
 } from '@/features/menu-items';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useGetServedOrderByTableIdQuery } from '@/features/orders';
+import { useCancelOrderMutation, useGetServedOrderByTableIdQuery } from '@/features/orders';
 import {
   useCreateOrderItemMutation,
   useUpdateOrderItemMutation,
@@ -70,6 +70,7 @@ export default function CashierPage() {
   const createOrderItemMutation = useCreateOrderItemMutation();
   const updateOrderItemMutation = useUpdateOrderItemMutation();
   const deleteOrderItemMutation = useDeleteOrderItemMutation();
+  const cancelOrderMutation = useCancelOrderMutation();
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
@@ -203,6 +204,19 @@ export default function CashierPage() {
     setDeleteItemId(itemId);
   }, []);
 
+  const handleCancelOrder = useCallback(async (orderId: string) => {
+    if (!orderId) {
+      toast.error('Vui lòng chọn đơn hàng');
+      return;
+    };
+    await toast.promise(cancelOrderMutation.mutateAsync(orderId), {
+      loading: 'Đang hủy đơn...',
+      success: 'Đơn đã được hủy',
+      error: (err: ApiError) =>
+        err?.response?.data?.message || 'Hủy đơn thất bại',
+    });
+  }, [cancelOrderMutation]);
+
   const handleNotify = useCallback(() => {
     if (!selectedTable) return;
     alert(`Đã gửi thông báo cho ${selectedTable.name}`);
@@ -308,6 +322,7 @@ export default function CashierPage() {
         totalAmount={totalAmount}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
+        onCancel={handleCancelOrder}
         onNotify={handleNotify}
         onPay={handlePay}
       />

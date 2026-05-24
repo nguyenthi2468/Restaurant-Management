@@ -15,12 +15,13 @@ import {
   Printer,
   ClipboardList,
   Loader2,
+  X,
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 import { Order } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
-import { OrderItem } from '@/features/order-items';;
+import { OrderItem } from '@/features/order-items';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -33,6 +34,7 @@ interface OrderPanelProps {
   onRemoveItem: (itemId: string) => void;
   onNotify: () => void;
   onPay: () => void;
+  onCancel: (orderId: string) => void;
 }
 
 export function OrderPanel({
@@ -46,9 +48,9 @@ export function OrderPanel({
   onRemoveItem,
   onNotify,
   onPay,
+  onCancel,
 }: OrderPanelProps) {
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
-  console.log(orderItems);
   if (!selectedTable) {
     return (
       <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
@@ -146,13 +148,22 @@ export function OrderPanel({
         </div>
       </div>
 
-      <div className="px-4 py-2 border-b border-slate-200">
+      <div className="px-4 py-2 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
         <div className="flex items-center gap-2 text-sm">
           <span className="text-slate-500">Mã đơn:</span>
-          <span className="font-mono text-slate-900 bg-slate-100 px-2 py-1 rounded text-xs">
+          <span className="font-mono text-slate-900 bg-slate-100 px-2 py-1 rounded text-xs border border-slate-200">
             {order?.id}
           </span>
         </div>
+        <Button
+          onClick={() => onCancel(order?.id || '')}
+          variant="outline"
+          size="sm"
+          className="h-9 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
+        >
+          <X size={14} className="mr-1.5" />
+          Hủy
+        </Button>
       </div>
 
       <ScrollArea className="flex-1 px-4 py-2">

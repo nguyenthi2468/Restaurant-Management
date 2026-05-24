@@ -36,3 +36,10 @@ export const deleteOrder = async (id: string) => {
   const response = await api.delete(`${API_ENDPOINTS.ORDERS.BASE}/${id}`);
   return response.data;
 };
+
+export const cancelOrder = async (id: string) => {
+  const response = await api.patch<Order>(
+    `${API_ENDPOINTS.ORDERS.BASE}/${id}/cancel`,
+  );
+  return response.data;
+};

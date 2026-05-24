@@ -1,4 +1,5 @@
 import { OrderItem } from "../order-items";
+import { Table } from "../tables";
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -17,7 +18,18 @@ export interface Order {
   customerName?: string | null;
   customerPhone?: string | null;
   items?: OrderItem[];
+  orderTables?: OrderTable[];
 }
+
+export interface OrderTable {
+  id: string;
+  orderId: string;
+  tableId: string;
+  createdAt: string;
+  table: Table;
+}
+
+
 
 export interface CreateOrderData {
   tableIds: string[];
