@@ -12,8 +12,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiBaseUrl =
-     'http://localhost:8080/api/v1';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
 
     const response = await fetch(`${apiBaseUrl}/pusher/trigger`, {
       method: 'POST',
