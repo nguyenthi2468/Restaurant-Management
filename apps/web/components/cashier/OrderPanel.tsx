@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
+import { HistoryKitchenTicketDrawer } from '@/components/cashier/HistoryKitchenTicketDrawer';
 import { Order } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
 import { OrderItem } from '@/features/order-items';
@@ -52,6 +53,7 @@ export function OrderPanel({
   onCancel,
 }: OrderPanelProps) {
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
+  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
   if (!selectedTable) {
     return (
       <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
@@ -209,7 +211,11 @@ export function OrderPanel({
             <Button size="icon-xs" variant="ghost">
               <Phone size={12} />
             </Button>
-             <Button size="icon-xs" variant="ghost">
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              onClick={() => setHistoryDrawerOpen(true)}
+            >
               <NotepadText size={12} />
             </Button>
             <Button size="icon-xs" variant="ghost">
@@ -245,6 +251,12 @@ export function OrderPanel({
           </Button>
         </div>
       </div>
+
+      <HistoryKitchenTicketDrawer
+        open={historyDrawerOpen}
+        onOpenChange={setHistoryDrawerOpen}
+        orderId={order?.id || null}
+      />
     </div>
   );
 }
