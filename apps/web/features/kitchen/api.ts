@@ -7,9 +7,11 @@ import {
   KitchenItemStatus,
 } from './types';
 
-export const getKitchenTickets = async () => {
+export const getKitchenTickets = async (status?: string) => {
   const response = await api.get<KitchenTicket[]>(
-    API_ENDPOINTS.KITCHEN_TICKETS.BASE,
+    status
+      ? `${API_ENDPOINTS.KITCHEN_TICKETS.BASE}?status=${status}`
+      : API_ENDPOINTS.KITCHEN_TICKETS.BASE,
   );
   return response.data;
 };
@@ -57,13 +59,6 @@ export const acceptKitchenTicket = async (id: string) => {
 export const completeKitchenTicket = async (id: string) => {
   const response = await api.patch<KitchenTicket>(
     API_ENDPOINTS.KITCHEN_TICKETS.COMPLETE(id),
-  );
-  return response.data;
-};
-
-export const getKitchenTicketsByStatus = async (status: string) => {
-  const response = await api.get<KitchenTicket[]>(
-    API_ENDPOINTS.KITCHEN_TICKETS.BY_STATUS(status),
   );
   return response.data;
 };

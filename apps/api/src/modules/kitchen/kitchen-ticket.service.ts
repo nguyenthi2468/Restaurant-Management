@@ -43,12 +43,17 @@ export class KitchenTicketService {
     });
   }
 
-  async findAll() {
+  async findAll(status?: KitchenTicketStatus) {
     return this.prisma.kitchenTicket.findMany({
+      where: status ? { status } : undefined,
       include: {
         items: {
           include: {
-            orderItem: true,
+            orderItem: {
+              include: {
+                menuItem: true,
+              },
+            },
           },
         },
         order: true,

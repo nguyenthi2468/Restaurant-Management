@@ -1,90 +1,80 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  ChevronRight,
-  ChevronsRight,
-  Volume2,
-  Settings,
-  Bell,
-  Menu,
-  Search,
-  Phone,
-  Globe,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ChevronRight, ChevronsRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  KitchenTicketItem,
+  useGetKitchenTicketsQuery,
+  useUpdateKitchenTicketItemStatusMutation,
+} from '@/features/kitchen';
+import { KitchenItemStatus } from '@/features/kitchen';
+import { formatDistanceToNow } from 'date-fns';
 
-type TabType = 'priority' | 'by-dish' | 'by-table';
-
-type KitchenItemStatus = 'pending' | 'completed';
-
-interface KitchenItem {
-  id: string;
-  name: string;
-  quantity: number;
-  tableName: string;
-  time: string;
-  staffName: string;
-  elapsedTime: string;
-  status: KitchenItemStatus;
+interface TransformationData {
+  pendingItems: any[];
+  completedItems: any[];
 }
 
-const TABS: { key: TabType; label: string }[] = [
-  { key: 'priority', label: 'Ưu tiên' },
-  { key: 'by-dish', label: 'Theo món' },
-  { key: 'by-table', label: 'Theo phòng/bàn' },
-];
+const transformKitchenTickets = (tickets: any[]): TransformationData => {
+  const pendingItems: any[] = [];
+  const completedItems: any[] = [];
 
-const INITIAL_PENDING_ITEMS: KitchenItem[] = [
-  {
-    id: '1',
-    name: 'Bia Hà Nội',
-    quantity: 1,
-    tableName: 'Bàn 2',
-    time: '2:25 - 20/05/2026 15:01',
-    staffName: 'Bởi Nguyễn Phạm Đăng Khoa',
-    elapsedTime: 'vài giây trước',
-    status: 'pending',
-  },
-];
+  tickets.forEach((ticket) => {
+    if (ticket.items && ticket.items.length > 0) {
+      ticket.items.forEach((item: any) => {
+        const transformedItem = {
+          id: item.id,
+          name: item.orderItem?.menuItem?.name || 'Unknown Item',
+          quantity: item.quantity,
+          tableName: `Bàn ${ticket.orderId}`,
+          time: `${ticket.createdAt}`,
+          elapsedTime: item.completedAt
+            ? formatDistanceToNow(new Date(item.completedAt), {
+                addSuffix: true,
+              })
+            : formatDistanceToNow(new Date(ticket.createdAt), {
+                addSuffix: true,
+              }),
+          status:
+            item.status === KitchenItemStatus.READY ||
+            item.status === KitchenItemStatus.SERVED
+              ? ('completed' as const)
+              : ('pending' as const),
+        };
 
-const INITIAL_COMPLETED_ITEMS: KitchenItem[] = [
-  {
-    id: '2',
-    name: 'Thuốc lá Marlboro',
-    quantity: 1,
-    tableName: 'Bàn 2',
-    time: '2:25 - 20/05/2026 15:01',
-    staffName: 'Bởi Nguyễn Phạm Đăng Khoa',
-    elapsedTime: 'vài giây trước',
-    status: 'completed',
-  },
-];
+        if (transformedItem.status === 'completed') {
+          completedItems.push(transformedItem);
+        } else {
+          pendingItems.push(transformedItem);
+        }
+      });
+    }
+  });
+
+  return { pendingItems, completedItems };
+};
 
 export default function KitchenPage() {
-  const [activeTab, setActiveTab] = useState<TabType>('priority');
-  const [pendingItems, setPendingItems] = useState<KitchenItem[]>(
-    INITIAL_PENDING_ITEMS,
-  );
-  const [completedItems, setCompletedItems] = useState<KitchenItem[]>(
-    INITIAL_COMPLETED_ITEMS,
+  const { data: tickets, isLoading } = useGetKitchenTicketsQuery();
+  const mutation = useUpdateKitchenTicketItemStatusMutation();
+
+  const { pendingItems, completedItems } = transformKitchenTickets(
+    tickets || [],
   );
 
-  const moveToCompleted = (item: KitchenItem) => {
-    setPendingItems((prev) => prev.filter((i) => i.id !== item.id));
-    setCompletedItems((prev) => [
-      ...prev,
-      { ...item, status: 'completed' as const },
-    ]);
+  const moveToCompleted = (item: KitchenTicketItem) => {
+    mutation.mutate({
+      itemId: item.id,
+      status: KitchenItemStatus.READY,
+    });
   };
 
-  const moveToPending = (item: KitchenItem) => {
-    setCompletedItems((prev) => prev.filter((i) => i.id !== item.id));
-    setPendingItems((prev) => [
-      ...prev,
-      { ...item, status: 'pending' as const },
-    ]);
+  const moveToPending = (item: KitchenTicketItem) => {
+    mutation.mutate({
+      itemId: item.id,
+      status: KitchenItemStatus.PENDING,
+    });
   };
 
   return (
@@ -99,7 +89,6 @@ export default function KitchenPage() {
           <h2 className="mr-auto text-lg font-semibold">
             Đã xong/ Chờ cung ứng
           </h2>
-       
         </div>
       </div>
 
@@ -129,7 +118,7 @@ export default function KitchenPage() {
                         </span>
                       </div>
                       <div className="mt-1 text-xs text-gray-500">
-                        {item.time} - {item.staffName}
+                        {item.time}
                       </div>
                     </div>
 

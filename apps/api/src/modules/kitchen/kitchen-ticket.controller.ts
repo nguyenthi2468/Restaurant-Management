@@ -8,8 +8,9 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { KitchenTicketService } from './kitchen-ticket.service';
 import { CreateKitchenTicketDto } from './dto/create-kitchen-ticket.dto';
 import { UpdateKitchenTicketDto } from './dto/update-kitchen-ticket.dto';
@@ -32,8 +33,8 @@ export class KitchenTicketController {
   }
 
   @Get()
-  findAll() {
-    return this.kitchenTicketService.findAll();
+  findAll(@Query('status') status: KitchenTicketStatus) {
+    return this.kitchenTicketService.findAll(status);
   }
 
   @Get(':id')

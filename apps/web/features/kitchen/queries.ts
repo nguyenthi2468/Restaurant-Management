@@ -1,15 +1,15 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   getKitchenTickets,
   getKitchenTicketById,
-  getKitchenTicketsByStatus,
   getKitchenTicketsByOrderId,
 } from './api';
 
-export const useGetKitchenTicketsQuery = () => {
+export const useGetKitchenTicketsQuery = (status?: string) => {
   return useQuery({
-    queryKey: ['kitchen-tickets'],
-    queryFn: () => getKitchenTickets(),
+    queryKey: ['kitchen-tickets', status],
+    queryFn: () => getKitchenTickets(status),
+    enabled: true,
   });
 };
 
@@ -18,14 +18,6 @@ export const useGetKitchenTicketByIdQuery = (id: string) => {
     queryKey: ['kitchen-ticket', id],
     queryFn: () => getKitchenTicketById(id),
     enabled: !!id,
-  });
-};
-
-export const useGetKitchenTicketsByStatusQuery = (status: string) => {
-  return useQuery({
-    queryKey: ['kitchen-tickets', 'status', status],
-    queryFn: () => getKitchenTicketsByStatus(status),
-    enabled: !!status,
   });
 };
 

@@ -486,6 +486,8 @@ model KitchenTicketItem {
   ticket          KitchenTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   orderItemId     String
   orderItem       OrderItem     @relation(fields: [orderItemId], references: [id])
+  completedQty    Int     @default(0)   
+  servedQty       Int     @default(0)
   quantity        Int
   status          KitchenItemStatus @default(PENDING)
   note            String?
