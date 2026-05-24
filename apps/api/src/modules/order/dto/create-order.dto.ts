@@ -1,9 +1,13 @@
-import { IsString, IsNumber, IsArray, ValidateNested, IsOptional, Min } from 'class-validator';
-import { Type } from 'class-transformer';
 import {
-  ApiProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+  IsString,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  Min,
+  IsOptional,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 class CreateOrderItemDto {
   @ApiProperty({
@@ -34,11 +38,22 @@ class CreateOrderItemDto {
 
 export class CreateOrderDto {
   @ApiProperty({
-    description: 'ID bàn đã đặt',
-    example: 'table_456def',
+    description: 'ID khách hàng',
+    example: 'customer_123abc',
   })
-  @IsString()
-  tableId: string;
+  @IsOptional()
+  customerId?: string;
+
+  @ApiProperty({
+    description: 'Danh sách ID bàn cho đơn hàng (có thể nhiều bàn)',
+    example: ['table_456def', 'table_789ghi'],
+    type: [String],
+    required: false,
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tableIds?: string[];
 
   @ApiProperty({
     description: 'Tổng tiền đơn hàng (tiền tệ)',
@@ -46,8 +61,9 @@ export class CreateOrderDto {
     minimum: 0,
   })
   @IsNumber()
+  @IsOptional()
   @Min(0)
-  total: number;
+  total?: number;
 
   @ApiProperty({
     description: 'Danh sách món ăn trong đơn hàng',
@@ -61,6 +77,34 @@ export class CreateOrderDto {
   })
   @IsArray()
   @ValidateNested({ each: true })
+  @IsOptional()
   @Type(() => CreateOrderItemDto)
-  items: CreateOrderItemDto[];
+  items?: CreateOrderItemDto[];
+
+  @ApiProperty({
+    description: 'Ghi chú cho đơn hàng',
+    example: 'Không hành',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  note?: string;
+
+  @ApiProperty({
+    description: 'Tên khách hàng',
+    example: 'Nguyễn Văn A',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  customerName?: string;
+
+  @ApiProperty({
+    description: 'Số điện thoại khách hàng',
+    example: '0901234567',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  customerPhone?: string;
 }

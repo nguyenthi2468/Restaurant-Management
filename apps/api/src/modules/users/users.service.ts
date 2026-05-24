@@ -39,6 +39,7 @@ export class UsersService {
   async createLocalUser(
     email: string,
     password: string,
+    phone?: string,
     firstName?: string,
     lastName?: string,
   ) {
@@ -46,7 +47,7 @@ export class UsersService {
     if (exists) throw new ConflictException('Email already in use');
     const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
     return this.prisma.user.create({
-      data: { email, passwordHash, firstName, lastName },
+      data: { email, passwordHash, phone, firstName, lastName },
     });
   }
   async markEmailVerified(userId: string) {

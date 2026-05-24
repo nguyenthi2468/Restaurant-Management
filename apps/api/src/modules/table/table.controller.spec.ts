@@ -18,9 +18,7 @@ describe('TableController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TableController],
-      providers: [
-        { provide: TableService, useValue: mockTableService },
-      ],
+      providers: [{ provide: TableService, useValue: mockTableService }],
     }).compile();
 
     controller = module.get<TableController>(TableController);
@@ -32,7 +30,15 @@ describe('TableController', () => {
 
   it('should create a table', async () => {
     const dto = { name: 'T1', floor: '1', area: TableArea.NORMAL, seats: 4 };
-    mockTableService.create.mockResolvedValue({ id: '1', ...dto, status: TableStatus.AVAILABLE });
-    expect(await controller.create(dto)).toEqual({ id: '1', ...dto, status: TableStatus.AVAILABLE });
+    mockTableService.create.mockResolvedValue({
+      id: '1',
+      ...dto,
+      status: TableStatus.AVAILABLE,
+    });
+    expect(await controller.create(dto)).toEqual({
+      id: '1',
+      ...dto,
+      status: TableStatus.AVAILABLE,
+    });
   });
 });

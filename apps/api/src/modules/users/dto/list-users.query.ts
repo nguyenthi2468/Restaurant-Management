@@ -40,6 +40,6 @@ export class ListUsersQuery {
   sortBy: string = 'createdAt';
 
   @IsOptional()
-   @IsIn(['asc', 'desc'])
-    order: 'asc' | 'desc' = 'desc';
+  @IsIn(['asc', 'desc'])
+  order: 'asc' | 'desc' = 'desc';
 }

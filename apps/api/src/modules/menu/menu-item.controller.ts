@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   UseGuards,
   UploadedFile,
   UseInterceptors,
@@ -13,6 +14,8 @@ import {
 import { MenuItemService } from './menu-item.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { QueryMenuItemDto } from './dto/query-menu-item.dto';
+import { PaginatedMenuItemResponseDto } from './dto/paginated-menu-item-response.dto';
 import { Action } from '../auth/decorator/action.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionGuard } from '../auth/guards/action.guard';
@@ -75,29 +78,6 @@ export class MenuItemController {
             },
           },
         },
-        options: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              description: { type: 'string' },
-              group: { type: 'string' },
-              isRequired: { type: 'boolean' },
-              values: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    description: { type: 'string' },
-                    priceAdjustment: { type: 'number' },
-                  },
-                },
-              },
-            },
-          },
-        },
       },
     },
   })
@@ -109,21 +89,23 @@ export class MenuItemController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async create(@Body() createMenuItemDto: CreateMenuItemDto) {
-  
-
     return this.menuItemService.create(createMenuItemDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách tất cả món ăn có sẵn' })
+  @ApiOperation({
+    summary: 'Lấy danh sách tất cả món ăn có sẵn với tìm kiếm và phân trang',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Danh sách món ăn',
-    isArray: true,
+    description: 'Danh sách món ăn với phân trang',
+    type: PaginatedMenuItemResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findAll() {
-    return this.menuItemService.findAll();
+  findAll(
+    @Query() queryDto: QueryMenuItemDto,
+  ): Promise<PaginatedMenuItemResponseDto> {
+    return this.menuItemService.findAllWithPagination(queryDto);
   }
 
   @Get(':id')
@@ -176,29 +158,6 @@ export class MenuItemController {
             },
           },
         },
-        options: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              description: { type: 'string' },
-              group: { type: 'string' },
-              isRequired: { type: 'boolean' },
-              values: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    description: { type: 'string' },
-                    priceAdjustment: { type: 'number' },
-                  },
-                },
-              },
-            },
-          },
-        },
       },
     },
   })
@@ -214,7 +173,6 @@ export class MenuItemController {
     @Param('id') id: string,
     @Body() updateMenuItemDto: UpdateMenuItemDto,
   ) {
-
     return this.menuItemService.update(id, updateMenuItemDto);
   }
 

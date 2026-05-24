@@ -77,7 +77,7 @@ export class AuthService {
     const accessToken = await this.signAccessToken(userId, jti);
 
     // 3) Tính expiresAt từ refresh (exp là seconds)
-    const payload = this.jwt.decode(refreshToken) as { exp: number } | null;
+    const payload = this.jwt.decode(refreshToken);
     if (!payload?.exp) {
       // Phòng hờ cấu hình JWT sai
       throw new Error('Failed to decode refresh token exp');
@@ -166,6 +166,7 @@ export class AuthService {
     const user = await this.users.createLocalUser(
       input.email.toLowerCase().trim(),
       input.password,
+      input.phone,
       input.firstName,
       input.lastName,
     );
@@ -181,7 +182,7 @@ export class AuthService {
     const verifyUrl =
       new URL(
         '/auth/verify-email',
-        this.cfg.get<string>('PUBLIC_WEB_URL')!,
+        this.cfg.get<string>('PUBLIC_WEB_URL'),
       ).toString() + `?token=${token}`;
 
     await this.mail.sendVerifyEmail(user.email, verifyUrl);

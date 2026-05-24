@@ -55,23 +55,6 @@ function MenuItemPage() {
               unit: ing.unit,
               isAllergen: ing.isAllergen,
             })) ?? [],
-          options:
-            menuItem.options?.map((opt) => ({
-              id: opt.id,
-              name: opt.name,
-              description: opt.description ?? '',
-              group: opt.group ?? '',
-              isRequired: opt.isRequired ?? false,
-              position: opt.position ?? 0,
-              values:
-                opt.values?.map((val) => ({
-                  id: val.id,
-                  name: val.name,
-                  description: val.description ?? '',
-                  priceAdjustment: val.priceAdjustment ?? 0,
-                  position: val.position ?? 0,
-                })) ?? [],
-            })) ?? [],
         }
       : undefined;
 

@@ -24,4 +24,5 @@ export const ROUTES = {
   ADMIN_MENU_ITEMS: '/admin/menu-items',
   ADMIN_CASHIER: '/admin/cashier',
   ADMIN_TABLES: '/admin/tables',
+  ADMIN_RESERVATIONS: '/admin/reservations',
 };

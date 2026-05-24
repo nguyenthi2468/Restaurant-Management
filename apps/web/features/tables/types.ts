@@ -24,6 +24,26 @@ export interface Table {
   updatedAt: string;
 }
 
+export interface TableMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedTableResponse {
+  data: Table[];
+  meta: TableMeta;
+}
+
+export interface QueryTableDto {
+  search?: string;
+  floorId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
 // DTOs for API requests
 export interface CreateTableDto {
   name: string;
@@ -39,4 +59,28 @@ export interface UpdateTableDto {
   area?: TableArea;
   seats?: number;
   status?: TableStatus;
+}
+
+export interface CheckAvailableTablesDto {
+  bookingTime: string;
+  floorId: string;
+  endTime?: string;
+}
+
+export interface BookingInfo {
+  id: string;
+  bookingTime: string;
+  endTime: string;
+  guestCount: number;
+  customerName: string;
+  customerPhone: string;
+}
+
+export interface TableWithBookings extends Table {
+  bookings: BookingInfo[];
+}
+
+export interface PaginatedTableWithBookingsResponse {
+  data: TableWithBookings[];
+  meta: TableMeta;
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { Booking } from '@prisma/client';
 
 @Injectable()
 export class MailService {
@@ -114,5 +115,86 @@ export class MailService {
           `;
 
     await this.mailer.sendMail({ to, subject, text }); // dùng hàm sendMail bạn đã có
+  }
+
+  /**
+   * Send booking confirmation email
+   */
+  async sendBookingConfirmationEmail(
+    booking: Booking & { bookingTables: { table: { name: string } }[] },
+  ) {
+    const email = booking.customerEmail;
+    if (!email) {
+      return;
+    }
+
+    const tables = booking.bookingTables.map((bt) => bt.table.name).join(', ');
+
+    const html = `
+      <div style="font-family:Inter,Arial,sans-serif;line-height:1.6;max-width:640px;margin:auto">
+        <h2>✅ Xác nhận đặt bàn thành công</h2>
+        <p>Chào ${booking.customerName},</p>
+        <p>Cảm ơn bạn đã đặt bàn tại nhà hàng của chúng tôi. Đặt bàn của bạn đã được xác nhận:</p>
+        
+        <div style="padding:16px;border:1px solid #eee;border-radius:10px;background:#f9f9f9">
+          <p style="margin:0 0 8px 0"><b>Mã đặt bàn:</b> ${booking.id}</p>
+          <p style="margin:0 0 8px 0"><b>Thời gian bắt đầu:</b> ${new Date(booking.bookingTime).toLocaleString('vi-VN')}</p>
+          <p style="margin:0 0 8px 0"><b>Số lượng khách:</b> ${booking.numberOfGuests} người (${booking.numberOfChildren} trẻ em)</p>
+          <p style="margin:0 0 8px 0"><b>Bàn:</b> ${tables}</p>
+          ${booking.note ? `<p style="margin:0 0 8px 0"><b>Ghi chú:</b> ${booking.note}</p>` : ''}
+        </div>
+
+        <p style="margin-top:16px">Chúng tôi sẽ giữ bàn cho bạn đúng thời gian đã đặt. Nếu có bất kỳ thay đổi nào, vui lòng liên hệ với chúng tôi.</p>
+        
+        <hr style="border:0;border-top:1px solid #eee;margin:24px 0"/>
+        <small style="color:#666">Đây là email tự động. Vui lòng không trả lời email này.</small>
+      </div>
+    `;
+
+    await this.mailer.sendMail({
+      to: email,
+      subject: `Xác nhận đặt bàn thành công - ${booking.id}`,
+      html,
+    });
+  }
+
+  async sendBookingConfirmationBookedEmail(
+    booking: Booking & { bookingTables: { table: { name: string } }[] },
+  ) {
+    const email = booking.customerEmail;
+    if (!email) {
+      return;
+    }
+
+    const tables = booking.bookingTables.map((bt) => bt.table.name).join(', ');
+
+    const html = `
+      <div style="font-family:Inter,Arial,sans-serif;line-height:1.6;max-width:640px;margin:auto">
+        <h2>✅ Đặt bàn của bạn đã được xác nhận</h2>
+        <p>Chào ${booking.customerName},</p>
+        <p>Cảm ơn bạn đã đặt bàn tại nhà hàng của chúng tôi.</p>
+        
+        <p>Bọn mình đã ghi nhận đặt bàn của bạn và sẽ xác nhận trong <b>24 giờ</b>. Khi đặt bàn được xác nhận, bạn sẽ nhận được email thông báo.</p>
+        
+        <div style="padding:16px;border:1px solid #eee;border-radius:10px;background:#f9f9f9">
+          <p style="margin:0 0 8px 0"><b>Mã đặt bàn:</b> ${booking.id}</p>
+          <p style="margin:0 0 8px 0"><b>Thời gian bắt đầu:</b> ${new Date(booking.bookingTime).toLocaleString('vi-VN')}</p>
+          <p style="margin:0 0 8px 0"><b>Số lượng khách:</b> ${booking.numberOfGuests} người (${booking.numberOfChildren} trẻ em)</p>
+          <p style="margin:0 0 8px 0"><b>Bàn:</b> ${tables}</p>
+          ${booking.note ? `<p style="margin:0 0 8px 0"><b>Ghi chú:</b> ${booking.note}</p>` : ''}
+        </div>
+
+        <p style="margin-top:16px">Nếu có bất kỳ thay đổi nào, vui lòng liên hệ với chúng tôi qua email nguyenthi24683579@gmail.com.</p>
+        
+        <hr style="border:0;border-top:1px solid #eee;margin:24px 0"/>
+        <small style="color:#666">Đây là email tự động. Vui lòng không trả lời email này.</small>
+      </div>
+    `;
+
+    await this.mailer.sendMail({
+      to: email,
+      subject: `Đặt bàn của bạn đã được xác nhận - ${booking.id}`,
+      html,
+    });
   }
 }

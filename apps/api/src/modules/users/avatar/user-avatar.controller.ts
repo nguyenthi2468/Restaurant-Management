@@ -22,7 +22,7 @@ export class UserAvatarController {
   @Post()
   @UseInterceptors(FileInterceptor('file', imageMulterOptions))
   async uploadAvatar(
-    @UploadedFile(makeImageParsePipe()) file: Express.Multer.File, 
+    @UploadedFile(makeImageParsePipe()) file: Express.Multer.File,
     @Req() req: Request,
   ) {
     const user = req.user as any;

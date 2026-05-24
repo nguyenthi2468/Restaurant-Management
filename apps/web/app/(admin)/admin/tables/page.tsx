@@ -9,20 +9,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MESSAGES } from '@/constants/message';
 import {
   Table,
   TableFormValues,
-  useTablesQuery,
+  useTablesQueryWithPagination,
   useCreateTableMutation,
   useUpdateTableMutation,
   useDeleteTableMutation,
   TableStatus,
-  SearchTablesParams,
+  QueryTableDto,
 } from '@/features/tables';
 import { useFloorsQuery } from '@/features/floor';
 import TableManagementTable from '@/components/tables/TableManagementTable';
 import TableFormDialog from '@/components/tables/TableFormDialog';
+import EllipsisPagination from '@/components/ui/EllipsisPagination';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { ApiError } from '@/types';
 import { Plus, Search, X } from 'lucide-react';
@@ -34,18 +34,24 @@ function TablesPage() {
   const [nameFilter, setNameFilter] = useState('');
   const [floorFilter, setFloorFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  let limit = 10;
 
   const debouncedNameFilter = useDebounce(nameFilter, 300);
 
-  const searchParams: SearchTablesParams = useMemo(() => {
-    const params: SearchTablesParams = {};
-    if (debouncedNameFilter) params.name = debouncedNameFilter;
+  const searchParams: QueryTableDto = useMemo(() => {
+    const params: QueryTableDto = {
+      page: currentPage,
+      limit: limit,
+    };
+    if (debouncedNameFilter) params.search = debouncedNameFilter;
     if (floorFilter) params.floorId = floorFilter;
     if (statusFilter) params.status = statusFilter;
     return params;
-  }, [debouncedNameFilter, floorFilter, statusFilter]);
+  }, [debouncedNameFilter, floorFilter, statusFilter, currentPage, limit]);
 
-  const { data, isLoading, isError } = useTablesQuery(searchParams);
+  const { data, isLoading, isError } =
+    useTablesQueryWithPagination(searchParams);
   const { data: floorsData } = useFloorsQuery();
   const [tableToEdit, setTableToEdit] = useState<Table | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -57,7 +63,8 @@ function TablesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-  const tables = data || [];
+  const tables = data?.data || [];
+  const meta = data?.meta;
 
   const hasFilters = nameFilter || floorFilter || statusFilter;
 
@@ -65,6 +72,11 @@ function TablesPage() {
     setNameFilter('');
     setFloorFilter('');
     setStatusFilter('');
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleEdit = (table: Table) => {
@@ -144,7 +156,7 @@ function TablesPage() {
 
       <Card className="p-4 bg-card border-border">
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             {/* Name search */}
             <div className="relative">
               <Search
@@ -226,6 +238,16 @@ function TablesPage() {
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
+
+          {meta && meta.totalPages > 1 && (
+            <div className="flex items-center justify-end py-4">
+              <EllipsisPagination
+                currentPage={meta.page}
+                totalPages={meta.totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
 
           {/* Edit/Create Table Dialog */}
           <TableFormDialog

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMenuItem, updateMenuItem, deleteMenuItem } from './api';
 import { toast } from 'react-hot-toast';
 import { MenuItemFormValues } from './validator';
+import { ApiError } from '@/types';
 
 export const useCreateMenuItemMutation = () => {
   const queryClient = useQueryClient();
@@ -43,8 +44,8 @@ export const useDeleteMenuItemMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['menu-items'] });
       toast.success('Món ăn đã được xóa thành công');
     },
-    onError: (error) => {
-      toast.error('Không thể xóa món ăn');
+    onError: (error: ApiError) => {
+      toast.error(error?.response?.data?.message || 'Không thể xóa món ăn');
       console.error(error);
     },
   });

@@ -5,6 +5,7 @@ import AdminSidebar from '@/components/layouts/AdminSidebar';
 import AdminHeader from '@/components/layouts/AdminHeader';
 import AdminRoute from '@/components/layouts/AdminRoute';
 import { PermissionProvider } from '@/providers/PermissionProvider';
+import { TooltipProvider } from '@/components/ui/tooltip';
 export default function AdminLayout({
   children,
 }: {
@@ -20,7 +21,9 @@ export default function AdminLayout({
           <SidebarInset>
             <main className={cn('flex min-h-screen flex-col')}>
               <AdminHeader />
+              <TooltipProvider>
               {children}
+              </TooltipProvider>
             </main>
           </SidebarInset>
         </SidebarProvider>

@@ -1,3 +1,6 @@
+import { OrderItem } from "../order-items";
+import { Table } from "../tables";
+
 export enum OrderStatus {
   PENDING = 'PENDING',
   SERVED = 'SERVED',
@@ -15,38 +18,35 @@ export interface Order {
   customerName?: string | null;
   customerPhone?: string | null;
   items?: OrderItem[];
+  orderTables?: OrderTable[];
 }
 
-export interface OrderItem {
+export interface OrderTable {
   id: string;
   orderId: string;
-  menuItemId: string;
-  quantity: number;
-  price: string | number;
+  tableId: string;
   createdAt: string;
-  updatedAt: string;
-  menuItem?: {
-    id: string;
-    name: string;
-    price: string | number;
-  };
+  table: Table;
 }
 
+
+
 export interface CreateOrderData {
-  tableId: string;
-  total: number;
-  items: {
+  tableIds: string[];
+  total?: number;
+  items?: {
     menuItemId: string;
     quantity: number;
     price: number;
   }[];
+  customerId?: string;
   note?: string;
   customerName?: string;
   customerPhone?: string;
 }
 
 export interface UpdateOrderData {
-  tableId?: string;
+  tableIds?: string[];
   status?: OrderStatus;
   total?: number;
   note?: string;

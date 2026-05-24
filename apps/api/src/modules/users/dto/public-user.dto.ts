@@ -14,17 +14,19 @@ export class PublicUserDto {
   @Expose()
   id: string;
 
-  @Expose() 
+  @Expose()
   firstName?: string | null;
 
-  @Expose() 
+  @Expose()
   lastName?: string | null;
 
   @Expose({ groups: ['private'] })
   email: string;
   @Expose()
   @Type(() => PublicRoleDto)
-  @Transform(({ obj }) => obj.roles?.map((ur: any) => ur.role) ?? [], { toClassOnly: true })
+  @Transform(({ obj }) => obj.roles?.map((ur: any) => ur.role) ?? [], {
+    toClassOnly: true,
+  })
   roles?: PublicRoleDto[];
 
   @Expose()

@@ -99,7 +99,7 @@ export class ActionGuard implements CanActivate {
     if (!action || !action.enabled) return null;
 
     const value = {
-      mode: action.mode as 'ANY' | 'ALL',
+      mode: action.mode,
       permissionNames: action.policies.map((p) => p.permission.name),
     };
 

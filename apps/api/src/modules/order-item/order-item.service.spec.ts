@@ -39,7 +39,11 @@ describe('OrderItemService', () => {
   });
 
   it('should find all order items', async () => {
-    mockPrisma.orderItem.findMany.mockResolvedValue([{ id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 }]);
-    expect(await service.findAll()).toEqual([{ id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 }]);
+    mockPrisma.orderItem.findMany.mockResolvedValue([
+      { id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 },
+    ]);
+    expect(await service.findAll()).toEqual([
+      { id: '1', orderId: '1', menuItemId: '1', quantity: 1, price: 100 },
+    ]);
   });
 });

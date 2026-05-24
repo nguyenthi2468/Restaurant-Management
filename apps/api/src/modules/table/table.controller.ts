@@ -20,6 +20,11 @@ import {
 } from '@nestjs/swagger';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
+import { CheckAvailableTablesDto } from './dto/check-available-tables.dto';
+import { QueryTableDto } from './dto/query-table.dto';
+import { PaginatedTableResponseDto } from './dto/paginated-table-response.dto';
+import { PaginatedTableWithBookingsResponseDto } from './dto/table-with-bookings.dto';
+
 
 @ApiTags('tables')
 @ApiBearerAuth()
@@ -46,12 +51,12 @@ export class TableController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lấy danh sách tất cả bàn',
+    summary: 'Lấy danh sách bàn với phân trang',
     description:
-      'Lấy danh sách tất cả các bàn, có thể tìm kiếm theo tên, tầng và lọc theo trạng thái',
+      'Lấy danh sách bàn với khả năng tìm kiếm, lọc và phân trang. Hỗ trợ tìm kiếm theo tên, lọc theo tầng và trạng thái.',
   })
   @ApiQuery({
-    name: 'name',
+    name: 'search',
     required: false,
     description: 'Tìm kiếm theo tên bàn (tìm kiếm gần đúng)',
   })
@@ -66,17 +71,66 @@ export class TableController {
     enum: TableStatus,
     description: 'Lọc bàn theo trạng thái',
   })
-  @ApiResponse({ status: 200, description: 'Danh sách bàn', isArray: true })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Số trang (bắt đầu từ 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bàn với metadata phân trang',
+    type: PaginatedTableResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findAll(
-    @Query('name') name?: string,
-    @Query('floorId') floorId?: string,
-    @Query('status') status?: TableStatus,
-  ) {
-    if (name || floorId || status) {
-      return this.tableService.search({ name, floorId, status });
-    }
-    return this.tableService.findAll();
+  findAll(@Query() queryDto: QueryTableDto) {
+    return this.tableService.findAllWithPagination(queryDto);
+  }
+
+  @Get('with-bookings')
+  @ApiOperation({
+    summary: 'Lấy danh sách bàn với thông tin đặt bàn',
+    description:
+      'Lấy danh sách bàn kèm theo thông tin đặt bàn (bookingTime, endTime, số khách, tên và số điện thoại khách hàng). Hỗ trợ tìm kiếm, lọc và phân trang.',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Tìm kiếm theo tên bàn (tìm kiếm gần đúng)',
+  })
+  @ApiQuery({
+    name: 'floorId',
+    required: false,
+    description: 'Lọc bàn theo ID tầng',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: TableStatus,
+    description: 'Lọc bàn theo trạng thái',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Số trang (bắt đầu từ 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bàn với thông tin đặt bàn và metadata phân trang',
+    type: PaginatedTableWithBookingsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  findAllWithBookings(@Query() queryDto: QueryTableDto) {
+    return this.tableService.findAllWithBookingsAndPagination(queryDto);
   }
 
   @Get(':id')
@@ -115,5 +169,62 @@ export class TableController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   remove(@Param('id') id: string) {
     return this.tableService.remove(id);
+  }
+
+  @Get('available/tables')
+  @ApiOperation({
+    summary: 'Kiểm tra bàn khả dụng',
+    description:
+      'Lấy danh sách các bàn khả dụng dựa trên thời gian đặt bàn. Nếu không cung cấp endTime, hệ thống sẽ tự động tính dựa trên số lượng khách.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bàn khả dụng',
+    isArray: true,
+  })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async checkAvailableTables(@Query() dto: CheckAvailableTablesDto) {
+    const bookingTime = new Date(dto.bookingTime);
+    const endTime = dto.endTime ? new Date(dto.endTime) : undefined;
+
+    return this.tableService.getAvailableTables(
+      bookingTime,
+      endTime,
+      dto.floorId,
+    );
+  }
+
+  @Get('available/count')
+  @ApiOperation({
+    summary: 'Đếm số lượng bàn khả dụng',
+    description:
+      'Trả về số lượng bàn khả dụng dựa trên thời gian đặt bàn. Dùng để kiểm tra nhanh xem có bàn trống hay không.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Số lượng bàn khả dụng',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          example: 5,
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async checkAvailableTablesCount(@Query() dto: CheckAvailableTablesDto) {
+    const bookingTime = new Date(dto.bookingTime);
+    const endTime = dto.endTime ? new Date(dto.endTime) : undefined;
+
+    const count = await this.tableService.getAvailableTablesCount(
+      bookingTime,
+      endTime,
+    );
+
+    return { count };
   }
 }

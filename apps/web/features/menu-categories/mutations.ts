@@ -6,6 +6,7 @@ import {
 } from './api';
 import { toast } from 'react-hot-toast';
 import { MenuCategoryFormValues } from './validator';
+import { ApiError } from '@/types';
 export const useCreateMenuCategoryMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -46,8 +47,12 @@ export const useDeleteMenuCategoryMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['menu-categories'] });
       toast.success('Danh mục menu đã được xóa thành công');
     },
-    onError: (error) => {
-      toast.error('Không thể xóa danh mục menu');
+    onError: (error: ApiError) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error.message ||
+        'Không thể xóa danh mục menu';
+      toast.error(errorMessage);
       console.error(error);
     },
   });

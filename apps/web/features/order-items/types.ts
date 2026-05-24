@@ -1,15 +1,14 @@
 import { MenuItem } from "../menu-items";
-import { Order } from "../orders";
 
 export interface OrderItem {
   id: string;
   orderId: string;
   menuItemId: string;
   quantity: number;
-  price: string | number;
-  createdAt: string;
-  updatedAt: string;
-  order?: Order;
+  price: number;
+  createdAt?: string;
+  updatedAt?: string;
+  note?: string;
   menuItem?: MenuItem;
 }
 
@@ -18,6 +17,7 @@ export interface CreateOrderItemData {
   menuItemId: string;
   quantity: number;
   price: number;
+  note?: string;
 }
 
 export interface UpdateOrderItemData {
@@ -25,4 +25,5 @@ export interface UpdateOrderItemData {
   menuItemId?: string;
   quantity?: number;
   price?: number;
+  note?: string;
 }

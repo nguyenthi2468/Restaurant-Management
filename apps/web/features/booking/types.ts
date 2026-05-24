@@ -1,3 +1,5 @@
+import { Floor } from '../floor';
+
 export enum BookingStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
@@ -20,7 +22,7 @@ export interface BookingTable {
   table?: {
     id: string;
     name: string;
-    floor: string;
+    floor: Floor;
     seats: number;
   };
 }
@@ -43,6 +45,7 @@ export interface Booking {
   customerId?: string | null;
   customerName: string;
   customerPhone: string;
+  customerEmail: string;
   bookingTime: string;
   endTime: string;
   numberOfGuests: number;
@@ -71,8 +74,9 @@ export interface CreateBookingData {
   customerId?: string;
   customerName: string;
   customerPhone: string;
+  customerEmail: string;
   bookingTime: Date | string;
-  endTime: Date | string;
+  endTime?: Date | string;
   numberOfGuests: number;
   numberOfChildren?: number;
   note?: string;
@@ -87,6 +91,7 @@ export interface UpdateBookingData {
   customerId?: string;
   customerName?: string;
   customerPhone?: string;
+  customerEmail?: string;
   bookingTime?: Date | string;
   endTime?: Date | string;
   numberOfGuests?: number;
@@ -101,4 +106,23 @@ export interface UpdateBookingData {
 
 export interface VnpayPaymentResponse {
   paymentUrl: string;
+}
+
+export interface BookingQueryParams {
+  search?: string;
+  status?: BookingStatus;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedBookingResponse {
+  data: Booking[];
+  meta: PaginationMeta;
 }

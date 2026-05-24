@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '@/constants';
 import api from '@/lib/axios';
-import type { MenuItem } from './types';
+import type { MenuItem, PaginatedMenuItem, MenuItemQueryParams } from './types';
 import type { MenuItemFormValues } from './validator';
 
 export const getMenuItems = async () => {
@@ -30,5 +30,14 @@ export const deleteMenuItem = async (id: string) => {
   const response = await api.delete<MenuItem>(
     `${API_ENDPOINTS.MENU_ITEMS}/${id}`,
   );
+  return response.data;
+};
+
+export const getMenuItemsWithPagination = async (
+  params?: MenuItemQueryParams,
+) => {
+  const response = await api.get<PaginatedMenuItem>(API_ENDPOINTS.MENU_ITEMS, {
+    params,
+  });
   return response.data;
 };

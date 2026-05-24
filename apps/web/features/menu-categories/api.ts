@@ -11,6 +11,14 @@ export const getMenuCategories = async () => {
   return response.data;
 };
 
+// Get all menu categories with menu items
+export const getMenuCategoriesWithMenuItems = async () => {
+  const response = await api.get<MenuCategory[]>(
+    `${API_ENDPOINTS.MENU_CATEGORIES}/with-menu-items`,
+  );
+  return response.data;
+};
+
 // Get menu category by ID
 export const getMenuCategoryById = async (id: string) => {
   const response = await api.get<MenuCategory>(

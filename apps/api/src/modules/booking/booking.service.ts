@@ -8,9 +8,17 @@ import { TableService } from '../table/table.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { CreateBookingMenuItemDto } from './dto/create-booking-menu-item.dto';
-import { Booking, BookingStatus, DepositStatus } from '@prisma/client';
+import { QueryBookingDto } from './dto/query-booking.dto';
+import { PaginatedBookingResponseDto } from './dto/paginated-booking-response.dto';
+import {
+  Booking,
+  BookingStatus,
+  DepositStatus,
+  PaymentStatus,
+} from '@prisma/client';
 import { VnpayService } from './vnpay.service';
 import { Prisma } from '@prisma/client'; // Import Prisma types
+import { MailService } from '../mail/mail.service'; // Import MailService
 
 interface VnpayReturnParams {
   vnp_TxnRef: string;
@@ -24,6 +32,7 @@ export class BookingService {
     private readonly prisma: PrismaService,
     private readonly tableService: TableService,
     private readonly vnpayService: VnpayService,
+    private readonly mailService: MailService, // Inject MailService
   ) {}
 
   /**
@@ -33,6 +42,13 @@ export class BookingService {
    */
   async create(createBookingDto: CreateBookingDto): Promise<Booking> {
     const { tables, preOrderItems, ...bookingData } = createBookingDto;
+
+    if (!bookingData.endTime) {
+      bookingData.endTime = this.calculateEndTime(
+        bookingData.bookingTime,
+        bookingData.numberOfGuests,
+      );
+    }
 
     // 1. Kiểm tra tính khả dụng của các bàn
     if (tables && tables.length > 0) {
@@ -96,6 +112,7 @@ export class BookingService {
     const booking = await this.prisma.booking.create({
       data: {
         ...bookingData,
+        endTime: bookingData.endTime,
         depositAmount,
         depositStatus,
         bookingTables: {
@@ -114,10 +131,20 @@ export class BookingService {
           : undefined,
       },
       include: {
-        bookingTables: true,
+        bookingTables: {
+          include: {
+            table: true,
+          },
+        },
         preOrderItems: true,
+        payments: true,
       },
     });
+
+    // Gửi email xác nhận khi tạo booking thành công
+    if (booking.customerEmail) {
+      await this.mailService.sendBookingConfirmationBookedEmail(booking);
+    }
 
     return booking;
   }
@@ -127,16 +154,102 @@ export class BookingService {
       include: {
         bookingTables: true,
         preOrderItems: true,
+        payments: true,
       },
     });
+  }
+
+  async findAllWithPagination(
+    queryDto: QueryBookingDto,
+  ): Promise<PaginatedBookingResponseDto> {
+    const { search, status, page = 1, limit = 10 } = queryDto;
+
+    const where: Prisma.BookingWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        {
+          customerName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          customerPhone: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          bookingTables: {
+            include: {
+              table: {
+                include: {
+                  floor: true,
+                },
+              },
+            },
+          },
+          preOrderItems: {
+            include: {
+              menuItem: true,
+            },
+          },
+          payments: true,
+        },
+        orderBy: {
+          bookingTime: 'desc',
+        },
+      }),
+      this.prisma.booking.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: bookings as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 
   async findOne(id: string): Promise<Booking> {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: {
-        bookingTables: true,
-        preOrderItems: true,
+        bookingTables: {
+          include: {
+            table: {
+              include: {
+                floor: true,
+              },
+            },
+          },
+        },
+        preOrderItems: {
+          include: {
+            menuItem: true,
+          },
+        },
+        payments: true,
       },
     });
     if (!booking) {
@@ -201,6 +314,22 @@ export class BookingService {
     return this.prisma.booking.delete({
       where: { id },
     });
+  }
+
+  private calculateEndTime(bookingTime: Date, numberOfGuests: number): Date {
+    const endTime = new Date(bookingTime);
+    let durationMinutes: number;
+
+    if (numberOfGuests >= 1 && numberOfGuests <= 4) {
+      durationMinutes = 90;
+    } else if (numberOfGuests >= 5 && numberOfGuests <= 8) {
+      durationMinutes = 120;
+    } else {
+      durationMinutes = 180;
+    }
+
+    endTime.setMinutes(endTime.getMinutes() + durationMinutes);
+    return endTime;
   }
 
   /**
@@ -298,7 +427,7 @@ export class BookingService {
     return this.prisma.booking.update({
       where: { id },
       data: { depositStatus: DepositStatus.REFUNDED, depositAmount: 0 },
-      include: { bookingTables: true, preOrderItems: true },
+      include: { bookingTables: true, preOrderItems: true, payments: true },
     });
   }
 
@@ -321,16 +450,22 @@ export class BookingService {
     }
 
     // Cập nhật trạng thái bàn thành RESERVED (hoặc OCCUPIED)
-    const tableIds = booking.bookingTables.map((bt) => bt.tableId);
-    await this.prisma.table.updateMany({
-      where: { id: { in: tableIds } },
-      data: { status: 'RESERVED' }, // Hoặc 'OCCUPIED' tùy theo nghiệp vụ
-    });
+    // const tableIds = booking.bookingTables.map((bt) => bt.tableId);
+    // await this.prisma.table.updateMany({
+    //   where: { id: { in: tableIds } },
+    //   data: { status: 'RESERVED' }, // Hoặc 'OCCUPIED' tùy theo nghiệp vụ
+    // });
 
-    return this.prisma.booking.update({
+    const updatedBooking = await this.prisma.booking.update({
       where: { id },
       data: { status: BookingStatus.CONFIRMED },
+      include: { bookingTables: { include: { table: true } } },
     });
+
+    // Gửi email xác nhận
+    await this.mailService.sendBookingConfirmationEmail(updatedBooking);
+
+    return updatedBooking;
   }
 
   /**
@@ -413,15 +548,19 @@ export class BookingService {
 
   /**
    * Handles the return from VNPay after payment attempt.
+   * Creates a Payment record for successful or failed transactions.
    */
-  async handleVnpayReturn(params: VnpayReturnParams): Promise<Booking> {
+  async handleVnpayReturn(
+    params: VnpayReturnParams,
+  ): Promise<{ responseCode: string; bookingId: string }> {
     const isValidSignature = this.vnpayService.verifyResponse(params);
 
     if (!isValidSignature) {
       throw new ConflictException('Invalid VNPay signature');
     }
 
-    const { vnp_TxnRef, vnp_TransactionStatus } = params;
+    const { vnp_TxnRef, vnp_TransactionStatus, vnp_Amount, vnp_TransactionNo } =
+      params;
 
     const booking = await this.prisma.booking.findUnique({
       where: { id: vnp_TxnRef },
@@ -431,14 +570,47 @@ export class BookingService {
       throw new NotFoundException(`Booking with id ${vnp_TxnRef} not found`);
     }
 
+    // Calculate actual amount from VNPay (amount is multiplied by 100)
+    const actualAmount = vnp_Amount
+      ? Number(vnp_Amount) / 100
+      : Number(booking.depositAmount);
+
+    // Generate transaction code from VNPay or create one
+    const transactionCode =
+      vnp_TransactionNo || `VNP_${Date.now()}_${vnp_TxnRef}`;
+
     if (vnp_TransactionStatus === '00') {
-      // Update deposit status to PAID
-      return this.prisma.booking.update({
-        where: { id: vnp_TxnRef },
-        data: { depositStatus: DepositStatus.PAID },
-      });
+      // Payment successful - Create SUCCESS payment record and update booking
+      const [updatedBooking] = await this.prisma.$transaction([
+        this.prisma.booking.update({
+          where: { id: vnp_TxnRef },
+          data: {
+            depositStatus: DepositStatus.PAID,
+            // status: BookingStatus.CONFIRMED,
+          },
+        }),
+        this.prisma.payment.create({
+          data: {
+            bookingId: vnp_TxnRef,
+            transactionCode,
+            amount: actualAmount,
+            status: PaymentStatus.SUCCESS,
+          },
+        }),
+      ]);
+
+      return { responseCode: vnp_TransactionStatus, bookingId: vnp_TxnRef };
     } else {
-      // Handle failed transaction
+      // Payment failed - Create FAILED payment record
+      await this.prisma.payment.create({
+        data: {
+          bookingId: vnp_TxnRef,
+          transactionCode,
+          amount: actualAmount,
+          status: PaymentStatus.FAILED,
+        },
+      });
+
       throw new ConflictException(
         `VNPay transaction failed with status: ${vnp_TransactionStatus}`,
       );

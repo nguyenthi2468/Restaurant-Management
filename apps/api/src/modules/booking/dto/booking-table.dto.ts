@@ -2,7 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsUUID } from 'class-validator';
 
 export class BookingTableDto {
-  @ApiProperty({ description: 'The unique identifier of the booking table entry' })
+  @ApiProperty({
+    description: 'The unique identifier of the booking table entry',
+  })
   @IsUUID()
   id: string;
 
@@ -14,9 +16,13 @@ export class BookingTableDto {
   @IsUUID()
   tableId: string;
 
-  @ApiProperty({ description: 'The creation timestamp of the booking table entry' })
+  @ApiProperty({
+    description: 'The creation timestamp of the booking table entry',
+  })
   createdAt: Date;
 
-  @ApiProperty({ description: 'The last update timestamp of the booking table entry' })
+  @ApiProperty({
+    description: 'The last update timestamp of the booking table entry',
+  })
   updatedAt: Date;
 }

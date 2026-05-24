@@ -6,8 +6,8 @@ export class CreateOrderItemDto {
     description: 'ID của đơn hàng mà mục này thuộc về',
     example: 'order_123abc',
   })
-  @IsString()
-  orderId!: string;
+  @IsNumber()
+  orderId!: number;
 
   @ApiProperty({
     description: 'ID của món ăn trong mục đơn hàng này',
@@ -26,11 +26,17 @@ export class CreateOrderItemDto {
   quantity!: number;
 
   @ApiProperty({
+    description: 'Ghi chú hoặc chú thích về món ăn',
+    example: 'Với thêm',
+  })
+  note?: string;
+
+  @ApiProperty({
     description: 'Đơn giá của món ăn (tiền tệ, đơn vị: VND)',
     example: 150000,
     minimum: 0,
   })
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 3 })
   @Min(0)
   price!: number;
 }

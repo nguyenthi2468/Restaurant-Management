@@ -58,6 +58,14 @@ export class RegisterDto {
     value === undefined || value === null ? value : String(value).trim(),
   )
   @IsString()
+  @MaxLength(15, { message: 'Phone number must not exceed 15 characters.' })
+  phone?: string;
+
+  @IsOptional()
+  @Transform(({ value }) =>
+    value === undefined || value === null ? value : String(value).trim(),
+  )
+  @IsString()
   @MaxLength(50, { message: 'Last name must not exceed 50 characters.' })
   lastName?: string;
 }

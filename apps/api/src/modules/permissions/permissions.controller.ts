@@ -53,12 +53,12 @@ export class PermissionsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll(q?: { search?: string; skip?: number; take?: number }) {
-  return this.service.listPermissions({
-    q: q?.search,
-    offset: q?.skip ?? 0,
-    limit: q?.take ?? 50,
-  });
-}
+    return this.service.listPermissions({
+      q: q?.search,
+      offset: q?.skip ?? 0,
+      limit: q?.take ?? 50,
+    });
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Lấy quyền theo ID' })

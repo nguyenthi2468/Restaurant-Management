@@ -23,13 +23,17 @@ export class CreateBookingDto {
   @IsString()
   customerPhone!: string;
 
+  @IsString()
+  customerEmail!: string;
+
   @IsDate()
   @Type(() => Date)
   bookingTime!: Date;
 
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
-  endTime!: Date;
+  endTime?: Date;
 
   @IsInt()
   numberOfGuests!: number;

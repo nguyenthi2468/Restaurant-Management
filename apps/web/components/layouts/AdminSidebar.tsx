@@ -80,6 +80,12 @@ export const navItems: NavItem[] = [
     action: 'cashier.read',
   },
   {
+    title: 'Reservations',
+    href: ROUTES.ADMIN_RESERVATIONS,
+    icon: Receipt,
+    action: 'reservation.read',
+  },
+  {
     title: 'Users',
     href: ROUTES.ADMIN_USERS,
     icon: Users,

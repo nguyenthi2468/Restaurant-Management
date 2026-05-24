@@ -49,8 +49,7 @@ const areaOptions = [
 
 const statusOptions = [
   { value: TableStatus.AVAILABLE, label: 'Trống' },
-  { value: TableStatus.OCCUPIED, label: 'Có khách' },
-  { value: TableStatus.RESERVED, label: 'Đã đặt' },
+  // { value: TableStatus.RESERVED, label: 'Đã đặt' },
   { value: TableStatus.MAINTENANCE, label: 'Bảo trì' },
 ];
 
@@ -246,6 +245,11 @@ function TableFormDialog({
                             {option.label}
                           </SelectItem>
                         ))}
+                        {table?.status === TableStatus.OCCUPIED && (
+                          <SelectItem value={TableStatus.OCCUPIED}>
+                            Có khách
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     {fieldState.invalid && (

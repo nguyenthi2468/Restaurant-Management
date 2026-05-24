@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+  Patch,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Action } from '../auth/decorator/action.decorator';
@@ -44,17 +53,16 @@ export class OrderController {
     description:
       'Bàn không tồn tại - ID bàn được cung cấp không tìm thấy trong hệ thống',
   })
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  create(@Body() createOrderDto: CreateOrderDto, @Req() req: any) {
+    const userId = req.user?.id;
+    return this.orderService.create(createOrderDto, userId);
   }
 
   @Get()
-  @Action('order:read')
-  @UseGuards(JwtAuthGuard, ActionGuard)
   @ApiOperation({
     summary: 'Lấy danh sách tất cả đơn hàng',
     description:
-      'Lấy danh sách tất cả các đơn hàng trong hệ thống kèm theo chi tiết món ăn',
+      'Lấy danh sách tất cả các đơn hàng trong hệ thống kèm theo chi tiết món ăn và bàn',
   })
   @ApiResponse({
     status: 200,
@@ -68,5 +76,76 @@ export class OrderController {
   })
   findAll() {
     return this.orderService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Lấy chi tiết đơn hàng theo ID',
+    description:
+      'Lấy thông tin chi tiết của một đơn hàng bao gồm món ăn, bàn và thanh toán',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin chi tiết đơn hàng',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy đơn hàng với ID được cung cấp',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  findOne(@Param('id') id: number) {
+    return this.orderService.findOne(id);
+  }
+
+  @Get('table/:tableId/served')
+  @ApiOperation({
+    summary: 'Lấy chi tiết đơn hàng SERVED theo ID bàn',
+    description:
+      'Lấy thông tin chi tiết đơn hàng có trạng thái SERVED liên kết với một bàn cụ thể',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin chi tiết đơn hàng SERVED',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy đơn hàng với bàn được cung cấp',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  findServedOrderByTableId(@Param('tableId') tableId: string) {
+    return this.orderService.findServedOrderByTableId(tableId);
+  }
+
+  @Patch(':id/cancel')
+  @Action('order:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @ApiOperation({
+    summary: 'Hủy đơn hàng',
+    description: 'Hủy đơn hàng bằng cách cập nhật trạng thái thành CANCELLED',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Đơn hàng đã được hủy thành công',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy đơn hàng với ID được cung cấp',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Đơn hàng đã ở trạng thái không thể hủy',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  cancel(@Param('id') id: number) {
+    return this.orderService.cancel(id);
   }
 }

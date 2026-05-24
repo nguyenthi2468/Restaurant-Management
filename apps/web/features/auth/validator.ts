@@ -30,6 +30,7 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
+    phone: z.string().nonempty("Phone number cannot be empty"),
     firstName: z.string().nonempty("First name cannot be empty"),
     lastName: z.string().nonempty("Last name cannot be empty"),
     email: z

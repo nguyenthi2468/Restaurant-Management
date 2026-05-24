@@ -1,14 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { QueryMenuItemDto } from './dto/query-menu-item.dto';
+import { PaginatedMenuItemResponseDto } from './dto/paginated-menu-item-response.dto';
 
 @Injectable()
 export class MenuItemService {
   constructor(private prisma: PrismaService) {}
 
   async create(createMenuItemDto: CreateMenuItemDto) {
-    // First, check if category exists
     const category = await this.prisma.menuCategory.findUnique({
       where: { id: createMenuItemDto.categoryId },
     });
@@ -19,9 +24,7 @@ export class MenuItemService {
       );
     }
 
-    // Start a transaction to create menu item, ingredients, and options
     return this.prisma.$transaction(async (tx) => {
-      // Create menu item
       const menuItem = await tx.menuItem.create({
         data: {
           name: createMenuItemDto.name,
@@ -39,7 +42,6 @@ export class MenuItemService {
         },
       });
 
-      // Create ingredients if provided
       if (
         createMenuItemDto.ingredients &&
         createMenuItemDto.ingredients.length > 0
@@ -55,38 +57,66 @@ export class MenuItemService {
         });
       }
 
-      // Create options and their values if provided
-      if (createMenuItemDto.options && createMenuItemDto.options.length > 0) {
-        for (const opt of createMenuItemDto.options) {
-          // Create option
-          const option = await tx.menuItemOption.create({
-            data: {
-              menuItemId: menuItem.id,
-              name: opt.name,
-              description: opt.description,
-              group: opt.group,
-              isRequired: opt.isRequired ?? false,
-              position: 0, // We'll update position later if needed, but for simplicity set to 0
-            },
-          });
-
-          // Create option values
-          if (opt.values && opt.values.length > 0) {
-            await tx.menuItemOptionValue.createMany({
-              data: opt.values.map((val) => ({
-                optionId: option.id,
-                name: val.name,
-                description: val.description,
-                priceAdjustment: val.priceAdjustment,
-                position: 0, // Similarly, set to 0 for simplicity
-              })),
-            });
-          }
-        }
-      }
-
       return menuItem;
     });
+  }
+
+  async findAllWithPagination(
+    queryDto: QueryMenuItemDto,
+  ): Promise<PaginatedMenuItemResponseDto> {
+    const {
+      search,
+      isAvailable,
+      menuCategoryId,
+      page = 1,
+      limit = 10,
+    } = queryDto;
+
+    const where: any = {};
+
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
+    if (isAvailable !== undefined) {
+      where.isAvailable = isAvailable;
+    }
+
+    if (menuCategoryId) {
+      where.categoryId = menuCategoryId;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [menuItems, total] = await Promise.all([
+      this.prisma.menuItem.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          category: true,
+          image: true,
+          ingredients: true,
+        },
+        orderBy: { position: 'asc' },
+      }),
+      this.prisma.menuItem.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: menuItems as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 
   async findAll() {
@@ -96,12 +126,6 @@ export class MenuItemService {
         category: true,
         image: true,
         ingredients: true,
-        options: {
-          include: {
-            values: true,
-          },
-          orderBy: { position: 'asc' },
-        },
       },
       orderBy: { position: 'asc' },
     });
@@ -114,12 +138,6 @@ export class MenuItemService {
         category: true,
         image: true,
         ingredients: true,
-        options: {
-          include: {
-            values: true,
-          },
-          orderBy: { position: 'asc' },
-        },
       },
     });
 
@@ -135,11 +153,6 @@ export class MenuItemService {
       where: { id },
       include: {
         ingredients: true,
-        options: {
-          include: {
-            values: true,
-          },
-        },
       },
     });
 
@@ -147,7 +160,6 @@ export class MenuItemService {
       throw new NotFoundException(`Menu item with ID ${id} not found`);
     }
 
-    // If categoryId is being updated, check if new category exists
     if (updateMenuItemDto.categoryId) {
       const category = await this.prisma.menuCategory.findUnique({
         where: { id: updateMenuItemDto.categoryId },
@@ -160,30 +172,24 @@ export class MenuItemService {
       }
     }
 
-    // Filter out undefined values from the DTO, excluding 'ingredients' and 'options'
     const updateData: Record<string, any> = {};
     Object.entries(updateMenuItemDto).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'ingredients' && key !== 'options') {
+      if (value !== undefined && key !== 'ingredients') {
         updateData[key] = value;
       }
     });
 
-    // Start a transaction to update menu item, ingredients, and options
     return this.prisma.$transaction(async (tx) => {
-      // Update menu item with filtered data
       const updatedMenuItem = await tx.menuItem.update({
         where: { id },
         data: updateData as any,
       });
 
-      // Handle ingredients: delete existing and create new if provided
       if (updateMenuItemDto.ingredients !== undefined) {
-        // Delete existing ingredients
         await tx.menuItemIngredient.deleteMany({
           where: { menuItemId: id },
         });
 
-        // Create new ingredients if provided
         if (
           updateMenuItemDto.ingredients &&
           updateMenuItemDto.ingredients.length > 0
@@ -200,44 +206,6 @@ export class MenuItemService {
         }
       }
 
-      // Handle options: delete existing and create new if provided
-      if (updateMenuItemDto.options !== undefined) {
-        // Delete existing options (which will also delete their values due to cascade)
-        await tx.menuItemOption.deleteMany({
-          where: { menuItemId: id },
-        });
-
-        // Create new options if provided
-        if (updateMenuItemDto.options && updateMenuItemDto.options.length > 0) {
-          for (const opt of updateMenuItemDto.options) {
-            // Create option
-            const option = await tx.menuItemOption.create({
-              data: {
-                menuItemId: id,
-                name: opt.name,
-                description: opt.description,
-                group: opt.group,
-                isRequired: opt.isRequired ?? false,
-                position: 0,
-              },
-            });
-
-            // Create option values
-            if (opt.values && opt.values.length > 0) {
-              await tx.menuItemOptionValue.createMany({
-                data: opt.values.map((val) => ({
-                  optionId: option.id,
-                  name: val.name,
-                  description: val.description,
-                  priceAdjustment: val.priceAdjustment,
-                  position: 0,
-                })),
-              });
-            }
-          }
-        }
-      }
-
       return updatedMenuItem;
     });
   }
@@ -251,10 +219,22 @@ export class MenuItemService {
       throw new NotFoundException(`Menu item with ID ${id} not found`);
     }
 
-    // Soft delete: set isAvailable to false
-    return this.prisma.menuItem.update({
+    const hasOrderItems = await this.prisma.orderItem.count({
+      where: { menuItemId: id },
+    });
+
+    const hasBookingItems = await this.prisma.bookingMenuItem.count({
+      where: { menuItemId: id },
+    });
+
+    if (hasOrderItems > 0 || hasBookingItems > 0) {
+      throw new ConflictException(
+        'Cannot delete menu item. It is referenced in orders or bookings.',
+      );
+    }
+
+    return this.prisma.menuItem.delete({
       where: { id },
-      data: { isAvailable: false },
     });
   }
 }

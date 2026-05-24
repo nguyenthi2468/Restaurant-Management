@@ -80,6 +80,28 @@ export class OrderItemController {
     return this.orderItemService.findAll();
   }
 
+  @Get('order/:orderId')
+  @Action('order-item:read')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @ApiOperation({
+    summary: 'Lấy danh sách mục đơn hàng theo orderId',
+    description:
+      'Lấy tất cả các mục đơn hàng thuộc về một đơn hàng cụ thể kèm theo thông tin món ăn',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Danh sách các mục đơn hàng của đơn hàng bao gồm thông tin món ăn',
+    isArray: true,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  findByOrderId(@Param('orderId') orderId: number) {
+    return this.orderItemService.findByOrderId(orderId);
+  }
+
   @Get(':id')
   @Action('order-item:read')
   @UseGuards(JwtAuthGuard, ActionGuard)

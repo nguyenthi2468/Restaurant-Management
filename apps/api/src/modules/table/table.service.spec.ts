@@ -36,12 +36,38 @@ describe('TableService', () => {
   it('should create a table', async () => {
     const dto = { name: 'T1', floor: '1', area: TableArea.NORMAL, seats: 4 };
     mockPrisma.table.findUnique.mockResolvedValue(null);
-    mockPrisma.table.create.mockResolvedValue({ id: '1', ...dto, status: TableStatus.AVAILABLE });
-    expect(await service.create(dto)).toEqual({ id: '1', ...dto, status: TableStatus.AVAILABLE });
+    mockPrisma.table.create.mockResolvedValue({
+      id: '1',
+      ...dto,
+      status: TableStatus.AVAILABLE,
+    });
+    expect(await service.create(dto)).toEqual({
+      id: '1',
+      ...dto,
+      status: TableStatus.AVAILABLE,
+    });
   });
 
   it('should find all tables', async () => {
-    mockPrisma.table.findMany.mockResolvedValue([{ id: '1', name: 'T1', floor: '1', area: TableArea.NORMAL, seats: 4, status: TableStatus.AVAILABLE }]);
-    expect(await service.findAll()).toEqual([{ id: '1', name: 'T1', floor: '1', area: TableArea.NORMAL, seats: 4, status: TableStatus.AVAILABLE }]);
+    mockPrisma.table.findMany.mockResolvedValue([
+      {
+        id: '1',
+        name: 'T1',
+        floor: '1',
+        area: TableArea.NORMAL,
+        seats: 4,
+        status: TableStatus.AVAILABLE,
+      },
+    ]);
+    expect(await service.findAll()).toEqual([
+      {
+        id: '1',
+        name: 'T1',
+        floor: '1',
+        area: TableArea.NORMAL,
+        seats: 4,
+        status: TableStatus.AVAILABLE,
+      },
+    ]);
   });
 });

@@ -1,11 +1,4 @@
-import {
-  IsInt,
-  IsOptional,
-  IsString,
-  IsIn,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsInt, IsOptional, IsString, IsIn, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ListPermissionsQueryDto {
