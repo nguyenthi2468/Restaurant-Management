@@ -20,11 +20,13 @@ import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 import { Order } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
-import { useGetOrderItemsByOrderIdQuery } from '@/features/order-items';
+import { OrderItem } from '@/features/order-items';;
 
 interface OrderPanelProps {
   selectedTable: Table | null;
   order: Order | null;
+  isLoading: boolean;
+  orderItems: OrderItem[];
   totalAmount: number;
   onUpdateQuantity: (itemId: string, delta: number) => void;
   onRemoveItem: (itemId: string) => void;
@@ -35,6 +37,8 @@ interface OrderPanelProps {
 export function OrderPanel({
   selectedTable,
   order,
+  isLoading,
+  orderItems,
   totalAmount,
   onUpdateQuantity,
   onRemoveItem,
@@ -42,9 +46,7 @@ export function OrderPanel({
   onPay,
 }: OrderPanelProps) {
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
-  const { data: orderItems, isLoading } = useGetOrderItemsByOrderIdQuery(
-    order?.id || '',
-  );
+  console.log(orderItems);
   if (!selectedTable) {
     return (
       <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">

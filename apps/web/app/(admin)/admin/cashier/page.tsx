@@ -26,8 +26,11 @@ import { useGetServedOrderByTableIdQuery } from '@/features/orders';
 import {
   useCreateOrderItemMutation,
   useUpdateOrderItemMutation,
+  useDeleteOrderItemMutation,
+  useGetOrderItemsByOrderIdQuery,
 } from '@/features/order-items';
 import toast from 'react-hot-toast';
+import { ApiError } from '@/types';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -61,8 +64,11 @@ export default function CashierPage() {
     selectedTableId ?? '',
   );
   const { data: menuCategories = [] } = useMenuCategoriesQuery();
+  const { data: orderItems, isLoading: isLoadingOrderItems } =
+    useGetOrderItemsByOrderIdQuery(orderData?.id || '');
   const createOrderItemMutation = useCreateOrderItemMutation();
   const updateOrderItemMutation = useUpdateOrderItemMutation();
+  const deleteOrderItemMutation = useDeleteOrderItemMutation();
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
     menuCategoryId: selectedMenuCategory,
@@ -119,7 +125,7 @@ export default function CashierPage() {
     async (menuItem: MenuItem) => {
       if (!orderData?.id) return;
 
-      const existingItem = orderData.items?.find(
+      const existingItem = orderItems?.find(
         (i) => i.menuItemId === menuItem.id,
       );
 
@@ -160,21 +166,54 @@ export default function CashierPage() {
     [orderData, createOrderItemMutation, updateOrderItemMutation],
   );
 
-  const handleUpdateQuantity = useCallback((itemId: string, delta: number) => {
-    setLocalOrderItems((prev) =>
-      prev
-        .map((i) => {
-          if (i.id !== itemId) return i;
-          const newQty = Math.max(0, i.quantity + delta);
-          return { ...i, quantity: newQty, total: newQty * Number(i.price) };
-        })
-        .filter((i) => i.quantity > 0),
-    );
-  }, []);
+  const handleUpdateQuantity = useCallback(
+    async (itemId: string, delta: number) => {
+      if (!orderItems) return;
 
-  const handleRemoveItem = useCallback((itemId: string) => {
-    setLocalOrderItems((prev) => prev.filter((i) => i.id !== itemId));
-  }, []);
+      const existingItem = orderItems.find((i) => i.id === itemId);
+      if (!existingItem) return;
+
+      const newQty = existingItem.quantity + delta;
+
+      if (newQty <= 0) {
+        await toast.promise(deleteOrderItemMutation.mutateAsync(itemId), {
+          loading: 'Đang xóa món ăn...',
+          success: 'Món ăn đã được xóa',
+          error: (err: ApiError) =>
+            err?.response?.data?.message || 'Xóa món ăn thất bại',
+        });
+      } else {
+        await toast.promise(
+          updateOrderItemMutation.mutateAsync({
+            id: itemId,
+            data: {
+              quantity: newQty,
+              price: Number(existingItem.price),
+            },
+          }),
+          {
+            loading: 'Đang cập nhật số lượng...',
+            success: 'Số lượng đã được cập nhật',
+            error: (err: ApiError) =>
+              err?.response?.data?.message || 'Cập nhật số lượng thất bại',
+          },
+        );
+      }
+    },
+    [orderData, updateOrderItemMutation, deleteOrderItemMutation],
+  );
+
+  const handleRemoveItem = useCallback(
+    async (itemId: string) => {
+      await toast.promise(deleteOrderItemMutation.mutateAsync(itemId), {
+        loading: 'Đang xóa món ăn...',
+        success: 'Món ăn đã được xóa',
+        error: (err: ApiError) =>
+          err?.response?.data?.message || 'Xóa món ăn thất bại',
+      });
+    },
+    [deleteOrderItemMutation],
+  );
 
   const handleNotify = useCallback(() => {
     if (!selectedTable) return;
@@ -263,6 +302,8 @@ export default function CashierPage() {
       <OrderPanel
         selectedTable={selectedTable}
         order={orderData || null}
+        isLoading={isLoadingOrderItems}
+        orderItems={orderItems || []}
         totalAmount={totalAmount}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
