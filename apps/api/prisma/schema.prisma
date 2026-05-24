@@ -221,7 +221,7 @@ enum TableStatus {
 // ==================== ORDER MODELS ====================
 
 model Order {
-  id        String      @id @default(cuid())
+  id        Int         @id @default(autoincrement())
   status    OrderStatus @default(SERVED)
   total     Decimal     @db.Decimal(12, 3) @default(0)
   createdAt DateTime    @default(now())
@@ -250,7 +250,7 @@ model Order {
 
 model OrderItem {
   id         String   @id @default(cuid())
-  orderId    String
+  orderId    Int
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   menuItemId String
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
@@ -273,7 +273,7 @@ enum OrderStatus {
 // Junction table for many-to-many relationship between Order and Table
 model OrderTable {
   id        String   @id @default(cuid())
-  orderId   String
+  orderId   Int
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   tableId   String
   table     Table    @relation(fields: [tableId], references: [id])
@@ -425,7 +425,7 @@ model Payment {
   id        String   @id @default(cuid())
   bookingId String?
   booking   Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  orderId String?
+  orderId Int?
   order   Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   transactionCode String
   amount    Decimal  @db.Decimal(12, 3)

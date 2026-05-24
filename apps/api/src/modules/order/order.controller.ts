@@ -95,7 +95,7 @@ export class OrderController {
     status: 401,
     description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
   })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.orderService.findOne(id);
   }
 

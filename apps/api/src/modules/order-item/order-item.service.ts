@@ -23,7 +23,7 @@ export class OrderItemService {
     });
   }
 
-  async findByOrderId(orderId: string) {
+  async findByOrderId(orderId: number) {
     return this.prisma.orderItem.findMany({
       where: { orderId },
       include: {

@@ -6,8 +6,8 @@ export class CreateOrderItemDto {
     description: 'ID của đơn hàng mà mục này thuộc về',
     example: 'order_123abc',
   })
-  @IsString()
-  orderId!: string;
+  @IsNumber()
+  orderId!: number;
 
   @ApiProperty({
     description: 'ID của món ăn trong mục đơn hàng này',

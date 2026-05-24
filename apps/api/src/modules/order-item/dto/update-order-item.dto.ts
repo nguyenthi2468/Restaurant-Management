@@ -6,9 +6,9 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 export class UpdateOrderItemDto extends PartialType(CreateOrderItemDto) {
   @ApiPropertyOptional({
     description: 'ID của đơn hàng mà mục này thuộc về',
-    example: 'order_123abc',
+    example: 123,
   })
-  orderId?: string;
+  orderId?: number;
 
   @ApiPropertyOptional({
     description: 'ID của món ăn trong mục đơn hàng này',
