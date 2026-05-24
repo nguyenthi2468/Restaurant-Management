@@ -3,15 +3,19 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateKitchenTicketDto } from './dto/create-kitchen-ticket.dto';
 import { UpdateKitchenTicketDto } from './dto/update-kitchen-ticket.dto';
 import { KitchenTicketStatus, KitchenItemStatus } from '@prisma/client';
+import { PusherService } from '../pusher/pusher.service';
 
 @Injectable()
 export class KitchenTicketService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly pusherService: PusherService,
+  ) {}
 
   async create(createKitchenTicketDto: CreateKitchenTicketDto) {
     const { orderId, priority = 0, note, items } = createKitchenTicketDto;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const kitchenTicket = await tx.kitchenTicket.create({
         data: {
           orderId,
@@ -41,6 +45,12 @@ export class KitchenTicketService {
         },
       });
     });
+
+    await this.pusherService.trigger('kitchen-channel', 'ticket-created', {
+      ticket: result,
+    });
+
+    return result;
   }
 
   async findAll(status?: KitchenTicketStatus) {
@@ -163,10 +173,24 @@ export class KitchenTicketService {
   }
 
   async updateItemStatus(ticketItemId: string, status: KitchenItemStatus) {
-    return this.prisma.kitchenTicketItem.update({
+    const result = await this.prisma.kitchenTicketItem.update({
       where: { id: ticketItemId },
       data: { status },
+      include: {
+        orderItem: {
+          include: {
+            menuItem: true,
+          },
+        },
+        ticket: true,
+      },
     });
+
+    await this.pusherService.trigger('kitchen-channel', 'ticket-item-updated', {
+      item: result,
+    });
+
+    return result;
   }
 
   async acceptTicket(id: string, acceptedBy: string) {

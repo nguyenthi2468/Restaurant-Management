@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, ChevronsRight } from 'lucide-react';
+import { ChevronRight, ChevronsRight, Bell } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   KitchenTicketItem,
@@ -10,7 +10,8 @@ import {
 } from '@/features/kitchen';
 import { KitchenItemStatus } from '@/features/kitchen';
 import { formatDistanceToNow } from 'date-fns';
-
+import { usePusherChannel } from '@/hooks/usePusherChannel';
+import { useQueryClient } from '@tanstack/react-query';
 interface TransformationData {
   pendingItems: any[];
   completedItems: any[];
@@ -58,6 +59,17 @@ const transformKitchenTickets = (tickets: any[]): TransformationData => {
 export default function KitchenPage() {
   const { data: tickets, isLoading } = useGetKitchenTicketsQuery();
   const mutation = useUpdateKitchenTicketItemStatusMutation();
+  const queryClient = useQueryClient();
+
+  usePusherChannel('kitchen-channel', 'ticket-created', () => {
+    queryClient.invalidateQueries({ queryKey: ['kitchen-tickets'] });
+    new Audio('/audio/kichen_bell.mp3').play().catch(() => {});
+  });
+
+  usePusherChannel('kitchen-channel', 'ticket-item-updated', () => {
+    queryClient.invalidateQueries({ queryKey: ['kitchen-tickets'] });
+    new Audio('/audio/kichen_bell.mp3').play().catch(() => {});
+  });
 
   const { pendingItems, completedItems } = transformKitchenTickets(
     tickets || [],

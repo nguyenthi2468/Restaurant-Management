@@ -35,6 +35,8 @@ import { useCreateKitchenTicketMutation } from '@/features/kitchen';
 import toast from 'react-hot-toast';
 import { ApiError } from '@/types';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { usePusherChannel } from '@/hooks/usePusherChannel';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -75,6 +77,15 @@ export default function CashierPage() {
   const deleteOrderItemMutation = useDeleteOrderItemMutation();
   const cancelOrderMutation = useCancelOrderMutation();
   const createKitchenTicketMutation = useCreateKitchenTicketMutation();
+  const queryClient = useQueryClient();
+
+  usePusherChannel('kitchen-channel', 'ticket-item-updated', () => {
+    if (orderData?.id) {
+      queryClient.invalidateQueries({
+        queryKey: ['order-items', 'order', orderData.id],
+      });
+    }
+  });
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
