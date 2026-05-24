@@ -21,6 +21,7 @@ import { OrderModule } from './modules/order/order.module';
 import { OrderItemModule } from './modules/order-item/order-item.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { PusherModule } from './modules/pusher/pusher.module';
+import { KitchenModule } from './modules/kitchen/kitchen.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { PusherModule } from './modules/pusher/pusher.module';
     OrderItemModule,
     BookingModule,
     PusherModule,
+    KitchenModule,
   ],
   controllers: [AppController],
   providers: [

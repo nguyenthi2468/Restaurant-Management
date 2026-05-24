@@ -39,4 +39,11 @@ export const API_ENDPOINTS = {
     BASE: '/bookings',
     VNPAY_RETURN: '/bookings/vnpay-return',
   },
+  KITCHEN_TICKETS: {
+    BASE: '/kitchen/tickets',
+    ACCEPT: (id: string) => `${API_ENDPOINTS.KITCHEN_TICKETS.BASE}/${id}/accept`,
+    COMPLETE: (id: string) => `${API_ENDPOINTS.KITCHEN_TICKETS.BASE}/${id}/complete`,
+    BY_STATUS: (status: string) => `${API_ENDPOINTS.KITCHEN_TICKETS.BASE}/status/${status}`,
+    ITEM_STATUS: (itemId: string) => `${API_ENDPOINTS.KITCHEN_TICKETS.BASE}/items/${itemId}/status`,
+  },
 };

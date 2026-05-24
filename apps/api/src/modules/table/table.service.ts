@@ -352,7 +352,7 @@ export class TableService {
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: tables as any,
+      data: tables,
       meta: {
         page,
         limit,
@@ -395,7 +395,7 @@ export class TableService {
         include: {
           floor: true,
           bookings: {
-             where: {
+            where: {
               booking: {
                 status: BookingStatus.CONFIRMED,
               },
@@ -423,7 +423,7 @@ export class TableService {
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: tablesWithBookings as any,
+      data: tablesWithBookings,
       meta: {
         page,
         limit,

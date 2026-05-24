@@ -25,7 +25,6 @@ import { QueryTableDto } from './dto/query-table.dto';
 import { PaginatedTableResponseDto } from './dto/paginated-table-response.dto';
 import { PaginatedTableWithBookingsResponseDto } from './dto/table-with-bookings.dto';
 
-
 @ApiTags('tables')
 @ApiBearerAuth()
 @Controller('tables')

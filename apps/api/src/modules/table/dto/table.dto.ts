@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsInt, IsString, IsUUID, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import { TableArea, TableStatus } from '@prisma/client';
 
 export class FloorDto {
@@ -56,4 +63,3 @@ export class TableDto {
   @IsDateString()
   updatedAt: Date;
 }
-

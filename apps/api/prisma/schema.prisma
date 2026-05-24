@@ -425,7 +425,7 @@ model BookingMenuItem {
 }
 
 model Payment {
-  id        String   @id @default(cuid())
+  id        String @id @default(cuid())
   bookingId String?
   booking   Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   orderId Int?
@@ -484,7 +484,7 @@ model KitchenTicketItem {
   id              String        @id @default(cuid())
   ticketId        String
   ticket          KitchenTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  orderItemId     String        @unique  // 1-1 với OrderItem
+  orderItemId     String
   orderItem       OrderItem     @relation(fields: [orderItemId], references: [id])
   quantity        Int
   status          KitchenItemStatus @default(PENDING)
@@ -492,7 +492,7 @@ model KitchenTicketItem {
   completedAt     DateTime?
 
   @@index([ticketId])
-  @@index([status])
+  @@index([orderItemId])
 }
 
 enum KitchenTicketStatus {
