@@ -242,6 +242,7 @@ model Order {
   items     OrderItem[]
   payments  Payment[]
   orderTables OrderTable[] // Many-to-many relation with Table
+  kitchenTickets KitchenTicket[]
 
   @@index([status])
   @@index([createdById])
@@ -259,6 +260,8 @@ model OrderItem {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   note       String?
+
+  kitchenTicketItems KitchenTicketItem[]
   @@index([orderId])
   @@index([menuItemId])
 }
@@ -454,4 +457,55 @@ enum DepositStatus {
   PAID
   REFUNDED
   WAIVED
+}
+
+// ==================== KITCHEN MODE MODELS ====================
+// Phiếu gửi bếp (mỗi lần gọi món tạo 1 ticket)
+model KitchenTicket {
+  id          String              @id @default(cuid())
+  orderId     Int
+  order       Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status      KitchenTicketStatus @default(PENDING)
+  priority    Int                 @default(0)      // 0=normal, 1=rush
+  note        String?
+  sentAt      DateTime            @default(now())  // Lúc gửi xuống bếp
+  acceptedAt  DateTime?           // Bếp xác nhận nhận
+  completedAt DateTime?           // Bếp làm xong
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  items       KitchenTicketItem[]
+
+  @@index([status])
+  @@index([orderId])
+}
+
+model KitchenTicketItem {
+  id              String        @id @default(cuid())
+  ticketId        String
+  ticket          KitchenTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  orderItemId     String        @unique  // 1-1 với OrderItem
+  orderItem       OrderItem     @relation(fields: [orderItemId], references: [id])
+  quantity        Int
+  status          KitchenItemStatus @default(PENDING)
+  note            String?
+  completedAt     DateTime?
+
+  @@index([ticketId])
+  @@index([status])
+}
+
+enum KitchenTicketStatus {
+  PENDING     // Chờ bếp xác nhận
+  ACCEPTED    // Bếp đã nhận
+  SERVED      // Đã mang ra bàn
+  CANCELLED
+}
+
+enum KitchenItemStatus {
+  PENDING
+  COOKING
+  READY
+  SERVED
+  CANCELLED
 }

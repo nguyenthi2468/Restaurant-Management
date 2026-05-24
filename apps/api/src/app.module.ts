@@ -20,6 +20,7 @@ import { TableModule } from './modules/table/table.module';
 import { OrderModule } from './modules/order/order.module';
 import { OrderItemModule } from './modules/order-item/order-item.module';
 import { BookingModule } from './modules/booking/booking.module';
+import { PusherModule } from './modules/pusher/pusher.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { BookingModule } from './modules/booking/booking.module';
     OrderModule,
     OrderItemModule,
     BookingModule,
+    PusherModule,
   ],
   controllers: [AppController],
   providers: [
