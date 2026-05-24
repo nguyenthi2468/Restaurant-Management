@@ -26,6 +26,12 @@ export class UpdateOrderItemDto extends PartialType(CreateOrderItemDto) {
   quantity?: number;
 
   @ApiPropertyOptional({
+    description: 'Ghi chú hoặc chú thích về món ăn',
+    example: 'Với thêm',
+  })
+  note?: string;
+
+  @ApiPropertyOptional({
     description: 'Đơn giá của món ăn (tiền tệ, đơn vị: VND)',
     example: 150000,
     minimum: 0,

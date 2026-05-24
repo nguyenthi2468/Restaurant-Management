@@ -23,6 +23,15 @@ export class OrderItemService {
     });
   }
 
+  async findByOrderId(orderId: string) {
+    return this.prisma.orderItem.findMany({
+      where: { orderId },
+      include: {
+        menuItem: true,
+      },
+    });
+  }
+
   async update(id: string, updateOrderItemDto: UpdateOrderItemDto) {
     return this.prisma.orderItem.update({
       where: { id },

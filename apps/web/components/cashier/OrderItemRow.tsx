@@ -28,7 +28,7 @@ export function OrderItemRow({
         <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
           <button className="flex items-center gap-1 hover:text-blue-600">
             <Edit3 size={10} />
-            {item.notes || 'Ghi chú/Món thêm'}
+            {item.note || 'Ghi chú/Món thêm'}
           </button>
         </div>
       </div>

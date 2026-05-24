@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { TableStatus, type Table } from '@/features/tables';
-import type { OrderItem } from '@/features/cashier';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -10,18 +8,19 @@ import {
   Plus,
   Users,
   MoreHorizontal,
-  Search,
   Bell,
   DollarSign,
   Edit3,
   Phone,
   Printer,
   ClipboardList,
+  Loader2,
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 import { Order } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
+import { useGetOrderItemsByOrderIdQuery } from '@/features/order-items';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -42,9 +41,10 @@ export function OrderPanel({
   onNotify,
   onPay,
 }: OrderPanelProps) {
-  const [customerSearch, setCustomerSearch] = useState('');
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
-
+  const { data: orderItems, isLoading } = useGetOrderItemsByOrderIdQuery(
+    order?.id || '',
+  );
   if (!selectedTable) {
     return (
       <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
@@ -153,12 +153,16 @@ export function OrderPanel({
 
       <ScrollArea className="flex-1 px-4 py-2">
         <div className="space-y-3">
-          {order?.items?.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+            </div>
+          ) : orderItems?.length === 0 ? (
             <div className="text-center py-8 text-slate-400 text-sm">
               Chưa có món nào. Chọn thực đơn để thêm món.
             </div>
           ) : (
-            order?.items?.map((item, idx) => (
+            orderItems?.map((item, idx) => (
               <OrderItemRow
                 key={item.id}
                 item={item}

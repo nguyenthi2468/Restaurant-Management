@@ -8,7 +8,7 @@ import {
   useTablesWithBookingsQuery,
 } from '@/features/tables';
 import { Floor, useFloorsQuery } from '@/features/floor';
-import type { OrderItem } from '@/features/cashier';
+import type { OrderItem } from '@/features/order-items';
 import { TabNavigation } from '@/components/cashier/TabNavigation';
 import { FloorFilters } from '@/components/cashier/FloorFilters';
 import { StatusFilters } from '@/components/cashier/StatusFilters';
@@ -23,6 +23,11 @@ import {
 } from '@/features/menu-items';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGetServedOrderByTableIdQuery } from '@/features/orders';
+import {
+  useCreateOrderItemMutation,
+  useUpdateOrderItemMutation,
+} from '@/features/order-items';
+import toast from 'react-hot-toast';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -52,8 +57,12 @@ export default function CashierPage() {
       limit: 20,
     });
   const { data: floors = [] } = useFloorsQuery();
-  const { data: orderData } = useGetServedOrderByTableIdQuery(selectedTableId ?? '');
+  const { data: orderData } = useGetServedOrderByTableIdQuery(
+    selectedTableId ?? '',
+  );
   const { data: menuCategories = [] } = useMenuCategoriesQuery();
+  const createOrderItemMutation = useCreateOrderItemMutation();
+  const updateOrderItemMutation = useUpdateOrderItemMutation();
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
     menuCategoryId: selectedMenuCategory,
@@ -93,7 +102,10 @@ export default function CashierPage() {
 
   const totalAmount = useMemo(
     () =>
-      displayItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0),
+      displayItems.reduce(
+        (sum, item) => sum + Number(item.price) * item.quantity,
+        0,
+      ),
     [displayItems],
   );
 
@@ -103,32 +115,50 @@ export default function CashierPage() {
     setCurrentPageTable(1);
   }, []);
 
-  const handleAddItem = useCallback((menuItem: MenuItem) => {
-    setLocalOrderItems((prev) => {
-      const existing = prev.find((i) => i.menuItemId === menuItem.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.menuItemId === menuItem.id
-            ? {
-                ...i,
-                quantity: i.quantity + 1,
-                total: (i.quantity + 1) * i.price,
-              }
-            : i,
+  const handleAddItem = useCallback(
+    async (menuItem: MenuItem) => {
+      if (!orderData?.id) return;
+
+      const existingItem = orderData.items?.find(
+        (i) => i.menuItemId === menuItem.id,
+      );
+
+      if (existingItem) {
+        await toast.promise(
+          updateOrderItemMutation.mutateAsync({
+            id: existingItem.id,
+            data: {
+              quantity: existingItem.quantity + 1,
+              price: Number(menuItem.price),
+            },
+          }),
+          {
+            loading: 'Đang cập nhật món ăn...',
+            success: 'Món ăn đã được cập nhật',
+            error: (err: any) =>
+              err?.response?.data?.message || 'Cập nhật món ăn thất bại',
+          },
+        );
+      } else {
+        await toast.promise(
+          createOrderItemMutation.mutateAsync({
+            orderId: orderData.id,
+            menuItemId: menuItem.id,
+            price: Number(menuItem.price),
+            quantity: 1,
+            note: 'Ghi chú/Món thêm',
+          }),
+          {
+            loading: 'Đang thêm món ăn...',
+            success: 'Món ăn đã được thêm vào order',
+            error: (err: any) =>
+              err?.response?.data?.message || 'Thêm món ăn vào order thất bại',
+          },
         );
       }
-      const newItem: OrderItem = {
-        id: `tmp-${Date.now()}`,
-        menuItemId: menuItem.id,
-        name: menuItem.name,
-        price: menuItem.price,
-        quantity: 1,
-        notes: 'Ghi chú/Món thêm',
-        total: menuItem.price,
-      };
-      return [...prev, newItem];
-    });
-  }, []);
+    },
+    [orderData, createOrderItemMutation, updateOrderItemMutation],
+  );
 
   const handleUpdateQuantity = useCallback((itemId: string, delta: number) => {
     setLocalOrderItems((prev) =>
@@ -136,7 +166,7 @@ export default function CashierPage() {
         .map((i) => {
           if (i.id !== itemId) return i;
           const newQty = Math.max(0, i.quantity + delta);
-          return { ...i, quantity: newQty, total: newQty * i.price };
+          return { ...i, quantity: newQty, total: newQty * Number(i.price) };
         })
         .filter((i) => i.quantity > 0),
     );

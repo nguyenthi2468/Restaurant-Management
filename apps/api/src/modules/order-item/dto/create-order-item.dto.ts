@@ -26,11 +26,17 @@ export class CreateOrderItemDto {
   quantity!: number;
 
   @ApiProperty({
+    description: 'Ghi chú hoặc chú thích về món ăn',
+    example: 'Với thêm',
+  })
+  note?: string;
+
+  @ApiProperty({
     description: 'Đơn giá của món ăn (tiền tệ, đơn vị: VND)',
     example: 150000,
     minimum: 0,
   })
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 3 })
   @Min(0)
   price!: number;
 }

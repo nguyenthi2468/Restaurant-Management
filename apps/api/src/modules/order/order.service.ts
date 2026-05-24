@@ -101,15 +101,15 @@ export class OrderService {
           },
         },
       },
-      include: {
-        items: true,
-        orderTables: {
-          include: {
-            table: true,
-          },
-        },
-        payments: true,
-      },
+      // include: {
+      //   items: true,
+      //   orderTables: {
+      //     include: {
+      //       table: true,
+      //     },
+      //   },
+      //   payments: true,
+      // },
     });
   }
 }

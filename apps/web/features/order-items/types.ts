@@ -5,10 +5,10 @@ export interface OrderItem {
   orderId: string;
   menuItemId: string;
   quantity: number;
-  price: string | number;
-  createdAt: string;
-  updatedAt: string;
-  notes: string;
+  price: number;
+  createdAt?: string;
+  updatedAt?: string;
+  note?: string;
   menuItem?: MenuItem;
 }
 
@@ -17,6 +17,7 @@ export interface CreateOrderItemData {
   menuItemId: string;
   quantity: number;
   price: number;
+  note?: string;
 }
 
 export interface UpdateOrderItemData {
@@ -24,4 +25,5 @@ export interface UpdateOrderItemData {
   menuItemId?: string;
   quantity?: number;
   price?: number;
+  note?: string;
 }
