@@ -45,7 +45,7 @@ export const useDeleteOrderMutation = () => {
 export const useCancelOrderMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => cancelOrder(id),
+    mutationFn: (id: number) => cancelOrder(id),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['order', data.id] });
       queryClient.invalidateQueries({ queryKey: ['tables', 'with-bookings'] });

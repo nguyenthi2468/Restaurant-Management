@@ -16,6 +16,7 @@ import {
   ClipboardList,
   Loader2,
   X,
+  NotepadText,
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
@@ -34,7 +35,7 @@ interface OrderPanelProps {
   onRemoveItem: (itemId: string) => void;
   onNotify: () => void;
   onPay: () => void;
-  onCancel: (orderId: string) => void;
+  onCancel: (orderId: number) => void;
 }
 
 export function OrderPanel({
@@ -156,7 +157,7 @@ export function OrderPanel({
           </span>
         </div>
         <Button
-          onClick={() => onCancel(order?.id || '')}
+          onClick={() => onCancel(order?.id || 0)}
           variant="outline"
           size="sm"
           className="h-9 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
@@ -207,6 +208,9 @@ export function OrderPanel({
             </Button>
             <Button size="icon-xs" variant="ghost">
               <Phone size={12} />
+            </Button>
+             <Button size="icon-xs" variant="ghost">
+              <NotepadText size={12} />
             </Button>
             <Button size="icon-xs" variant="ghost">
               <Printer size={12} />

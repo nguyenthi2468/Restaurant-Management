@@ -16,7 +16,7 @@ export const useGetOrderItemByIdQuery = (id: string) => {
   });
 };
 
-export const useGetOrderItemsByOrderIdQuery = (orderId: string) => {
+export const useGetOrderItemsByOrderIdQuery = (orderId: number) => {
   return useQuery({
     queryKey: ["order-items", "order", orderId],
     queryFn: () => getOrderItemsByOrderId(orderId),

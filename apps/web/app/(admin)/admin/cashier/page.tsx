@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useCashierOrderQuery } from '@/features/cashier';
 import {
   TableWithBookings,
   TableStatus,
@@ -22,13 +21,17 @@ import {
   useMenuItemsWithPaginationQuery,
 } from '@/features/menu-items';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useCancelOrderMutation, useGetServedOrderByTableIdQuery } from '@/features/orders';
+import {
+  useCancelOrderMutation,
+  useGetServedOrderByTableIdQuery,
+} from '@/features/orders';
 import {
   useCreateOrderItemMutation,
   useUpdateOrderItemMutation,
   useDeleteOrderItemMutation,
   useGetOrderItemsByOrderIdQuery,
 } from '@/features/order-items';
+import { useCreateKitchenTicketMutation } from '@/features/kitchen';
 import toast from 'react-hot-toast';
 import { ApiError } from '@/types';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -66,11 +69,12 @@ export default function CashierPage() {
   );
   const { data: menuCategories = [] } = useMenuCategoriesQuery();
   const { data: orderItems, isLoading: isLoadingOrderItems } =
-    useGetOrderItemsByOrderIdQuery(orderData?.id || '');
+    useGetOrderItemsByOrderIdQuery(orderData?.id || 0);
   const createOrderItemMutation = useCreateOrderItemMutation();
   const updateOrderItemMutation = useUpdateOrderItemMutation();
   const deleteOrderItemMutation = useDeleteOrderItemMutation();
   const cancelOrderMutation = useCancelOrderMutation();
+  const createKitchenTicketMutation = useCreateKitchenTicketMutation();
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
@@ -204,23 +208,59 @@ export default function CashierPage() {
     setDeleteItemId(itemId);
   }, []);
 
-  const handleCancelOrder = useCallback(async (orderId: string) => {
-    if (!orderId) {
-      toast.error('Vui lòng chọn đơn hàng');
-      return;
-    };
-    await toast.promise(cancelOrderMutation.mutateAsync(orderId), {
-      loading: 'Đang hủy đơn...',
-      success: 'Đơn đã được hủy',
-      error: (err: ApiError) =>
-        err?.response?.data?.message || 'Hủy đơn thất bại',
-    });
-  }, [cancelOrderMutation]);
+  const handleCancelOrder = useCallback(
+    async (orderId: number) => {
+      if (!orderId) {
+        toast.error('Vui lòng chọn đơn hàng');
+        return;
+      }
+      await toast.promise(cancelOrderMutation.mutateAsync(orderId), {
+        loading: 'Đang hủy đơn...',
+        success: 'Đơn đã được hủy',
+        error: (err: ApiError) =>
+          err?.response?.data?.message || 'Hủy đơn thất bại',
+      });
+    },
+    [cancelOrderMutation],
+  );
 
-  const handleNotify = useCallback(() => {
-    if (!selectedTable) return;
-    alert(`Đã gửi thông báo cho ${selectedTable.name}`);
-  }, [selectedTable]);
+  const handleNotify = useCallback(async () => {
+    if (!selectedTable) {
+      toast.error('Vui lòng chọn bàn');
+      return;
+    }
+
+    if (!orderData?.id) {
+      toast.error('Không tìm thấy đơn hàng');
+      return;
+    }
+
+    if (!orderItems || orderItems.length === 0) {
+      toast.error('Đơn hàng không có món ăn nào');
+      return;
+    }
+
+    const kitchenTicketData = {
+      orderId: orderData.id,
+      priority: 1,
+      note: `Bàn ${selectedTable.name}`,
+      items: orderItems.map((item) => ({
+        orderItemId: item.id,
+        quantity: item.quantity,
+        note: item.note || undefined,
+      })),
+    };
+
+    await toast.promise(
+      createKitchenTicketMutation.mutateAsync(kitchenTicketData),
+      {
+        loading: 'Đang gửi thông báo đến bếp...',
+        success: `Đã gửi thông báo cho ${selectedTable.name} đến bếp`,
+        error: (err: ApiError) =>
+          err?.response?.data?.message || 'Gửi thông báo thất bại',
+      },
+    );
+  }, [selectedTable, orderData, orderItems, createKitchenTicketMutation]);
 
   const handlePay = useCallback(() => {
     if (!selectedTable) return;

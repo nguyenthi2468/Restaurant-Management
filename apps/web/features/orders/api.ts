@@ -37,7 +37,7 @@ export const deleteOrder = async (id: string) => {
   return response.data;
 };
 
-export const cancelOrder = async (id: string) => {
+export const cancelOrder = async (id: number) => {
   const response = await api.patch<Order>(
     `${API_ENDPOINTS.ORDERS.BASE}/${id}/cancel`,
   );

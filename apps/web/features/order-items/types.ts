@@ -13,7 +13,7 @@ export interface OrderItem {
 }
 
 export interface CreateOrderItemData {
-  orderId: string;
+  orderId: number;
   menuItemId: string;
   quantity: number;
   price: number;

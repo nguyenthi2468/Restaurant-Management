@@ -12,7 +12,7 @@ export const getOrderItemById = async (id: string) => {
   return response.data;
 };
 
-export const getOrderItemsByOrderId = async (orderId: string) => {
+export const getOrderItemsByOrderId = async (orderId: number) => {
   const response = await api.get<OrderItem[]>(`${API_ENDPOINTS.ORDER_ITEMS.ORDER}/${orderId}`);
   return response.data;
 };

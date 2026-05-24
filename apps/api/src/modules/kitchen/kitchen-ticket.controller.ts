@@ -27,9 +27,7 @@ export class KitchenTicketController {
   @Post()
   @Action('kitchen:ticket:create')
   @UseGuards(JwtAuthGuard, ActionGuard)
-  create(
-    @Body() createKitchenTicketDto: CreateKitchenTicketDto,
-  ) {
+  create(@Body() createKitchenTicketDto: CreateKitchenTicketDto) {
     return this.kitchenTicketService.create(createKitchenTicketDto);
   }
 
@@ -41,6 +39,11 @@ export class KitchenTicketController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.kitchenTicketService.findOne(id);
+  }
+
+  @Get('order/:orderId')
+  findAllByOrderId(@Param('orderId') orderId: number) {
+    return this.kitchenTicketService.findByOrderId(orderId);
   }
 
   @Patch(':id')
@@ -61,14 +64,14 @@ export class KitchenTicketController {
   }
 
   @Patch(':id/accept')
-  @Action('kitchen:ticket:accept')
+  @Action('kitchen:ticket:update')
   @UseGuards(JwtAuthGuard, ActionGuard)
   acceptTicket(@Param('id') id: string) {
     return this.kitchenTicketService.acceptTicket(id, 'user_id');
   }
 
   @Patch(':id/complete')
-  @Action('kitchen:ticket:complete')
+  @Action('kitchen:ticket:update')
   @UseGuards(JwtAuthGuard, ActionGuard)
   completeTicket(@Param('id') id: string) {
     return this.kitchenTicketService.completeTicket(id);

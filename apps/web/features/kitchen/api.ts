@@ -68,6 +68,13 @@ export const getKitchenTicketsByStatus = async (status: string) => {
   return response.data;
 };
 
+export const getKitchenTicketsByOrderId = async (orderId: number) => {
+  const response = await api.get<KitchenTicket[]>(
+    API_ENDPOINTS.KITCHEN_TICKETS.BY_ORDER(orderId),
+  );
+  return response.data;
+};
+
 export const updateKitchenTicketItemStatus = async (
   itemId: string,
   status: KitchenItemStatus,

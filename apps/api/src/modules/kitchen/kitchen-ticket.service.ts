@@ -77,6 +77,27 @@ export class KitchenTicketService {
     });
   }
 
+  async findByOrderId(orderId: number) {
+    return this.prisma.kitchenTicket.findMany({
+      where: { orderId },
+      include: {
+        items: {
+          include: {
+            orderItem: {
+              include: {
+                menuItem: true,
+              },
+            },
+          },
+        },
+        order: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   async update(id: string, updateKitchenTicketDto: UpdateKitchenTicketDto) {
     const { priority, note, items } = updateKitchenTicketDto;
 

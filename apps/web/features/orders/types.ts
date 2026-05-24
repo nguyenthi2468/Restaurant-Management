@@ -8,7 +8,7 @@ export enum OrderStatus {
   CANCELLED = 'CANCELLED',
 }
 export interface Order {
-  id: string;
+  id: number;
   tableId: string;
   status: OrderStatus;
   total: string | number;
@@ -23,7 +23,7 @@ export interface Order {
 
 export interface OrderTable {
   id: string;
-  orderId: string;
+  orderId: number;
   tableId: string;
   createdAt: string;
   table: Table;
