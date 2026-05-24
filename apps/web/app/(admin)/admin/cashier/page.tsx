@@ -31,6 +31,7 @@ import {
 } from '@/features/order-items';
 import toast from 'react-hot-toast';
 import { ApiError } from '@/types';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -70,6 +71,7 @@ export default function CashierPage() {
   const updateOrderItemMutation = useUpdateOrderItemMutation();
   const deleteOrderItemMutation = useDeleteOrderItemMutation();
   const [selectedMenuCategory, setSelectedMenuCategory] = useState<string>('');
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
     menuCategoryId: selectedMenuCategory,
     search: debouncedSearchTerm,
@@ -176,12 +178,7 @@ export default function CashierPage() {
       const newQty = existingItem.quantity + delta;
 
       if (newQty <= 0) {
-        await toast.promise(deleteOrderItemMutation.mutateAsync(itemId), {
-          loading: 'Đang xóa món ăn...',
-          success: 'Món ăn đã được xóa',
-          error: (err: ApiError) =>
-            err?.response?.data?.message || 'Xóa món ăn thất bại',
-        });
+        setDeleteItemId(itemId);
       } else {
         await toast.promise(
           updateOrderItemMutation.mutateAsync({
@@ -203,17 +200,9 @@ export default function CashierPage() {
     [orderData, updateOrderItemMutation, deleteOrderItemMutation],
   );
 
-  const handleRemoveItem = useCallback(
-    async (itemId: string) => {
-      await toast.promise(deleteOrderItemMutation.mutateAsync(itemId), {
-        loading: 'Đang xóa món ăn...',
-        success: 'Món ăn đã được xóa',
-        error: (err: ApiError) =>
-          err?.response?.data?.message || 'Xóa món ăn thất bại',
-      });
-    },
-    [deleteOrderItemMutation],
-  );
+  const handleRemoveItem = useCallback((itemId: string) => {
+    setDeleteItemId(itemId);
+  }, []);
 
   const handleNotify = useCallback(() => {
     if (!selectedTable) return;
@@ -226,6 +215,18 @@ export default function CashierPage() {
       `Thanh toán ${totalAmount.toLocaleString('vi-VN')}đ cho ${selectedTable.name}`,
     );
   }, [selectedTable, totalAmount]);
+
+  const handleDeleteItem = useCallback(async () => {
+    if (!deleteItemId) return;
+
+    await toast.promise(deleteOrderItemMutation.mutateAsync(deleteItemId), {
+      loading: 'Đang xóa món ăn...',
+      success: 'Món ăn đã được xóa',
+      error: (err: ApiError) =>
+        err?.response?.data?.message || 'Xóa món ăn thất bại',
+    });
+    setDeleteItemId(null);
+  }, [deleteItemId, deleteOrderItemMutation]);
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-slate-100">
@@ -309,6 +310,17 @@ export default function CashierPage() {
         onRemoveItem={handleRemoveItem}
         onNotify={handleNotify}
         onPay={handlePay}
+      />
+
+      <ConfirmDialog
+        open={!!deleteItemId}
+        title="Xác nhận xóa"
+        description="Bạn có chắc chắn muốn xóa món ăn này khỏi order?"
+        confirmText="Xóa"
+        cancelText="Hủy"
+        isLoading={deleteOrderItemMutation.isPending}
+        onConfirm={handleDeleteItem}
+        onCancel={() => setDeleteItemId(null)}
       />
     </div>
   );
