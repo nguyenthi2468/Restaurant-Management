@@ -15,13 +15,21 @@ export class KitchenTicketService {
   async create(createKitchenTicketDto: CreateKitchenTicketDto) {
     const { orderId, priority = 0, note, items } = createKitchenTicketDto;
 
+    const hasNegativeQuantity = items?.some((item) => item.quantity < 0);
+    const ticketStatus = hasNegativeQuantity
+      ? KitchenTicketStatus.ACCEPTED
+      : KitchenTicketStatus.PENDING;
+    const itemStatus = hasNegativeQuantity
+      ? KitchenItemStatus.SERVED
+      : KitchenItemStatus.PENDING;
+
     const result = await this.prisma.$transaction(async (tx) => {
       const kitchenTicket = await tx.kitchenTicket.create({
         data: {
           orderId,
           priority,
           note,
-          status: KitchenTicketStatus.PENDING,
+          status: ticketStatus,
         },
       });
 
@@ -32,7 +40,7 @@ export class KitchenTicketService {
             orderItemId: item.orderItemId,
             quantity: item.quantity,
             note: item.note,
-            status: KitchenItemStatus.PENDING,
+            status: itemStatus,
           })),
         });
       }

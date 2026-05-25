@@ -20,10 +20,8 @@ export class CreateKitchenTicketItemDto {
   @ApiProperty({
     description: 'Số lượng món ăn',
     example: 2,
-    minimum: 1,
   })
   @IsInt()
-  @Min(1)
   quantity: number;
 
   @ApiPropertyOptional({

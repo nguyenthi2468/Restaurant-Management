@@ -76,8 +76,6 @@ export class KitchenTicketController {
     return this.kitchenTicketService.acceptTicket(id, 'user_id');
   }
 
-
-
   @Patch('items/:itemId/status')
   @Action('kitchen:ticket:update')
   @UseGuards(JwtAuthGuard, ActionGuard)

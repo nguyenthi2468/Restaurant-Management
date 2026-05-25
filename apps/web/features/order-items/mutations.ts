@@ -21,6 +21,10 @@ export const useUpdateOrderItemMutation = () => {
         queryClient.invalidateQueries({
           queryKey: ['order-items', 'order', _.orderId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ['kitchen-tickets', 'order', _.orderId],
+        });
+        
       }
       }
     });

@@ -37,7 +37,7 @@ const statusConfig = {
     color: 'text-slate-600',
   },
   [KitchenTicketStatus.ACCEPTED]: {
-    label: 'Đang chế biến',
+    label: 'Chấp nhận',
     variant: 'default' as const,
     icon: ChefHat,
     color: 'text-blue-600',

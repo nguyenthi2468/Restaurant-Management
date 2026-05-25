@@ -35,7 +35,7 @@ interface OrderPanelProps {
   tickets: KitchenTicket[];
   isLoadingTickets: boolean;
   totalAmount: number;
-  onUpdateQuantity: (itemId: string, delta: number) => void;
+  onUpdateQuantity: (item: OrderItem, delta: number) => void;
   onRemoveItem: (itemId: string) => void;
   onNotify: () => void;
   onPay: () => void;
@@ -229,7 +229,7 @@ export function OrderPanel({
           <div className="flex items-center gap-1 text-sm font-semibold text-slate-800">
             Tổng tiền
             <span className="ml-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {order?.items?.length || 0}
+              {orderItems.reduce((acc, cur) => acc + cur.quantity, 0) || 0}
             </span>
             <span className="ml-2 text-blue-600 text-base">
               {formatCurrency(totalAmount)}

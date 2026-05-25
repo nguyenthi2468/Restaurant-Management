@@ -15,7 +15,7 @@ interface OrderItemRowProps {
   item: OrderItem;
   index: number;
   isUpdating: boolean;
-  onUpdateQuantity: (itemId: string, delta: number) => void;
+  onUpdateQuantity: (item: OrderItem, delta: number) => void;
   onRemove: (itemId: string) => void;
 }
 
@@ -32,7 +32,7 @@ export function OrderItemRow({
   const handleQuantityConfirm = (newQuantity: number) => {
     const delta = newQuantity - item.quantity;
     if (delta !== 0) {
-      onUpdateQuantity(item.id, delta);
+      onUpdateQuantity(item, delta);
     }
   };
   return (
@@ -55,7 +55,7 @@ export function OrderItemRow({
       <div className="flex items-center gap-2">
         <button
           disabled={isUpdating}
-          onClick={() => onUpdateQuantity(item.id, -1)}
+          onClick={() => onUpdateQuantity(item, -1)}
           className={cn(
             'w-6 h-6 rounded-full border flex items-center justify-center text-slate-600 transition-all',
             isUpdating
@@ -96,7 +96,7 @@ export function OrderItemRow({
         </TooltipProvider>
         <button
           disabled={isUpdating}
-          onClick={() => onUpdateQuantity(item.id, 1)}
+          onClick={() => onUpdateQuantity(item, 1)}
           className={cn(
             'w-6 h-6 rounded-full border flex items-center justify-center text-slate-600 transition-all',
             isUpdating

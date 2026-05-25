@@ -40,6 +40,7 @@ import { ApiError } from '@/types';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePusherChannel } from '@/hooks/usePusherChannel';
 import { useQueryClient } from '@tanstack/react-query';
+import { ReturnOrderItemsDialog } from '@/components/cashier/ReturnOrderItemsDialog';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -52,8 +53,8 @@ export default function CashierPage() {
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [currentPageTable, setCurrentPageTable] = useState(1);
   const [currentPageMenu, setCurrentPageMenu] = useState(1);
-  const [localOrderItems, setLocalOrderItems] = useState<OrderItem[]>([]);
-
+  const [openReturnOrderItemsDialog, setOpenReturnOrderItemsDialog] = useState(false);
+  const [selectedOrderItem, setSelectedOrderItem] = useState<OrderItem | null>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
@@ -128,24 +129,17 @@ export default function CashierPage() {
     };
   }, [tables]);
 
-  const displayItems = useMemo(() => {
-    if (localOrderItems.length > 0) return localOrderItems;
-    return orderData?.items ?? [];
-  }, [localOrderItems, orderData]);
-
   const totalAmount = useMemo(
     () =>
-      displayItems.reduce(
+      (orderItems || []).reduce(
         (sum, item) => sum + Number(item.price) * item.quantity,
         0,
       ),
-    [displayItems],
+    [orderItems],
   );
 
   const handleSelectTable = useCallback((table: TableWithBookings) => {
     setSelectedTableId(table.id);
-    setLocalOrderItems([]);
-    setCurrentPageTable(1);
   }, []);
 
   const handleAddItem = useCallback(
@@ -194,23 +188,24 @@ export default function CashierPage() {
   );
 
   const handleUpdateQuantity = useCallback(
-    async (itemId: string, delta: number) => {
+    async (item: OrderItem, delta: number) => {
       if (!orderItems) return;
 
-      const existingItem = orderItems.find((i) => i.id === itemId);
-      if (!existingItem) return;
-
-      const newQty = existingItem.quantity + delta;
-
+      if(tickets && tickets.length > 0 && delta < 0){
+        setSelectedOrderItem(item);
+        setOpenReturnOrderItemsDialog(true);
+        return;
+      }
+      const newQty = item.quantity + delta;
       if (newQty <= 0) {
-        setDeleteItemId(itemId);
+        setDeleteItemId(item.id);
       } else {
         await toast.promise(
           updateOrderItemMutation.mutateAsync({
-            id: itemId,
+            id: item.id,
             data: {
               quantity: newQty,
-              price: Number(existingItem.price),
+              price: Number(item.price),
             },
           }),
           {
@@ -279,7 +274,7 @@ export default function CashierPage() {
               remainingQuantity: item.quantity - totalSentQuantity,
             };
           })
-          .filter(({ remainingQuantity }) => remainingQuantity > 0)
+          .filter(({remainingQuantity }) => remainingQuantity > 0) // Lọc món ăn có số lượng còn lại lớn hơn 0
           .map(({ item, remainingQuantity }) => ({
             orderItemId: item.id,
             quantity: remainingQuantity,
@@ -338,6 +333,36 @@ export default function CashierPage() {
     createKitchenTicketMutation,
     tickets,
   ]);
+
+  const handleReturnItems = useCallback(async (quantity: number, reason: string) => {
+    if (!selectedOrderItem) {
+      toast.error('Vui lòng chọn món ăn');
+      return;
+    }
+    if (quantity > selectedOrderItem.quantity) {
+      toast.error('Số lượng hủy không thể lớn hơn số lượng món ăn');
+      return;
+    }
+    if(quantity === selectedOrderItem.quantity){
+      handleRemoveItem(selectedOrderItem.id);
+      handleDeleteItem();
+      return
+    }
+    await toast.promise(updateOrderItemMutation.mutateAsync({
+      id: selectedOrderItem.id,
+      data: {
+        note: reason,
+        quantity: selectedOrderItem.quantity - quantity,
+      },
+    }), {
+      loading: 'Đang hủy món...',
+      success: 'Món ăn đã được hủy',
+      error: (err: ApiError) =>
+        err?.response?.data?.message || 'Hủy món thất bại',
+    });
+    setSelectedOrderItem(null);
+    setOpenReturnOrderItemsDialog(false);
+  }, [selectedOrderItem, updateOrderItemMutation]);
 
   const handlePay = useCallback(() => {
     if (!selectedTable) return;
@@ -455,6 +480,12 @@ export default function CashierPage() {
         isLoading={deleteOrderItemMutation.isPending}
         onConfirm={handleDeleteItem}
         onCancel={() => setDeleteItemId(null)}
+      />
+      <ReturnOrderItemsDialog
+        open={openReturnOrderItemsDialog}
+        onConfirm={handleReturnItems}
+        onOpenChange={setOpenReturnOrderItemsDialog}
+        item={selectedOrderItem || null}
       />
     </div>
   );
