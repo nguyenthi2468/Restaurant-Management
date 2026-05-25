@@ -16,6 +16,7 @@ import { useGetKitchenTicketsByOrderIdQuery } from '@/features/kitchen/queries';
 import {
   KitchenTicketStatus,
   KitchenItemStatus,
+  KitchenTicket,
 } from '@/features/kitchen/types';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -23,6 +24,8 @@ import { vi } from 'date-fns/locale';
 interface HistoryKitchenTicketDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  tickets: KitchenTicket[];
+  isLoadingTickets: boolean;
   orderId: number | null;
 }
 
@@ -79,14 +82,12 @@ const itemStatusConfig = {
 export function HistoryKitchenTicketDrawer({
   open,
   onOpenChange,
+  tickets,
+  isLoadingTickets,
   orderId,
 }: HistoryKitchenTicketDrawerProps) {
-  const { data: tickets, isLoading } = useGetKitchenTicketsByOrderIdQuery(
-    orderId || 0,
-  );
-
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} direction='right'>
+    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Lịch sử phiếu bếp</DrawerTitle>
@@ -95,8 +96,8 @@ export function HistoryKitchenTicketDrawer({
           </DrawerDescription>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 px-4 pb-4">
-          {isLoading ? (
+        <ScrollArea className="h-[calc(100vh-10px)] px-4 pb-4">
+          {isLoadingTickets ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
             </div>

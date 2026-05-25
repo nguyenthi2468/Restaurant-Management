@@ -24,6 +24,7 @@ import { HistoryKitchenTicketDrawer } from '@/components/cashier/HistoryKitchenT
 import { Order } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
 import { OrderItem } from '@/features/order-items';
+import { KitchenTicket } from '@/features/kitchen';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -31,6 +32,8 @@ interface OrderPanelProps {
   isLoading: boolean;
   isUpdating: boolean;
   orderItems: OrderItem[];
+  tickets: KitchenTicket[];
+  isLoadingTickets: boolean;
   totalAmount: number;
   onUpdateQuantity: (itemId: string, delta: number) => void;
   onRemoveItem: (itemId: string) => void;
@@ -46,6 +49,8 @@ export function OrderPanel({
   isUpdating,
   orderItems,
   totalAmount,
+  tickets,
+  isLoadingTickets,
   onUpdateQuantity,
   onRemoveItem,
   onNotify,
@@ -193,14 +198,13 @@ export function OrderPanel({
           )}
         </div>
       </ScrollArea>
-
-      <div className="mx-4 mb-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start gap-2">
+      {/* <div className="mx-4 mb-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start gap-2">
         <span className="mt-0.5">⚠</span>
         <span>
           Bạn vừa cập nhật đơn hàng. Click <strong>Thông báo</strong> để gửi
           thông tin chế biến đến bán bếp.
         </span>
-      </div>
+      </div> */}
 
       <div className="px-4 py-3 border-t border-slate-200 space-y-3">
         <div className="flex items-center justify-between">
@@ -253,6 +257,8 @@ export function OrderPanel({
       </div>
 
       <HistoryKitchenTicketDrawer
+        tickets={tickets}
+        isLoadingTickets={isLoadingTickets}
         open={historyDrawerOpen}
         onOpenChange={setHistoryDrawerOpen}
         orderId={order?.id || null}

@@ -31,7 +31,10 @@ import {
   useDeleteOrderItemMutation,
   useGetOrderItemsByOrderIdQuery,
 } from '@/features/order-items';
-import { useCreateKitchenTicketMutation } from '@/features/kitchen';
+import {
+  useCreateKitchenTicketMutation,
+  useGetKitchenTicketsByOrderIdQuery,
+} from '@/features/kitchen';
 import toast from 'react-hot-toast';
 import { ApiError } from '@/types';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -69,6 +72,8 @@ export default function CashierPage() {
   const { data: orderData } = useGetServedOrderByTableIdQuery(
     selectedTableId ?? '',
   );
+  const { data: tickets, isLoading: isLoadingTickets } =
+    useGetKitchenTicketsByOrderIdQuery(orderData?.id || 0);
   const { data: menuCategories = [] } = useMenuCategoriesQuery();
   const { data: orderItems, isLoading: isLoadingOrderItems } =
     useGetOrderItemsByOrderIdQuery(orderData?.id || 0);
@@ -235,6 +240,7 @@ export default function CashierPage() {
         error: (err: ApiError) =>
           err?.response?.data?.message || 'Hủy đơn thất bại',
       });
+      setSelectedTableId('');
     },
     [cancelOrderMutation],
   );
@@ -255,10 +261,60 @@ export default function CashierPage() {
       return;
     }
 
+    if (tickets && tickets.length > 0) {
+      const allExistingTicketItems = tickets
+        .filter((ticket) => ticket.items && ticket.items.length > 0)
+        .flatMap((ticket) => ticket.items || []);
+
+      if (allExistingTicketItems.length > 0) {
+        const newItems = orderItems
+          .map((item) => {
+            const totalSentQuantity = allExistingTicketItems
+              .filter((ti) => ti.orderItemId === item.id)
+              .reduce((sum, ti) => sum + ti.quantity, 0);
+
+            return {
+              item,
+              totalSentQuantity,
+              remainingQuantity: item.quantity - totalSentQuantity,
+            };
+          })
+          .filter(({ remainingQuantity }) => remainingQuantity > 0)
+          .map(({ item, remainingQuantity }) => ({
+            orderItemId: item.id,
+            quantity: remainingQuantity,
+            note: item.note || undefined,
+          }));
+
+        if (newItems.length === 0) {
+          toast.error('Không có món ăn nào mới hoặc thay đổi số lượng để tạo vé bếp');
+          return;
+        }
+
+        const kitchenTicketData = {
+          orderId: orderData.id,
+          priority: 1,
+          note: `${selectedTable.name}`,
+          items: newItems,
+        };
+
+        await toast.promise(
+          createKitchenTicketMutation.mutateAsync(kitchenTicketData),
+          {
+            loading: 'Đang gửi thông báo đến bếp...',
+            success: `Đã gửi thông báo cho ${selectedTable.name} đến bếp`,
+            error: (err: ApiError) =>
+              err?.response?.data?.message || 'Gửi thông báo thất bại',
+          },
+        );
+        return;
+      }
+    }
+
     const kitchenTicketData = {
       orderId: orderData.id,
       priority: 1,
-      note: `Bàn ${selectedTable.name}`,
+      note: `${selectedTable.name}`,
       items: orderItems.map((item) => ({
         orderItemId: item.id,
         quantity: item.quantity,
@@ -275,7 +331,13 @@ export default function CashierPage() {
           err?.response?.data?.message || 'Gửi thông báo thất bại',
       },
     );
-  }, [selectedTable, orderData, orderItems, createKitchenTicketMutation]);
+  }, [
+    selectedTable,
+    orderData,
+    orderItems,
+    createKitchenTicketMutation,
+    tickets,
+  ]);
 
   const handlePay = useCallback(() => {
     if (!selectedTable) return;
@@ -372,6 +434,8 @@ export default function CashierPage() {
         selectedTable={selectedTable}
         order={orderData || null}
         isLoading={isLoadingOrderItems}
+        tickets={tickets || []}
+        isLoadingTickets={isLoadingTickets}
         isUpdating={updateOrderItemMutation.isPending}
         orderItems={orderItems || []}
         totalAmount={totalAmount}
