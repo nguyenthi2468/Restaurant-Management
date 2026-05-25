@@ -1,12 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createOrderItem, updateOrderItem, deleteOrderItem } from './api';
-import { CreateOrderItemData, UpdateOrderItemData } from './types';
+import {
+  createOrderItem,
+  updateOrderItem,
+  updateOrderItemNote,
+  deleteOrderItem,
+} from './api';
+import {
+  CreateOrderItemData,
+  UpdateOrderItemData,
+  UpdateNoteData,
+} from './types';
 export const useCreateOrderItemMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateOrderItemData) => createOrderItem(data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['order-items', 'order', variables.orderId] });
+      queryClient.invalidateQueries({
+        queryKey: ['order-items', 'order', variables.orderId],
+      });
     },
   });
 };
@@ -24,10 +35,22 @@ export const useUpdateOrderItemMutation = () => {
         queryClient.invalidateQueries({
           queryKey: ['kitchen-tickets', 'order', _.orderId],
         });
-        
       }
-      }
-    });
+    },
+  });
+};
+
+export const useUpdateOrderItemNoteMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateNoteData }) =>
+      updateOrderItemNote(id, data),
+    onSuccess: (_) => {
+      queryClient.invalidateQueries({
+        queryKey: ['order-items', 'order', _.orderId],
+      });
+    },
+  });
 };
 
 export const useDeleteOrderItemMutation = () => {
@@ -35,10 +58,12 @@ export const useDeleteOrderItemMutation = () => {
   return useMutation({
     mutationFn: (id: string) => deleteOrderItem(id),
     onSuccess: (_) => {
-      queryClient.invalidateQueries({ queryKey: ['order-items', 'order', _.orderId] });
-       queryClient.invalidateQueries({
-          queryKey: ['kitchen-tickets', 'order', _.orderId],
-        });
+      queryClient.invalidateQueries({
+        queryKey: ['order-items', 'order', _.orderId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['kitchen-tickets', 'order', _.orderId],
+      });
     },
   });
 };

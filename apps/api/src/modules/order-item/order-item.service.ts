@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
+import { UpdateNoteDto } from './dto/update-note.dto';
 import { KitchenItemStatus, KitchenTicketStatus } from '@prisma/client';
 
 @Injectable()
@@ -89,12 +90,12 @@ export class OrderItemService {
       if (!orderItem) {
         throw new Error('Order item not found');
       }
-      
+
       const tickets = await tx.kitchenTicket.findMany({
         where: { orderId: orderItem.orderId },
       });
-      
-      if(tickets.length > 0){
+
+      if (tickets.length > 0) {
         await tx.kitchenTicket.create({
           data: {
             orderId: orderItem.orderId,
@@ -114,6 +115,15 @@ export class OrderItemService {
       return tx.orderItem.delete({
         where: { id },
       });
+    });
+  }
+
+  async updateNote(id: string, updateNoteDto: UpdateNoteDto) {
+    return this.prisma.orderItem.update({
+      where: { id },
+      data: {
+        note: updateNoteDto.note,
+      },
     });
   }
 }

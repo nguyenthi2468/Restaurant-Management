@@ -14,12 +14,14 @@ import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { Action } from '../auth/decorator/action.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionGuard } from '../auth/guards/action.guard';
+import { UpdateNoteDto } from './dto/update-note.dto';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiCreatedResponse,
   ApiBearerAuth,
+  ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('Order Items Management')
@@ -183,5 +185,40 @@ export class OrderItemController {
   })
   remove(@Param('id') id: string) {
     return this.orderItemService.remove(id);
+  }
+
+  @Patch(':id/note')
+  @Action('order-item:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @ApiOperation({
+    summary: 'Cập nhật ghi chú mục đơn hàng',
+    description: 'Chỉ cập nhật ghi chú của một mục đơn hàng cụ thể',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID của mục đơn hàng',
+    example: 'orderitem_123',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ghi chú đã được cập nhật thành công',
+    type: CreateOrderItemDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'Mục đơn hàng không tìm thấy - Không có mục đơn hàng nào với ID được cung cấp',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dữ liệu không hợp lệ - Ghi chú không hợp lệ',
+  })
+  updateNote(@Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto) {
+    return this.orderItemService.updateNote(id, updateNoteDto);
   }
 }

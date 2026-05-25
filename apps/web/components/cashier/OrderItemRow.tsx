@@ -1,4 +1,4 @@
-import { OrderItem } from '@/features/order-items';
+import { OrderItem, useUpdateOrderItemNoteMutation } from '@/features/order-items';
 import { formatCurrency } from '@/utils/currency';
 import { Minus, Plus, Trash2, Edit3, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,7 +9,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { UpdateQuantityDialog } from './UpdateQuantityDialog';
+import { NoteOrderItemsDialog } from './NoteOrderItemsDialog';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface OrderItemRowProps {
   item: OrderItem;
@@ -28,6 +30,8 @@ export function OrderItemRow({
 }: OrderItemRowProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const updateNoteMutation = useUpdateOrderItemNoteMutation();
 
   const handleQuantityConfirm = (newQuantity: number) => {
     const delta = newQuantity - item.quantity;
@@ -35,6 +39,21 @@ export function OrderItemRow({
       onUpdateQuantity(item, delta);
     }
   };
+
+  const handleNoteSave = (note: string) => {
+    updateNoteMutation.mutate({ id: item.id, data: { note } }, {
+      onSuccess: () => {
+        setNoteDialogOpen(false);
+        toast.success('Ghi chú đã được cập nhật');
+      },
+      onError: (error) => {
+        console.error('Error updating note:', error);
+        setNoteDialogOpen(false);
+        toast.error('Cập nhật ghi chú thất bại');
+      },
+    });
+  };
+
   return (
     <div className="flex items-start gap-3 py-2 border-b border-slate-100 last:border-0">
       <div className="flex-1 min-w-0">
@@ -45,7 +64,10 @@ export function OrderItemRow({
           </span>
         </div>
         <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-          <button className="flex items-center gap-1 hover:text-blue-600">
+          <button
+            className="flex items-center gap-1 hover:text-blue-600"
+            onClick={() => setNoteDialogOpen(true)}
+          >
             <Edit3 size={10} />
             {item.note || 'Ghi chú/Món thêm'}
           </button>
@@ -129,6 +151,14 @@ export function OrderItemRow({
         onOpenChange={setDialogOpen}
         currentQuantity={item.quantity}
         onConfirm={handleQuantityConfirm}
+      />
+
+      <NoteOrderItemsDialog
+        open={noteDialogOpen}
+        onOpenChange={setNoteDialogOpen}
+        isPending={updateNoteMutation.isPending}
+        note={item.note || ''}
+        onSave={handleNoteSave}
       />
     </div>
   );

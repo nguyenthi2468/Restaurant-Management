@@ -27,3 +27,7 @@ export interface UpdateOrderItemData {
   price?: number;
   note?: string;
 }
+
+export interface UpdateNoteData {
+  note?: string;
+}
