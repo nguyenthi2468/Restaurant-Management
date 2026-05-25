@@ -11,11 +11,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateKitchenTicketItemDto {
   @ApiProperty({
-    description: 'ID của OrderItem',
-    example: 'orderitem_123abc',
+    description: 'ID của MenuItem',
+    example: 'menuitem_123abc',
   })
   @IsString()
-  orderItemId: string;
+  menuItemId: string;
 
   @ApiProperty({
     description: 'Số lượng món ăn',
@@ -64,7 +64,7 @@ export class CreateKitchenTicketDto {
     description: 'Danh sách món ăn trong ticket',
     example: [
       {
-        orderItemId: 'orderitem_123abc',
+        menuItemId: 'menuitem_123abc',
         quantity: 2,
         note: 'Không hành',
       },

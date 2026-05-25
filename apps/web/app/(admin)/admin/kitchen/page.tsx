@@ -131,7 +131,7 @@ export default function KitchenPage() {
                               {item.quantity}
                             </span>
                             <span className="text-base font-semibold text-gray-900">
-                              {item.orderItem?.menuItem?.name || 'Unknown Item'}
+                              {item?.menuItem?.name || 'Unknown Item'}
                             </span>
                           </div>
                           <div className="mt-1 text-xs text-gray-500">
@@ -141,7 +141,7 @@ export default function KitchenPage() {
 
                         <div className="flex flex-col items-end gap-2">
                           <div className="text-sm font-medium text-gray-700">
-                            Bàn {item.orderItem?.order?.id}
+                            {/* {item?.note} */}
                           </div>
 
                           <div className="flex items-center justify-between gap-2 w-full">
@@ -152,12 +152,6 @@ export default function KitchenPage() {
                               Huỷ
                             </button>
                             <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => moveToCompleted(item)}
-                                className="flex size-8 items-center justify-center rounded-full border border-pink-500 text-pink-500 transition-colors hover:bg-pink-50"
-                              >
-                                <ChevronRight className="size-4" />
-                              </button>
                               <button
                                 onClick={() => moveToCompleted(item)}
                                 className="flex size-8 items-center justify-center rounded-full bg-pink-500 text-white transition-colors hover:bg-pink-600"
@@ -196,7 +190,7 @@ export default function KitchenPage() {
                           {item.quantity}
                         </span>
                         <span className="text-base font-semibold text-gray-900">
-                          {item.orderItem?.menuItem?.name || 'Unknown Item'}
+                          {item?.menuItem?.name || 'Unknown Item'}
                         </span>
                       </div>
                       <div className="mt-1 text-xs text-gray-500">
@@ -206,15 +200,9 @@ export default function KitchenPage() {
 
                     <div className="flex flex-col items-end gap-2">
                       <div className="text-sm font-medium text-gray-700">
-                        Bàn {item.orderItem?.order?.id}
+                        {/* Bàn {item.ordertem?.order?.id} */}
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => moveToServed(item)}
-                          className="flex size-8 items-center justify-center rounded-full border border-green-600 text-green-600 transition-colors hover:bg-green-50"
-                        >
-                          <ChevronRight className="size-4" />
-                        </button>
                         <button
                           onClick={() => moveToServed(item)}
                           className="flex size-8 items-center justify-center rounded-full bg-green-600 text-white transition-colors hover:bg-green-700"

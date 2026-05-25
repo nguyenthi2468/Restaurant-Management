@@ -20,21 +20,15 @@ export interface KitchenTicketItemQueryParams {
 export interface KitchenTicketItem {
   id: string;
   ticketId: string;
-  orderItemId: string;
+  menuItemId: string;
   quantity: number;
   status: KitchenItemStatus;
   note?: string | null;
   completedAt?: string | null;
-  orderItem?: {
+  menuItem?: {
     id: string;
-    order: {
-      id: number;
-    };
-    menuItem: {
-      id: string;
-      name: string;
-      price: number;
-    };
+    name: string;
+    price: number;
   };
 }
 
@@ -61,7 +55,7 @@ export interface KitchenTicket {
 }
 
 export interface CreateKitchenTicketItemData {
-  orderItemId: string;
+  menuItemId: string;
   quantity: number;
   note?: string;
 }

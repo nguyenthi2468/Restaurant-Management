@@ -35,7 +35,7 @@ export class OrderItemService {
       },
     });
   }
-  
+
   async update(id: string, updateOrderItemDto: UpdateOrderItemDto) {
     return this.prisma.$transaction(async (tx) => {
       const orderItem = await tx.orderItem.findUnique({
@@ -46,10 +46,15 @@ export class OrderItemService {
         throw new Error('Order item not found');
       }
 
-      const {note, ...updateData} = updateOrderItemDto
+      const tickets = await tx.kitchenTicket.findMany({
+        where: { orderId: orderItem.orderId },
+      });
+
+      const { note, ...updateData } = updateOrderItemDto;
       if (
         updateOrderItemDto.quantity &&
-        updateOrderItemDto.quantity < orderItem.quantity
+        updateOrderItemDto.quantity < orderItem.quantity &&
+        tickets.length > 0
       ) {
         await tx.kitchenTicket.create({
           data: {
@@ -57,7 +62,7 @@ export class OrderItemService {
             items: {
               create: [
                 {
-                  orderItemId: id,
+                  menuItemId: orderItem.menuItemId,
                   note,
                   status: KitchenItemStatus.SERVED,
                   quantity: updateOrderItemDto.quantity - orderItem.quantity,
@@ -77,8 +82,38 @@ export class OrderItemService {
   }
 
   async remove(id: string) {
-    return this.prisma.orderItem.delete({
-      where: { id },
+    return this.prisma.$transaction(async (tx) => {
+      const orderItem = await tx.orderItem.findUnique({
+        where: { id },
+      });
+      if (!orderItem) {
+        throw new Error('Order item not found');
+      }
+      
+      const tickets = await tx.kitchenTicket.findMany({
+        where: { orderId: orderItem.orderId },
+      });
+      
+      if(tickets.length > 0){
+        await tx.kitchenTicket.create({
+          data: {
+            orderId: orderItem.orderId,
+            items: {
+              create: [
+                {
+                  menuItemId: orderItem.menuItemId,
+                  status: KitchenItemStatus.SERVED,
+                  quantity: -orderItem.quantity,
+                },
+              ],
+            },
+            status: KitchenTicketStatus.ACCEPTED,
+          },
+        });
+      }
+      return tx.orderItem.delete({
+        where: { id },
+      });
     });
   }
 }

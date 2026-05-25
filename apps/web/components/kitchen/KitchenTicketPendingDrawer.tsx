@@ -141,7 +141,7 @@ export function KitchenTicketPendingDrawer({
                               {item.quantity}x
                             </span>
                             <span className="text-gray-700">
-                              {item.orderItem?.menuItem?.name || 'Unknown Item'}
+                              {item.menuItem?.name || 'Unknown Item'}
                             </span>
                           </div>
                           {item.note && (

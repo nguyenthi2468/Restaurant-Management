@@ -144,7 +144,7 @@ export function OrderPanel({
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Button size="icon-xs" variant="ghost">
+          {/* <Button size="icon-xs" variant="ghost">
             <Plus size={14} />
           </Button>
           <Button size="icon-xs" variant="ghost">
@@ -152,7 +152,7 @@ export function OrderPanel({
           </Button>
           <Button size="icon-xs" variant="ghost">
             <MoreHorizontal size={14} />
-          </Button>
+          </Button> */}
         </div>
       </div>
 

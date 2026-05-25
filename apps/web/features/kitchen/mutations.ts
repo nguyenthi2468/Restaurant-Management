@@ -70,6 +70,7 @@ export const useUpdateKitchenTicketItemStatusMutation = () => {
       status: KitchenItemStatus;
     }) => updateKitchenTicketItemStatus(itemId, status),
     onSuccess: (data) => {
+
       queryClient.invalidateQueries({ queryKey:  ['kitchen-ticket-items', KitchenItemStatus.COOKING] });
      
       queryClient.invalidateQueries({ queryKey:  ['kitchen-ticket-items', KitchenItemStatus.READY]});

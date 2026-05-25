@@ -37,7 +37,7 @@ export class KitchenTicketService {
         await tx.kitchenTicketItem.createMany({
           data: items.map((item) => ({
             ticketId: kitchenTicket.id,
-            orderItemId: item.orderItemId,
+            menuItemId: item.menuItemId,
             quantity: item.quantity,
             note: item.note,
             status: itemStatus,
@@ -67,11 +67,7 @@ export class KitchenTicketService {
       include: {
         items: {
           include: {
-            orderItem: {
-              include: {
-                menuItem: true,
-              },
-            },
+            menuItem: true,
           },
         },
         order: true,
@@ -88,11 +84,7 @@ export class KitchenTicketService {
       include: {
         items: {
           include: {
-            orderItem: {
-              include: {
-                menuItem: true,
-              },
-            },
+            menuItem: true,
           },
         },
         order: true,
@@ -106,11 +98,7 @@ export class KitchenTicketService {
       include: {
         items: {
           include: {
-            orderItem: {
-              include: {
-                menuItem: true,
-              },
-            },
+            menuItem: true,
           },
         },
         order: true,
@@ -141,7 +129,7 @@ export class KitchenTicketService {
         await tx.kitchenTicketItem.createMany({
           data: items.map((item) => ({
             ticketId: id,
-            orderItemId: item.orderItemId,
+            menuItemId: item.menuItemId,
             quantity: item.quantity,
             note: item.note,
             status: KitchenItemStatus.PENDING,
@@ -154,11 +142,7 @@ export class KitchenTicketService {
         include: {
           items: {
             include: {
-              orderItem: {
-                include: {
-                  menuItem: true,
-                },
-              },
+              menuItem: true,
             },
           },
           order: true,
@@ -185,11 +169,7 @@ export class KitchenTicketService {
       where: { id: ticketItemId },
       data: { status },
       include: {
-        orderItem: {
-          include: {
-            menuItem: true,
-          },
-        },
+        menuItem: true,
         ticket: true,
       },
     });
@@ -226,11 +206,7 @@ export class KitchenTicketService {
     return this.prisma.kitchenTicketItem.findMany({
       where: status ? { status } : undefined,
       include: {
-        orderItem: {
-          include: {
-            menuItem: true,
-          },
-        },
+        menuItem: true,
         ticket: true,
       },
     });

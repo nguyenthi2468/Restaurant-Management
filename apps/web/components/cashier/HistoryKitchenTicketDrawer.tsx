@@ -191,7 +191,7 @@ export function HistoryKitchenTicketDrawer({
                               >
                                 <div className="flex-1">
                                   <div className="font-medium text-slate-900">
-                                    {item.orderItem?.menuItem?.name || 'N/A'}
+                                    {item?.menuItem?.name || 'N/A'}
                                   </div>
                                   {item.note && (
                                     <div className="text-xs text-slate-500 mt-0.5">

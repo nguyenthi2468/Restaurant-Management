@@ -40,7 +40,7 @@ export class UpdateKitchenTicketDto extends PartialType(
     description: 'Danh sách món ăn trong ticket',
     example: [
       {
-        orderItemId: 'orderitem_123abc',
+        menuItemId: 'menuitem_123abc',
         quantity: 2,
         note: 'Không hành',
       },

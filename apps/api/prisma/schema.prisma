@@ -236,7 +236,7 @@ model Order {
   customer    User?  @relation("OrderCustomer", fields: [customerId], references: [id])
 
   // 👇 Khách vãng lai (optional, dùng khi customer = null)
-  customerName  String?
+  customerName  String @default("Khách lẻ")
   customerPhone String?
 
   items     OrderItem[]
@@ -261,7 +261,6 @@ model OrderItem {
   updatedAt  DateTime @updatedAt
   note       String?
 
-  kitchenTicketItems KitchenTicketItem[]
   @@index([orderId])
   @@index([menuItemId])
 }
@@ -333,7 +332,7 @@ model MenuItem {
   ingredients   MenuItemIngredient[]
   orderItems    OrderItem[]
   bookingItems  BookingMenuItem[] // Added for BookingMenuItem relation
-
+  kitchenTicketItems KitchenTicketItem[]
   @@index([categoryId])
   @@index([isAvailable])
   @@index([position])
@@ -484,8 +483,8 @@ model KitchenTicketItem {
   id              String        @id @default(cuid())
   ticketId        String
   ticket          KitchenTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  orderItemId     String
-  orderItem       OrderItem     @relation(fields: [orderItemId], references: [id])
+  menuItemId      String
+  menuItem        MenuItem @relation(fields: [menuItemId], references: [id])
   completedQty    Int     @default(0)   
   servedQty       Int     @default(0)
   quantity        Int
@@ -494,7 +493,7 @@ model KitchenTicketItem {
   completedAt     DateTime?
 
   @@index([ticketId])
-  @@index([orderItemId])
+  @@index([menuItemId])
 }
 
 enum KitchenTicketStatus {

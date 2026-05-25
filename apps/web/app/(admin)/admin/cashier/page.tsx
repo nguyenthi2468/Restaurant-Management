@@ -90,6 +90,10 @@ export default function CashierPage() {
       queryClient.invalidateQueries({
         queryKey: ['order-items', 'order', orderData.id],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['kitchen-tickets', 'order', orderData.id],
+      });
+      
       const audio = new Audio('/audio/kichen_bell.mp3');
       audio.play().catch((error) => {
         console.error('Error playing audio:', error);
@@ -265,7 +269,7 @@ export default function CashierPage() {
         const newItems = orderItems
           .map((item) => {
             const totalSentQuantity = allExistingTicketItems
-              .filter((ti) => ti.orderItemId === item.id)
+              .filter((ti) => ti.menuItemId === item.menuItemId)
               .reduce((sum, ti) => sum + ti.quantity, 0);
 
             return {
@@ -276,7 +280,7 @@ export default function CashierPage() {
           })
           .filter(({remainingQuantity }) => remainingQuantity > 0) // Lọc món ăn có số lượng còn lại lớn hơn 0
           .map(({ item, remainingQuantity }) => ({
-            orderItemId: item.id,
+            menuItemId: item.menuItemId,
             quantity: remainingQuantity,
             note: item.note || undefined,
           }));
@@ -311,7 +315,7 @@ export default function CashierPage() {
       priority: 1,
       note: `${selectedTable.name}`,
       items: orderItems.map((item) => ({
-        orderItemId: item.id,
+        menuItemId: item.menuItemId,
         quantity: item.quantity,
         note: item.note || undefined,
       })),
