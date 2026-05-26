@@ -9,6 +9,7 @@ import {
   markArrived,
   completeBooking,
   cancelBooking,
+  noShowBooking,
 } from './api';
 import { toast } from 'react-hot-toast';
 import { CreateBookingData, UpdateBookingData } from './types';
@@ -134,6 +135,7 @@ export const useCompleteBookingMutation = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['booking', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['tables', 'with-bookings', { limit : 24 }] });
       toast.success('Hoàn thành đặt bàn thành công');
     },
     onError: (error: any) => {
@@ -156,6 +158,24 @@ export const useCancelBookingMutation = () => {
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Không thể hủy đặt bàn');
+      console.error(error);
+    },
+  });
+};
+
+export const useNoShowBookingMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (bookingId: string) => noShowBooking(bookingId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking', data.id] });
+      toast.success('Đánh dấu không đến thành công');
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || 'Không thể đánh dấu không đến',
+      );
       console.error(error);
     },
   });

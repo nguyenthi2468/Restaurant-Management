@@ -7,6 +7,7 @@ import {
   PaginatedBookingResponse,
   UpdateBookingData,
   VnpayPaymentResponse,
+  QueryBookingByTableParams,
 } from './types';
 
 export const getBookings = async () => {
@@ -96,6 +97,24 @@ export const completeBooking = async (bookingId: string) => {
 export const cancelBooking = async (bookingId: string) => {
   const response = await api.post<Booking>(
     `${API_ENDPOINTS.BOOKINGS.BASE}/${bookingId}/cancel`,
+  );
+  return response.data;
+};
+
+export const noShowBooking = async (bookingId: string) => {
+  const response = await api.post<Booking>(
+    `${API_ENDPOINTS.BOOKINGS.BASE}/${bookingId}/no-show`,
+  );
+  return response.data;
+};
+
+export const getBookingsByTableId = async (
+  tableId: string,
+  params?: QueryBookingByTableParams,
+) => {
+  const response = await api.get<PaginatedBookingResponse>(
+    `${API_ENDPOINTS.BOOKINGS.BASE}/table/${tableId}`,
+    { params },
   );
   return response.data;
 };

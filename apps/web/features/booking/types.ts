@@ -115,6 +115,12 @@ export interface BookingQueryParams {
   limit?: number;
 }
 
+export interface QueryBookingByTableParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface PaginationMeta {
   page: number;
   limit: number;

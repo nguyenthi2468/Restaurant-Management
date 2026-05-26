@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { getBookings, getBookingById, getBookingsWithPagination } from './api';
-import { BookingQueryParams } from './types';
+import {
+  getBookings,
+  getBookingById,
+  getBookingsWithPagination,
+  getBookingsByTableId,
+} from './api';
+import { BookingQueryParams, QueryBookingByTableParams } from './types';
 
 export const useBookingsQuery = () => {
   return useQuery({
@@ -21,5 +26,16 @@ export const useBookingQuery = (id: string) => {
     queryKey: ['booking', id],
     queryFn: () => getBookingById(id),
     enabled: !!id,
+  });
+};
+
+export const useBookingsByTableIdQuery = (
+  tableId: string,
+  params?: QueryBookingByTableParams,
+) => {
+  return useQuery({
+    queryKey: ['bookings', 'table', tableId, params],
+    queryFn: () => getBookingsByTableId(tableId, params),
+    enabled: !!tableId,
   });
 };

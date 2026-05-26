@@ -17,17 +17,24 @@ import {
   Loader2,
   X,
   NotepadText,
+  CalendarCheck,
 } from 'lucide-react';
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 import { HistoryKitchenTicketDrawer } from '@/components/cashier/HistoryKitchenTicketDrawer';
-import { Order, useCompleteOrderMutation, useCreateOrderPaymentMutation, useUpdateOrderNoteMutation } from '@/features/orders';
+import {
+  Order,
+  useCompleteOrderMutation,
+  useCreateOrderPaymentMutation,
+  useUpdateOrderNoteMutation,
+} from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
 import { OrderItem } from '@/features/order-items';
 import { KitchenTicket } from '@/features/kitchen';
 import { NoteOrderDialog } from './NoteOrderDialog';
 import { OrderPaymentDrawer } from './OrderPaymentDrawer';
 import { PaymentMethod } from '@/features/payments';
+import { ReservationTableDrawer } from './ReservationTableDrawer';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -64,6 +71,7 @@ export function OrderPanel({
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
+  const [reservationDrawerOpen, setReservationDrawerOpen] = useState(false);
   const updateOrderNoteMutation = useUpdateOrderNoteMutation();
   const completeOrderMutation = useCompleteOrderMutation();
   const createOrderPaymentMutation = useCreateOrderPaymentMutation();
@@ -86,21 +94,24 @@ export function OrderPanel({
     paymentMethod: PaymentMethod;
     totalAmount: number;
   }) => {
-    if(paymentData.paymentMethod === PaymentMethod.CASH) {
-      completeOrderMutation.mutate({
-        id: paymentData.orderId,
-        data: {
-          paymentMethod: paymentData.paymentMethod,
-          totalAmount: paymentData.totalAmount,
+    if (paymentData.paymentMethod === PaymentMethod.CASH) {
+      completeOrderMutation.mutate(
+        {
+          id: paymentData.orderId,
+          data: {
+            paymentMethod: paymentData.paymentMethod,
+            totalAmount: paymentData.totalAmount,
+          },
         },
-      }, {
-        onSuccess: () => {
-          setPaymentDrawerOpen(false);
+        {
+          onSuccess: () => {
+            setPaymentDrawerOpen(false);
+          },
         },
-      });
+      );
       return;
     }
-    if(paymentData.paymentMethod === PaymentMethod.VNPAY) {
+    if (paymentData.paymentMethod === PaymentMethod.VNPAY) {
       createOrderPaymentMutation.mutate(paymentData.orderId);
       return;
     }
@@ -138,11 +149,19 @@ export function OrderPanel({
           </div>
           <Button
             onClick={() => setCreateOrderDialogOpen(true)}
-            className="w-full max-w-[200px]"
+            className="w-full"
             size="lg"
           >
             <ClipboardList size={16} className="mr-2" />
             Tạo đơn cho bàn này
+          </Button>
+          <Button
+            onClick={() => {setReservationDrawerOpen(true)}}
+            className="w-full"
+            size="lg"
+          >
+            <CalendarCheck size={16} className="mr-2" />
+            Lịch đặt bàn của bàn này
           </Button>
         </div>
         {selectedTable && (
@@ -155,6 +174,11 @@ export function OrderPanel({
             }}
           />
         )}
+         <ReservationTableDrawer
+        tableId={selectedTable?.id || ''}
+        isOpen={reservationDrawerOpen}
+        onOpenChange={setReservationDrawerOpen}
+      />
       </div>
     );
   }
@@ -266,9 +290,6 @@ export function OrderPanel({
             >
               <Edit3 size={12} />
             </Button>
-            <Button size="icon-xs" variant="ghost">
-              <Phone size={12} />
-            </Button>
             <Button
               size="icon-xs"
               variant="ghost"
@@ -297,7 +318,7 @@ export function OrderPanel({
             className="flex-1 h-11 border-blue-300 text-blue-700 hover:bg-blue-50 text-sm font-medium"
           >
             <Bell size={16} className="mr-2" />
-             Thông báo bếp
+            Thông báo bếp
           </Button>
           <Button
             onClick={() => setPaymentDrawerOpen(true)}

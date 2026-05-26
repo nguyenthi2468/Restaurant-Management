@@ -24,6 +24,7 @@ import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { QueryBookingDto } from './dto/query-booking.dto';
+import { QueryBookingByTableDto } from './dto/query-booking-by-table.dto';
 import { PaginatedBookingResponseDto } from './dto/paginated-booking-response.dto';
 import { Action } from '../auth/decorator/action.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -195,7 +196,10 @@ export class BookingController {
     @Req() req: any,
   ): Promise<BookingDto> {
     const userId = req.user.id;
-    const completedBooking = await this.bookingService.completeBooking(id, userId);
+    const completedBooking = await this.bookingService.completeBooking(
+      id,
+      userId,
+    );
     return completedBooking as unknown as BookingDto;
   }
 
@@ -212,6 +216,21 @@ export class BookingController {
   async cancelBooking(@Param('id') id: string): Promise<BookingDto> {
     const cancelledBooking = await this.bookingService.cancelBooking(id);
     return cancelledBooking as unknown as BookingDto;
+  }
+
+  @Post(':id/no-show')
+  @Action('reservation:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @ApiOperation({ summary: 'Mark a booking as NO_SHOW' })
+  @ApiParam({ name: 'id', description: 'Booking UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Booking marked as NO_SHOW',
+    type: BookingDto,
+  })
+  async markNoShow(@Param('id') id: string): Promise<BookingDto> {
+    const noShowBooking = await this.bookingService.noShowBooking(id);
+    return noShowBooking as unknown as BookingDto;
   }
 
   // ----- VNPay payment integration -----
@@ -232,5 +251,23 @@ export class BookingController {
   ): Promise<{ paymentUrl: string }> {
     const paymentUrl = await this.bookingService.createVnpayPayment(id);
     return { paymentUrl };
+  }
+
+  @Get('table/:tableId')
+  @Action('reservation:read')
+  @ApiOperation({
+    summary: 'Get confirmed bookings by table ID with search and pagination',
+  })
+  @ApiParam({ name: 'tableId', description: 'Table UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of confirmed bookings',
+    type: PaginatedBookingResponseDto,
+  })
+  async findByTableId(
+    @Param('tableId') tableId: string,
+    @Query() queryDto: QueryBookingByTableDto,
+  ): Promise<PaginatedBookingResponseDto> {
+    return this.bookingService.findByTableIdWithPagination(tableId, queryDto);
   }
 }

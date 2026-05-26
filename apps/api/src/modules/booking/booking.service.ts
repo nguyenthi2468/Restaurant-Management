@@ -9,6 +9,7 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { CreateBookingMenuItemDto } from './dto/create-booking-menu-item.dto';
 import { QueryBookingDto } from './dto/query-booking.dto';
+import { QueryBookingByTableDto } from './dto/query-booking-by-table.dto';
 import { PaginatedBookingResponseDto } from './dto/paginated-booking-response.dto';
 import {
   Booking,
@@ -187,6 +188,82 @@ export class BookingService {
 
     if (status) {
       where.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          bookingTables: {
+            include: {
+              table: {
+                include: {
+                  floor: true,
+                },
+              },
+            },
+          },
+          preOrderItems: {
+            include: {
+              menuItem: true,
+            },
+          },
+          payments: true,
+        },
+        orderBy: {
+          bookingTime: 'desc',
+        },
+      }),
+      this.prisma.booking.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: bookings as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
+  }
+
+  async findByTableIdWithPagination(
+    tableId: string,
+    queryDto: QueryBookingByTableDto,
+  ): Promise<PaginatedBookingResponseDto> {
+    const { search, page = 1, limit = 10 } = queryDto;
+
+    const where: Prisma.BookingWhereInput = {
+      status: 'CONFIRMED',
+      bookingTables: {
+        some: {
+          tableId,
+        },
+      },
+    };
+
+    if (search) {
+      where.OR = [
+        {
+          customerName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          customerPhone: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
     }
 
     const skip = (page - 1) * limit;
@@ -473,9 +550,7 @@ export class BookingService {
   /**
    * Khách đến nhận bàn đặt trạng thái COMPLETED và cập nhật trạng thái bàn thành AVAILABLE.
    */
-  async completeBooking(
-    id: string, userId: string,
-  ): Promise<Booking> {
+  async completeBooking(id: string, userId: string): Promise<Booking> {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: { bookingTables: true, preOrderItems: true }, // Include bookingTables to get table IDs
@@ -492,7 +567,7 @@ export class BookingService {
     const tables = await this.prisma.table.findMany({
       where: { id: { in: tableIds }, status: TableStatus.OCCUPIED },
     });
-    if(tables.length>0){
+    if (tables.length > 0) {
       throw new ConflictException('Some tables are not available');
     }
     await this.prisma.table.updateMany({
@@ -565,6 +640,36 @@ export class BookingService {
     return this.prisma.booking.update({
       where: { id },
       data: { status: BookingStatus.CANCELLED },
+    });
+  }
+
+  /**
+   * Mark a booking as NO_SHOW.
+   * Updates table status to AVAILABLE.
+   */
+  async noShowBooking(id: string): Promise<Booking> {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id },
+      include: { bookingTables: true },
+    });
+    if (!booking) {
+      throw new NotFoundException(`Booking with id ${id} not found`);
+    }
+    if (
+      booking.status === BookingStatus.COMPLETED ||
+      booking.status === BookingStatus.CANCELLED ||
+      booking.status === BookingStatus.NO_SHOW
+    ) {
+      throw new ConflictException(
+        'Cannot mark as NO_SHOW for completed, cancelled, or already no-show booking',
+      );
+    }
+
+    const tableIds = booking.bookingTables.map((bt) => bt.tableId);
+
+    return this.prisma.booking.update({
+      where: { id },
+      data: { status: BookingStatus.NO_SHOW },
     });
   }
 

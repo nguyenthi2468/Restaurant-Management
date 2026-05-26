@@ -7,3 +7,4 @@ export { MenuGrid } from './MenuGrid';
 export { OrderPanel } from './OrderPanel';
 export { OrderItemRow } from './OrderItemRow';
 export { MenuCategoryFilters } from './MenuCategoryFilters';
+export { ReservationTableDrawer } from './ReservationTableDrawer';

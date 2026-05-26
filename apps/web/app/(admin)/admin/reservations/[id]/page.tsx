@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useBookingQuery } from '@/features/booking';
+import { useBookingQuery, useNoShowBookingMutation } from '@/features/booking';
 import {
   useUpdateBookingMutation,
   useApproveDepositMutation,
@@ -70,6 +70,7 @@ export default function BookingEditPage() {
   const updateMutation = useUpdateBookingMutation();
   const approveDepositMutation = useApproveDepositMutation();
   const markArrivedMutation = useMarkArrivedMutation();
+  const noShowMutation = useNoShowBookingMutation();
   const completeMutation = useCompleteBookingMutation();
   const cancelMutation = useCancelBookingMutation();
 
@@ -119,6 +120,10 @@ export default function BookingEditPage() {
       form.setValue('preOrderItems', items);
     }
   }, [booking, form]);
+
+  const handleNoShow = () => {
+    noShowMutation.mutate(bookingId);
+  };
 
   const handleTableToggle = (tableId: string) => {
     const newTables = selectedTables.includes(tableId)
@@ -512,6 +517,19 @@ export default function BookingEditPage() {
               )}
 
               {booking.status === BookingStatus.CONFIRMED && (
+                <div className="w-full">
+                  <Button
+                    onClick={handleNoShow}
+                    disabled={noShowMutation.isPending}
+                    className="w-full"
+                  >
+                    {noShowMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <XCircle className="mr-2 h-4 w-4" />
+                    )}
+                    No-Show
+                  </Button>
                 <Button
                   onClick={handleComplete}
                   disabled={completeMutation.isPending}
@@ -524,6 +542,7 @@ export default function BookingEditPage() {
                   )}
                   Mark as Completed
                 </Button>
+                </div>
               )}
 
               {(booking.status === BookingStatus.PENDING ||
