@@ -37,6 +37,7 @@ interface OrderPanelProps {
   orderItems: OrderItem[];
   tickets: KitchenTicket[];
   isLoadingTickets: boolean;
+  isLoadingOrderData: boolean;
   totalAmount: number;
   onUpdateQuantity: (item: OrderItem, delta: number) => void;
   onRemoveItem: (itemId: string) => void;
@@ -53,6 +54,7 @@ export function OrderPanel({
   totalAmount,
   tickets,
   isLoadingTickets,
+  isLoadingOrderData,
   onUpdateQuantity,
   onRemoveItem,
   onNotify,
@@ -221,7 +223,7 @@ export function OrderPanel({
 
       <ScrollArea className="flex-1 px-4 py-2">
         <div className="space-y-3">
-          {isLoading ? (
+          {isLoading || isLoadingOrderData ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
             </div>
@@ -295,7 +297,7 @@ export function OrderPanel({
             className="flex-1 h-11 border-blue-300 text-blue-700 hover:bg-blue-50 text-sm font-medium"
           >
             <Bell size={16} className="mr-2" />
-            Thông báo
+             Thông báo bếp
           </Button>
           <Button
             onClick={() => setPaymentDrawerOpen(true)}

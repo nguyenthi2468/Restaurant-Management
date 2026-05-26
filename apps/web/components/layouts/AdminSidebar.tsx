@@ -1,6 +1,15 @@
 'use client';
 
-import { Armchair, Bookmark, ChefHat, FileText, Receipt } from 'lucide-react';
+import {
+  Armchair,
+  Bookmark,
+  ChefHat,
+  FileText,
+  Receipt,
+  CreditCard,
+  Utensils,
+  Calendar,
+} from 'lucide-react';
 import { ChevronDown, Home, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -68,7 +77,7 @@ export const navItems: NavItem[] = [
     href: ROUTES.ADMIN_TABLES,
     icon: Armchair,
     action: 'tables.read',
-      submenu: [
+    submenu: [
       { title: 'Floors', href: ROUTES.ADMIN_FLOORS, action: 'tables.read' },
       { title: 'Tables', href: ROUTES.ADMIN_TABLES, action: 'tables.read' },
     ],
@@ -76,13 +85,19 @@ export const navItems: NavItem[] = [
   {
     title: 'Cashier',
     href: ROUTES.ADMIN_CASHIER,
-    icon: Receipt,
+    icon: CreditCard,
     action: 'cashier.read',
+  },
+  {
+    title: 'Kitchen',
+    href: ROUTES.ADMIN_KITCHEN,
+    icon: Utensils,
+    action: 'kitchen.read',
   },
   {
     title: 'Reservations',
     href: ROUTES.ADMIN_RESERVATIONS,
-    icon: Receipt,
+    icon: Calendar,
     action: 'reservation.read',
   },
   {

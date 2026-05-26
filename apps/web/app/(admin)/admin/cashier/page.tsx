@@ -67,10 +67,10 @@ export default function CashierPage() {
     useTablesWithBookingsQuery({
       floorId: floorFilter.id,
       page: currentPageTable,
-      limit: 20,
+      limit: 24,
     });
   const { data: floors = [] } = useFloorsQuery();
-  const { data: orderData } = useGetServedOrderByTableIdQuery(
+  const { data: orderData, isLoading: isLoadingOrderData } = useGetServedOrderByTableIdQuery(
     selectedTableId ?? '',
   );
   const { data: tickets, isLoading: isLoadingTickets } =
@@ -464,6 +464,7 @@ export default function CashierPage() {
         selectedTable={selectedTable}
         order={orderData || null}
         isLoading={isLoadingOrderItems}
+        isLoadingOrderData={isLoadingOrderData}
         tickets={tickets || []}
         isLoadingTickets={isLoadingTickets}
         isUpdating={updateOrderItemMutation.isPending}
