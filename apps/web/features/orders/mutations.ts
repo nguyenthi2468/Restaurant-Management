@@ -1,6 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createOrder, updateOrder, deleteOrder, cancelOrder } from './api';
+import {
+  createOrder,
+  updateOrder,
+  deleteOrder,
+  cancelOrder,
+  updateOrderNote,
+} from './api';
 import { CreateOrderData, UpdateOrderData } from './types';
+import toast from 'react-hot-toast';
+import { ApiError } from '@/types';
 
 export const useCreateOrderMutation = () => {
   const queryClient = useQueryClient();
@@ -52,6 +60,28 @@ export const useCancelOrderMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ['order', 'served', data.tableId],
       });
+    },
+  });
+};
+
+export const useUpdateOrderNoteMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, note }: { id: number; note: string }) =>
+      updateOrderNote(id, note),
+    onSuccess: (data) => {
+      if (data.orderTables?.length) {
+        data.orderTables.forEach((orderTable) => {
+          queryClient.invalidateQueries({
+            queryKey: ['order', 'served', orderTable.tableId],
+            exact: true,
+          });
+        });
+      }
+      toast.success('Note updated successfully');
+    },
+    onError: (error: ApiError) => {
+      toast.error(error?.response?.data?.message || 'Note update failed');
     },
   });
 };

@@ -65,11 +65,13 @@ export function OrderItemRow({
         </div>
         <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
           <button
-            className="flex items-center gap-1 hover:text-blue-600"
+            className="flex items-center justify-start gap-1 hover:text-blue-600"
             onClick={() => setNoteDialogOpen(true)}
           >
             <Edit3 size={10} />
-            {item.note || 'Ghi chú/Món thêm'}
+            <div className="flex justify-start text-left">
+              {item.note || 'Ghi chú/Món thêm'}
+            </div>
           </button>
         </div>
       </div>

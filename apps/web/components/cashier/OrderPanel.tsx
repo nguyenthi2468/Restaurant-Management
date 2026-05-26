@@ -21,10 +21,11 @@ import {
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 import { HistoryKitchenTicketDrawer } from '@/components/cashier/HistoryKitchenTicketDrawer';
-import { Order } from '@/features/orders';
+import { Order, useUpdateOrderNoteMutation } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
 import { OrderItem } from '@/features/order-items';
 import { KitchenTicket } from '@/features/kitchen';
+import { NoteOrderDialog } from './NoteOrderDialog';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -59,6 +60,21 @@ export function OrderPanel({
 }: OrderPanelProps) {
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const updateOrderNoteMutation = useUpdateOrderNoteMutation();
+
+  const onEditNote = (note: string) => {
+    updateOrderNoteMutation.mutate({
+      id: order?.id || 0,
+      note,
+    },
+    {
+      onSuccess: () => {
+        setNoteDialogOpen(false);
+      },
+    }
+  );
+  };
   if (!selectedTable) {
     return (
       <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
@@ -157,7 +173,7 @@ export function OrderPanel({
       </div>
 
       <div className="px-4 py-2 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2">
           <span className="text-slate-500">Mã đơn:</span>
           <span className="font-mono text-slate-900 bg-slate-100 px-2 py-1 rounded text-xs border border-slate-200">
             {order?.id}
@@ -206,10 +222,17 @@ export function OrderPanel({
         </span>
       </div> */}
 
-      <div className="px-4 py-3 border-t border-slate-200 space-y-3">
+      <div className="px-4 py-2 border-t border-slate-200 space-y-2">
+        <div className="text-xs text-slate-600">
+          Ghi chú: {order?.note || 'Không có ghi chú'}
+        </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button size="icon-xs" variant="ghost">
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              onClick={() => setNoteDialogOpen(true)}
+            >
               <Edit3 size={12} />
             </Button>
             <Button size="icon-xs" variant="ghost">
@@ -236,7 +259,6 @@ export function OrderPanel({
             </span>
           </div>
         </div>
-
         <div className="flex items-center gap-2">
           <Button
             onClick={onNotify}
@@ -244,18 +266,25 @@ export function OrderPanel({
             className="flex-1 h-11 border-blue-300 text-blue-700 hover:bg-blue-50 text-sm font-medium"
           >
             <Bell size={16} className="mr-2" />
-            Thông báo (F10)
+            Thông báo
           </Button>
           <Button
             onClick={onPay}
             className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
           >
             <DollarSign size={16} className="mr-2" />
-            Thanh toán (F9)
+            Thanh toán
           </Button>
         </div>
       </div>
 
+      <NoteOrderDialog
+        open={noteDialogOpen}
+        onOpenChange={setNoteDialogOpen}
+        note={order?.note || ''}
+        isPending={updateOrderNoteMutation.isPending}
+        onSave={onEditNote}
+      />
       <HistoryKitchenTicketDrawer
         tickets={tickets}
         isLoadingTickets={isLoadingTickets}

@@ -133,4 +133,18 @@ export class OrderService {
       return order;
     });
   }
+
+  async updateNote(orderId: number, note?: string) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { note },
+      include: {
+        orderTables: {
+          include: {
+            table: true,
+          },
+        },
+      },
+    });
+  }
 }

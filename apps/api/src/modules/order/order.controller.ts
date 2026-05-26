@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderNoteDto } from './dto/update-order-note.dto';
 import { Action } from '../auth/decorator/action.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionGuard } from '../auth/guards/action.guard';
@@ -147,5 +148,32 @@ export class OrderController {
   })
   cancel(@Param('id') id: number) {
     return this.orderService.cancel(id);
+  }
+
+  @Patch(':id/note')
+  @Action('order:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @ApiOperation({
+    summary: 'Cập nhật ghi chú đơn hàng',
+    description: 'Chỉ cập nhật ghi chú cho đơn hàng',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ghi chú đơn hàng đã được cập nhật thành công',
+    type: UpdateOrderNoteDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy đơn hàng với ID được cung cấp',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  updateNote(
+    @Param('id') id: number,
+    @Body() updateNoteDto: UpdateOrderNoteDto,
+  ) {
+    return this.orderService.updateNote(id, updateNoteDto.note);
   }
 }

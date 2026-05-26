@@ -43,3 +43,11 @@ export const cancelOrder = async (id: number) => {
   );
   return response.data;
 };
+
+export const updateOrderNote = async (id: number, note: string) => {
+  const response = await api.patch<Order>(
+    `${API_ENDPOINTS.ORDERS.BASE}/${id}/note`,
+    { note },
+  );
+  return response.data;
+};
