@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { getOrders, getOrderById, getServedOrderByTableId } from './api';
+import { GetOrdersQueryParams } from './types';
 
-export const useGetOrdersQuery = () => {
+export const useGetOrdersQuery = (params?: GetOrdersQueryParams) => {
   return useQuery({
-    queryKey: ['orders'],
-    queryFn: () => getOrders(),
+    queryKey: ['orders', params],
+    queryFn: () => getOrders(params),
   });
 };
 

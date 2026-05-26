@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CompleteOrderDto } from './dto/complete-order.dto';
+import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import {
   OrderStatus,
   TableStatus,
@@ -85,24 +86,91 @@ export class OrderService {
     });
   }
 
-  async findAll() {
-    return this.prisma.order.findMany({
-      include: {
-        items: true,
-        orderTables: {
-          include: {
-            table: true,
+  async findAll(query: FindAllOrdersDto) {
+    const { status, search, startDate, endDate, page = 1, limit = 10 } = query;
+
+    const where: any = {};
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      where.createdBy = {
+        firstName: {
+          contains: search,
+          mode: 'insensitive',
+        },
+        lastName: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      };
+    }
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        where.createdAt.lte = new Date(endDate);
+      }
+    }
+
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const [data, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          items: true,
+          orderTables: {
+            include: {
+              table: true,
+            },
+          },
+          createdBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.order.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
       },
-    });
+    };
   }
 
   async findOne(id: number) {
     return this.prisma.order.findUnique({
       where: { id },
       include: {
-        items: true,
+        items: {
+          include: {
+            menuItem: true,
+          },
+        },
         orderTables: {
           include: {
             table: {
@@ -300,7 +368,9 @@ export class OrderService {
         orderId: orderId,
       },
     });
-    const amount = Number(orderItems.reduce((acc, item) => acc + Number(item.price), 0));
+    const amount = Number(
+      orderItems.reduce((acc, item) => acc + Number(item.price), 0),
+    );
     await this.prisma.order.update({
       where: { id: orderId },
       data: {

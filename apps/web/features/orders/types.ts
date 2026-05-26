@@ -57,3 +57,22 @@ export interface CompleteOrderData {
   paymentMethod: PaymentMethod;
   totalAmount: number;
 }
+
+export interface GetOrdersQueryParams {
+  status?: OrderStatus;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedOrdersResponse {
+  data: Order[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}

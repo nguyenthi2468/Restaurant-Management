@@ -5,11 +5,16 @@ import {
   CreateOrderData,
   UpdateOrderData,
   CompleteOrderData,
+  GetOrdersQueryParams,
+  PaginatedOrdersResponse,
 } from './types';
 import { VnpayPaymentResponse } from '../booking';
 
-export const getOrders = async () => {
-  const response = await api.get<Order[]>(API_ENDPOINTS.ORDERS.BASE);
+export const getOrders = async (params?: GetOrdersQueryParams) => {
+  const response = await api.get<PaginatedOrdersResponse>(
+    API_ENDPOINTS.ORDERS.BASE,
+    { params },
+  );
   return response.data;
 };
 

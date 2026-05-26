@@ -26,4 +26,5 @@ export const ROUTES = {
   ADMIN_KITCHEN: '/admin/kitchen',
   ADMIN_TABLES: '/admin/tables',
   ADMIN_RESERVATIONS: '/admin/reservations',
+  ADMIN_ORDERS: '/admin/orders',
 };

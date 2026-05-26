@@ -15,6 +15,7 @@ import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderNoteDto } from './dto/update-order-note.dto';
 import { CompleteOrderDto } from './dto/complete-order.dto';
+import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { Action } from '../auth/decorator/action.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionGuard } from '../auth/guards/action.guard';
@@ -89,20 +90,18 @@ export class OrderController {
   @ApiOperation({
     summary: 'Lấy danh sách tất cả đơn hàng',
     description:
-      'Lấy danh sách tất cả các đơn hàng trong hệ thống kèm theo chi tiết món ăn và bàn',
+      'Lấy danh sách tất cả các đơn hàng trong hệ thống kèm theo chi tiết món ăn và bàn. Hỗ trợ lọc theo trạng thái, tìm kiếm theo tên người tạo, lọc theo khoảng thời gian và phân trang',
   })
   @ApiResponse({
     status: 200,
-    description:
-      'Danh sách tất cả các đơn hàng bao gồm thông tin bàn và chi tiết món ăn',
-    isArray: true,
+    description: 'Danh sách các đơn hàng với thông tin phân trang',
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
   })
-  findAll() {
-    return this.orderService.findAll();
+  findAll(@Query() query: FindAllOrdersDto) {
+    return this.orderService.findAll(query);
   }
 
   @Get(':id')
