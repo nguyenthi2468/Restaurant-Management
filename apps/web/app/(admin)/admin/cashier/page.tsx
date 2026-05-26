@@ -444,6 +444,7 @@ export default function CashierPage() {
               hasSelectedTable={!!selectedTable}
               currentPage={currentPageMenu}
               totalPages={metaMenuItems?.totalPages || 0}
+              hasOrder={!!orderData}
               onPageChange={setCurrentPageMenu}
             />
           </>

@@ -4,11 +4,13 @@ import { formatCurrency } from '@/utils/currency';
 import { ChefHat, Leaf, Wheat, Flame } from 'lucide-react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface MenuGridProps {
   menuItems: MenuItem[];
   onAddItem: (item: MenuItem) => void;
   hasSelectedTable: boolean;
+  hasOrder: boolean;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -18,13 +20,19 @@ export function MenuGrid({
   menuItems,
   onAddItem,
   hasSelectedTable,
+  hasOrder,
   currentPage,
   totalPages,
   onPageChange,
 }: MenuGridProps) {
   const handleItemClick = (item: MenuItem) => {
     if (!hasSelectedTable) {
-      alert('Vui lòng chọn bàn trước');
+      toast.error('Vui lòng chọn bàn trước');
+      return;
+    }
+    
+    if (!hasOrder) {
+      toast.error('Vui lòng tạo đơn hàng trước');
       return;
     }
     onAddItem(item);
