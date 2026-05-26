@@ -26,6 +26,7 @@ import { formatCurrency } from '@/utils/currency';
 import { OrderItem } from '@/features/order-items';
 import { KitchenTicket } from '@/features/kitchen';
 import { NoteOrderDialog } from './NoteOrderDialog';
+import { OrderPaymentDrawer } from './OrderPaymentDrawer';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -61,20 +62,33 @@ export function OrderPanel({
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
   const updateOrderNoteMutation = useUpdateOrderNoteMutation();
 
   const onEditNote = (note: string) => {
-    updateOrderNoteMutation.mutate({
-      id: order?.id || 0,
-      note,
-    },
-    {
-      onSuccess: () => {
-        setNoteDialogOpen(false);
+    updateOrderNoteMutation.mutate(
+      {
+        id: order?.id || 0,
+        note,
       },
-    }
-  );
+      {
+        onSuccess: () => {
+          setNoteDialogOpen(false);
+        },
+      },
+    );
   };
+
+  const handleConfirmPayment = (paymentData: {
+    orderId: number;
+    paymentMethod: string;
+    amountPaid: number;
+    change: number;
+  }) => {
+    setPaymentDrawerOpen(false);
+    onPay();
+  };
+
   if (!selectedTable) {
     return (
       <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
@@ -269,7 +283,7 @@ export function OrderPanel({
             Thông báo
           </Button>
           <Button
-            onClick={onPay}
+            onClick={() => setPaymentDrawerOpen(true)}
             className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
           >
             <DollarSign size={16} className="mr-2" />
@@ -291,6 +305,14 @@ export function OrderPanel({
         open={historyDrawerOpen}
         onOpenChange={setHistoryDrawerOpen}
         orderId={order?.id || null}
+      />
+      <OrderPaymentDrawer
+        open={paymentDrawerOpen}
+        onOpenChange={setPaymentDrawerOpen}
+        order={order}
+        orderItems={orderItems}
+        totalAmount={totalAmount}
+        onConfirmPayment={handleConfirmPayment}
       />
     </div>
   );
