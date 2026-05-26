@@ -57,9 +57,9 @@ export const acceptKitchenTicket = async (id: string) => {
   return response.data;
 };
 
-export const getKitchenTicketsByOrderId = async (orderId: number) => {
+export const getKitchenTicketsByOrderId = async (orderId: number | string) => {
   const response = await api.get<KitchenTicket[]>(
-    API_ENDPOINTS.KITCHEN_TICKETS.BY_ORDER(orderId),
+    API_ENDPOINTS.KITCHEN_TICKETS.BY_ORDER(Number(orderId)),
   );
   return response.data;
 };

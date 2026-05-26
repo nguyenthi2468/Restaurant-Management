@@ -2,12 +2,14 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useGetOrderByIdQuery } from '@/features/orders';
+import { useGetKitchenTicketsByOrderIdQuery } from '@/features/kitchen';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { ROUTES } from '@/constants';
 import { OrderStatus } from '@/features/orders';
+import { KitchenTicketStatus } from '@/features/kitchen';
 import { formatCurrency } from '@/utils/currency';
 
 export default function OrderDetailPage() {
@@ -16,6 +18,8 @@ export default function OrderDetailPage() {
   const orderId = params.id as string;
 
   const { data: order, isLoading, isError } = useGetOrderByIdQuery(orderId);
+  const { data: kitchenTickets, isLoading: isKitchenTicketsLoading } =
+    useGetKitchenTicketsByOrderIdQuery(Number(order?.id));
 
   if (isLoading) {
     return (
@@ -36,6 +40,14 @@ export default function OrderDetailPage() {
     );
   }
 
+  if (isKitchenTicketsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const getStatusBadge = (status: OrderStatus) => {
     const config = {
       [OrderStatus.PENDING]: {
@@ -51,6 +63,33 @@ export default function OrderDetailPage() {
         className: 'bg-green-100 text-green-800',
       },
       [OrderStatus.CANCELLED]: {
+        label: 'Cancelled',
+        className: 'bg-red-100 text-red-800',
+      },
+    };
+    const { label, className } = config[status];
+    return (
+      <span className={`px-3 py-1 text-sm rounded-full ${className}`}>
+        {label}
+      </span>
+    );
+  };
+
+  const getKitchenStatusBadge = (status: KitchenTicketStatus) => {
+    const config = {
+      [KitchenTicketStatus.PENDING]: {
+        label: 'Pending',
+        className: 'bg-yellow-100 text-yellow-800',
+      },
+      [KitchenTicketStatus.ACCEPTED]: {
+        label: 'Accepted',
+        className: 'bg-blue-100 text-blue-800',
+      },
+      [KitchenTicketStatus.SERVED]: {
+        label: 'Served',
+        className: 'bg-green-100 text-green-800',
+      },
+      [KitchenTicketStatus.CANCELLED]: {
         label: 'Cancelled',
         className: 'bg-red-100 text-red-800',
       },
@@ -132,8 +171,7 @@ export default function OrderDetailPage() {
               )}
             </CardContent>
           </Card>
-
-          {order.items && order.items.length > 0 && (
+ {order.items && order.items.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Order Items</CardTitle>
@@ -173,6 +211,78 @@ export default function OrderDetailPage() {
               </CardContent>
             </Card>
           )}
+          
+          {kitchenTickets && kitchenTickets.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Kitchen Tickets</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {kitchenTickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="p-4 border rounded-lg space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">Ticket #{ticket.id}</p>
+                      {getKitchenStatusBadge(ticket.status)}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Priority</p>
+                        <p className="font-medium">{ticket.priority}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Created</p>
+                        <p className="font-medium">
+                          {format(new Date(ticket.createdAt), 'HH:mm dd/MM')}
+                        </p>
+                      </div>
+                    </div>
+                    {ticket.note && (
+                      <div>
+                        <p className="text-muted-foreground text-sm">Note</p>
+                        <p className="font-medium text-sm">{ticket.note}</p>
+                      </div>
+                    )}
+                    {ticket.items && ticket.items.length > 0 && (
+                      <div className="pt-3 border-t">
+                        <p className="text-sm font-medium mb-2">Items:</p>
+                        <div className="space-y-2">
+                          {ticket.items.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="text-muted-foreground">
+                                {item.menuItem?.name || 'Unknown Item'} ×{' '}
+                                {item.quantity}
+                              </span>
+                              <span
+                                className={`px-2 py-0.5 rounded text-xs ${
+                                  item.status === 'COOKING'
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : item.status === 'READY'
+                                      ? 'bg-green-100 text-green-800'
+                                      : item.status === 'SERVED'
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                }`}
+                              >
+                                {item.status}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+         
         </div>
 
         <div className="space-y-6">
