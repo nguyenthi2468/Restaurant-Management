@@ -16,6 +16,7 @@ import {
   DepositStatus,
   PaymentMethod,
   PaymentStatus,
+  TableStatus,
 } from '@prisma/client';
 import { VnpayService } from './vnpay.service';
 import { Prisma } from '@prisma/client'; // Import Prisma types
@@ -433,10 +434,10 @@ export class BookingService {
   }
 
   /**
-   * Đánh dấu khách đã đến (xác nhận đặt bàn).
+   * Chấp nhận đặt bạn.
    * Trạng thái chuyển thành CONFIRMED.
    */
-  async markArrived(id: string): Promise<Booking> {
+  async confirmBooking(id: string): Promise<Booking> {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: { bookingTables: true }, // Include bookingTables to get table IDs
@@ -470,12 +471,14 @@ export class BookingService {
   }
 
   /**
-   * Kết thúc buổi ăn, đặt trạng thái COMPLETED và cập nhật trạng thái bàn thành AVAILABLE.
+   * Khách đến nhận bàn đặt trạng thái COMPLETED và cập nhật trạng thái bàn thành AVAILABLE.
    */
-  async completeBooking(id: string): Promise<Booking> {
+  async completeBooking(
+    id: string, userId: string,
+  ): Promise<Booking> {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
-      include: { bookingTables: true }, // Include bookingTables to get table IDs
+      include: { bookingTables: true, preOrderItems: true }, // Include bookingTables to get table IDs
     });
     if (!booking) {
       throw new NotFoundException(`Booking with id ${id} not found`);
@@ -486,9 +489,44 @@ export class BookingService {
 
     // Cập nhật trạng thái bàn thành AVAILABLE
     const tableIds = booking.bookingTables.map((bt) => bt.tableId);
+    const tables = await this.prisma.table.findMany({
+      where: { id: { in: tableIds }, status: TableStatus.OCCUPIED },
+    });
+    if(tables.length>0){
+      throw new ConflictException('Some tables are not available');
+    }
     await this.prisma.table.updateMany({
       where: { id: { in: tableIds } },
-      data: { status: 'AVAILABLE' },
+      data: { status: TableStatus.OCCUPIED },
+    });
+
+    const order = await this.prisma.order.create({
+      data: {
+        total: booking.preOrderItems.reduce(
+          (sum, item) => sum + Number(item.price) * Number(item.quantity),
+          0,
+        ),
+        createdById: userId,
+        customerId: booking.customerId,
+        customerName: booking.customerName,
+        customerPhone: booking.customerPhone,
+        items: {
+          create: booking.preOrderItems.map((item) => ({
+            menuItemId: item.menuItemId,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        },
+        orderTables: {
+          create: booking.bookingTables.map((bt) => ({
+            tableId: bt.tableId,
+          })),
+        },
+      },
+      include: {
+        items: true,
+        orderTables: true,
+      },
     });
 
     return this.prisma.booking.update({

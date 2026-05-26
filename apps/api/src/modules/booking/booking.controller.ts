@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -174,9 +175,9 @@ export class BookingController {
     description: 'Booking confirmed',
     type: BookingDto,
   })
-  async markArrived(@Param('id') id: string): Promise<BookingDto> {
-    const arrivedBooking = await this.bookingService.markArrived(id);
-    return arrivedBooking as unknown as BookingDto;
+  async confirmBooking(@Param('id') id: string): Promise<BookingDto> {
+    const confirmedBooking = await this.bookingService.confirmBooking(id);
+    return confirmedBooking as unknown as BookingDto;
   }
 
   @Post(':id/complete')
@@ -189,8 +190,12 @@ export class BookingController {
     description: 'Booking completed',
     type: BookingDto,
   })
-  async completeBooking(@Param('id') id: string): Promise<BookingDto> {
-    const completedBooking = await this.bookingService.completeBooking(id);
+  async completeBooking(
+    @Param('id') id: string,
+    @Req() req: any,
+  ): Promise<BookingDto> {
+    const userId = req.user.id;
+    const completedBooking = await this.bookingService.completeBooking(id, userId);
     return completedBooking as unknown as BookingDto;
   }
 
