@@ -6,6 +6,7 @@ import {
   UpdateOrderData,
   CompleteOrderData,
 } from './types';
+import { VnpayPaymentResponse } from '../booking';
 
 export const getOrders = async () => {
   const response = await api.get<Order[]>(API_ENDPOINTS.ORDERS.BASE);
@@ -61,6 +62,13 @@ export const completeOrder = async (id: number, data: CompleteOrderData) => {
   const response = await api.patch<Order>(
     `${API_ENDPOINTS.ORDERS.BASE}/${id}/complete`,
     data,
+  );
+  return response.data;
+};
+
+export const createOrderPayment = async (id: number) => {
+  const response = await api.post<VnpayPaymentResponse>(
+    `${API_ENDPOINTS.ORDERS.BASE}/${id}/pay`,
   );
   return response.data;
 };

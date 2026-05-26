@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CompleteOrderDto } from './dto/complete-order.dto';
@@ -8,10 +12,22 @@ import {
   PaymentMethod,
   PaymentStatus,
 } from '@prisma/client';
+import { VnpayService } from './vnpay.service';
+
+interface VnpayReturnParams {
+  vnp_TxnRef: string;
+  vnp_TransactionStatus: string;
+  vnp_Amount?: string;
+  vnp_TransactionNo?: string;
+  [key: string]: any;
+}
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly vnpayService: VnpayService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string) {
     const { tableIds, items, ...orderData } = createOrderDto;
@@ -89,7 +105,11 @@ export class OrderService {
         items: true,
         orderTables: {
           include: {
-            table: true,
+            table: {
+              include: {
+                floor: true,
+              },
+            },
           },
         },
         payments: true,
@@ -135,7 +155,7 @@ export class OrderService {
           },
         });
       }
-       const tickets = await tx.kitchenTicket.findMany({
+      const tickets = await tx.kitchenTicket.findMany({
         where: {
           orderId: orderId,
         },
@@ -195,16 +215,17 @@ export class OrderService {
           },
         },
       });
-
-      await tx.payment.create({
-        data: {
-          orderId: orderId,
-          transactionCode: `PAY_${Date.now()}_${orderId}`,
-          amount: totalAmount,
-          method: paymentMethod,
-          status: PaymentStatus.SUCCESS,
-        },
-      });
+      if (paymentMethod === PaymentMethod.CASH) {
+        await tx.payment.create({
+          data: {
+            orderId: orderId,
+            transactionCode: `PAY_${Date.now()}_${orderId}`,
+            amount: totalAmount,
+            method: paymentMethod,
+            status: PaymentStatus.SUCCESS,
+          },
+        });
+      }
 
       const tickets = await tx.kitchenTicket.findMany({
         where: {
@@ -257,5 +278,120 @@ export class OrderService {
         },
       });
     });
+  }
+
+  async createVnpayPayment(orderId: number): Promise<string> {
+    const order = await this.findOne(orderId);
+
+    if (!order) {
+      throw new NotFoundException(`Order with id ${orderId} not found`);
+    }
+
+    if (order.status === OrderStatus.COMPLETED) {
+      throw new ConflictException('Order is already completed');
+    }
+
+    if (order.status === OrderStatus.CANCELLED) {
+      throw new ConflictException('Cannot pay for a cancelled order');
+    }
+
+    const orderItems = await this.prisma.orderItem.findMany({
+      where: {
+        orderId: orderId,
+      },
+    });
+    const amount = Number(orderItems.reduce((acc, item) => acc + Number(item.price), 0));
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        total: amount,
+      },
+    });
+    const orderIdStr = orderId.toString();
+    const orderInfo = `Order payment ${orderId}`;
+
+    return this.vnpayService.createPaymentUrl(amount, orderIdStr, orderInfo);
+  }
+
+  async handleVnpayReturn(
+    params: VnpayReturnParams,
+  ): Promise<{ responseCode: string; orderId: string }> {
+    const isValidSignature = this.vnpayService.verifyResponse(params);
+
+    if (!isValidSignature) {
+      throw new ConflictException('Invalid VNPay signature');
+    }
+
+    const { vnp_TxnRef, vnp_TransactionStatus, vnp_Amount, vnp_TransactionNo } =
+      params;
+
+    const orderId = parseInt(vnp_TxnRef, 10);
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        orderTables: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with id ${orderId} not found`);
+    }
+
+    const actualAmount = vnp_Amount
+      ? Number(vnp_Amount) / 100
+      : Number(order.total);
+
+    const transactionCode = vnp_TransactionNo || `VNP_${Date.now()}_${orderId}`;
+
+    if (vnp_TransactionStatus === '00') {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            status: OrderStatus.COMPLETED,
+          },
+        });
+
+        await tx.payment.create({
+          data: {
+            orderId: orderId,
+            transactionCode,
+            method: PaymentMethod.VNPAY,
+            amount: actualAmount,
+            status: PaymentStatus.SUCCESS,
+          },
+        });
+
+        if (order.orderTables.length > 0) {
+          const tableIds = order.orderTables.map((ot) => ot.tableId);
+          await tx.table.updateMany({
+            where: {
+              id: {
+                in: tableIds,
+              },
+            },
+            data: {
+              status: TableStatus.AVAILABLE,
+            },
+          });
+        }
+      });
+
+      return { responseCode: vnp_TransactionStatus, orderId: vnp_TxnRef };
+    } else {
+      await this.prisma.payment.create({
+        data: {
+          orderId: orderId,
+          transactionCode,
+          method: PaymentMethod.VNPAY,
+          amount: actualAmount,
+          status: PaymentStatus.FAILED,
+        },
+      });
+
+      throw new ConflictException(
+        `VNPay transaction failed with status: ${vnp_TransactionStatus}`,
+      );
+    }
   }
 }

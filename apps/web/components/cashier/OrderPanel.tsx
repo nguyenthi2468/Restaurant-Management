@@ -21,7 +21,7 @@ import {
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 import { HistoryKitchenTicketDrawer } from '@/components/cashier/HistoryKitchenTicketDrawer';
-import { Order, useCompleteOrderMutation, useUpdateOrderNoteMutation } from '@/features/orders';
+import { Order, useCompleteOrderMutation, useCreateOrderPaymentMutation, useUpdateOrderNoteMutation } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
 import { OrderItem } from '@/features/order-items';
 import { KitchenTicket } from '@/features/kitchen';
@@ -64,6 +64,7 @@ export function OrderPanel({
   const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
   const updateOrderNoteMutation = useUpdateOrderNoteMutation();
   const completeOrderMutation = useCompleteOrderMutation();
+  const createOrderPaymentMutation = useCreateOrderPaymentMutation();
   const onEditNote = (note: string) => {
     updateOrderNoteMutation.mutate(
       {
@@ -83,18 +84,24 @@ export function OrderPanel({
     paymentMethod: PaymentMethod;
     totalAmount: number;
   }) => {
-    completeOrderMutation.mutate({
-      id: paymentData.orderId,
-      data: {
-        paymentMethod: paymentData.paymentMethod,
-        totalAmount: paymentData.totalAmount,
-      },
-    }, {
-      onSuccess: () => {
-        setPaymentDrawerOpen(false);
-      },
-    });
-  
+    if(paymentData.paymentMethod === PaymentMethod.CASH) {
+      completeOrderMutation.mutate({
+        id: paymentData.orderId,
+        data: {
+          paymentMethod: paymentData.paymentMethod,
+          totalAmount: paymentData.totalAmount,
+        },
+      }, {
+        onSuccess: () => {
+          setPaymentDrawerOpen(false);
+        },
+      });
+      return;
+    }
+    if(paymentData.paymentMethod === PaymentMethod.VNPAY) {
+      createOrderPaymentMutation.mutate(paymentData.orderId);
+      return;
+    }
   };
 
   if (!selectedTable) {

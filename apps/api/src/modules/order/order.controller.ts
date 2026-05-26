@@ -7,7 +7,10 @@ import {
   UseGuards,
   Req,
   Patch,
+  Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderNoteDto } from './dto/update-order-note.dto';
@@ -28,6 +31,28 @@ import {
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
+
+  @Get('vnpay-return')
+  @Action('order:handle_vnpay_return')
+  @ApiOperation({ summary: 'Handle VNPay return callback' })
+  @ApiResponse({
+    status: 200,
+    description: 'Order payment processed',
+  })
+  async handleVnpayReturn(
+    @Query() query: any,
+    @Res() res: Response,
+  ): Promise<void> {
+    const order = await this.orderService.handleVnpayReturn(query);
+    const status = order.responseCode === '00' ? 'success' : 'failed';
+
+    const feUrl = process.env.PUBLIC_WEB_URL ?? 'http://localhost:3000';
+
+    return res.redirect(
+      `${feUrl}/order/payment-result?payment_status=${status}` +
+        `&order_id=${order.orderId ?? ''}`,
+    );
+  }
 
   @Post()
   @Action('order:create')
@@ -207,5 +232,22 @@ export class OrderController {
     @Body() completeOrderDto: CompleteOrderDto,
   ) {
     return this.orderService.completeOrder(id, completeOrderDto);
+  }
+
+  @Post(':id/pay')
+  @ApiOperation({ summary: 'Create VNPay payment URL for order' })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment URL generated',
+    schema: {
+      type: 'object',
+      properties: { paymentUrl: { type: 'string' } },
+    },
+  })
+  async createVnpayPayment(
+    @Param('id') id: number,
+  ): Promise<{ paymentUrl: string }> {
+    const paymentUrl = await this.orderService.createVnpayPayment(id);
+    return { paymentUrl };
   }
 }

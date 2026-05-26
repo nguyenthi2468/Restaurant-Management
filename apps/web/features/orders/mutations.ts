@@ -6,6 +6,7 @@ import {
   cancelOrder,
   updateOrderNote,
   completeOrder,
+  createOrderPayment,
 } from './api';
 import { CreateOrderData, UpdateOrderData, CompleteOrderData } from './types';
 import toast from 'react-hot-toast';
@@ -106,6 +107,21 @@ export const useCompleteOrderMutation = () => {
     },
     onError: (error: ApiError) => {
       toast.error(error?.response?.data?.message || 'Order completion failed');
+    },
+  });
+};
+
+export const useCreateOrderPaymentMutation = () => {
+  return useMutation({
+    mutationFn: (id: number) => createOrderPayment(id),
+    onSuccess: (data) => {
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Không thể tạo thanh toán');
+      console.error(error);
     },
   });
 };
