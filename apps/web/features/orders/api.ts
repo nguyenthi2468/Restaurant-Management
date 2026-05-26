@@ -1,6 +1,11 @@
 import { API_ENDPOINTS } from '@/constants';
 import api from '@/lib/axios';
-import { Order, CreateOrderData, UpdateOrderData } from './types';
+import {
+  Order,
+  CreateOrderData,
+  UpdateOrderData,
+  CompleteOrderData,
+} from './types';
 
 export const getOrders = async () => {
   const response = await api.get<Order[]>(API_ENDPOINTS.ORDERS.BASE);
@@ -48,6 +53,14 @@ export const updateOrderNote = async (id: number, note: string) => {
   const response = await api.patch<Order>(
     `${API_ENDPOINTS.ORDERS.BASE}/${id}/note`,
     { note },
+  );
+  return response.data;
+};
+
+export const completeOrder = async (id: number, data: CompleteOrderData) => {
+  const response = await api.patch<Order>(
+    `${API_ENDPOINTS.ORDERS.BASE}/${id}/complete`,
+    data,
   );
   return response.data;
 };

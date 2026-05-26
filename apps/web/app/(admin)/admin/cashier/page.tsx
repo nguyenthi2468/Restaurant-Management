@@ -472,7 +472,6 @@ export default function CashierPage() {
         onRemoveItem={handleRemoveItem}
         onCancel={handleCancelOrder}
         onNotify={handleNotify}
-        onPay={handlePay}
       />
 
       <ConfirmDialog

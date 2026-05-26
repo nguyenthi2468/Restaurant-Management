@@ -5,8 +5,9 @@ import {
   deleteOrder,
   cancelOrder,
   updateOrderNote,
+  completeOrder,
 } from './api';
-import { CreateOrderData, UpdateOrderData } from './types';
+import { CreateOrderData, UpdateOrderData, CompleteOrderData } from './types';
 import toast from 'react-hot-toast';
 import { ApiError } from '@/types';
 
@@ -82,6 +83,29 @@ export const useUpdateOrderNoteMutation = () => {
     },
     onError: (error: ApiError) => {
       toast.error(error?.response?.data?.message || 'Note update failed');
+    },
+  });
+};
+
+export const useCompleteOrderMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: CompleteOrderData }) =>
+      completeOrder(id, data),
+    onSuccess: (data) => {
+      if (data.orderTables?.length) {
+        data.orderTables.forEach((orderTable) => {
+          queryClient.invalidateQueries({
+            queryKey: ['order', 'served', orderTable.tableId],
+            exact: true,
+          });
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['tables', 'with-bookings'] });
+      toast.success('Order completed successfully');
+    },
+    onError: (error: ApiError) => {
+      toast.error(error?.response?.data?.message || 'Order completion failed');
     },
   });
 };

@@ -432,10 +432,14 @@ model Payment {
   transactionCode String
   amount    Decimal  @db.Decimal(12, 3)
   status    PaymentStatus @default(PENDING)
+  method          PaymentMethod @default(CASH)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
+enum PaymentMethod {
+  CASH
+  VNPAY
+}
 enum PaymentStatus {
   PENDING
   SUCCESS

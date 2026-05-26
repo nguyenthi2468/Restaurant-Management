@@ -15,6 +15,7 @@ import { X, MoreHorizontal } from 'lucide-react';
 import { formatCurrency } from '@/utils/currency';
 import { Order } from '@/features/orders';
 import { OrderItem } from '@/features/order-items';
+import { PaymentMethod } from '@/features/payments';
 
 interface OrderPaymentDrawerProps {
   open: boolean;
@@ -22,61 +23,39 @@ interface OrderPaymentDrawerProps {
   order: Order | null;
   orderItems: OrderItem[];
   totalAmount: number;
-  onConfirmPayment?: (paymentData: {
+  isPending: boolean;
+  onConfirmPayment: (paymentData: {
     orderId: number;
-    paymentMethod: string;
-    amountPaid: number;
-    change: number;
+    paymentMethod: PaymentMethod;
+    totalAmount: number;
   }) => void;
 }
-
-type PaymentMethod = 'cash' | 'vnpay';
 
 export function OrderPaymentDrawer({
   open,
   onOpenChange,
   order,
   orderItems,
+  isPending,
   totalAmount,
   onConfirmPayment,
 }: OrderPaymentDrawerProps) {
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
-  const [amountPaid, setAmountPaid] = useState<number>(totalAmount);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+    PaymentMethod.CASH,
+  );
 
   const itemCount = useMemo(() => {
     return orderItems.reduce((acc, item) => acc + item.quantity, 0);
   }, [orderItems]);
 
-  const discount = 0;
-  const amountToPay = totalAmount - discount;
-
-  const change = useMemo(() => {
-    return Math.max(0, amountPaid - amountToPay);
-  }, [amountPaid, amountToPay]);
-
-  const quickAmounts = useMemo(() => {
-    const base = amountToPay;
-    return [base, base + 1000, base + 5000, base + 25000, base + 125000];
-  }, [amountToPay]);
-
-  const handleQuickAmount = (amount: number) => {
-    setAmountPaid(amount);
-  };
-
   const handlePayment = () => {
     if (!order) return;
 
-    onConfirmPayment?.({
+    onConfirmPayment({
       orderId: order.id,
       paymentMethod,
-      amountPaid,
-      change,
+      totalAmount,
     });
-  };
-
-  const paymentMethodLabels: Record<PaymentMethod, string> = {
-    cash: 'Tiền mặt',
-    vnpay: 'Vnpay',
   };
 
   return (
@@ -97,13 +76,14 @@ export function OrderPaymentDrawer({
           <div className="p-4 space-y-4">
             {
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="flex text-xs text-slate-500 mb-1">Khách hàng : 
-                <div className="font-medium text-slate-900">
-                     {order?.customerName || "Khách lẻ"}
+                <div className="flex text-xs text-slate-500 mb-1">
+                  Khách hàng :
+                  <div className="font-medium text-slate-900">
+                    {order?.customerName || 'Khách lẻ'}
+                  </div>
                 </div>
-                </div>
-                 
-                { order && order.customerPhone && (
+
+                {order && order.customerPhone && (
                   <div className="text-sm text-slate-600 mt-1">
                     {order.customerPhone}
                   </div>
@@ -156,7 +136,7 @@ export function OrderPaymentDrawer({
                   Khách cần trả
                 </span>
                 <span className="font-bold text-blue-600 text-base">
-                  {formatCurrency(amountToPay)}
+                  {formatCurrency(totalAmount)}
                 </span>
               </div>
             </div>
@@ -164,27 +144,27 @@ export function OrderPaymentDrawer({
             <div className="space-y-3 pt-2">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setPaymentMethod('cash')}
+                  onClick={() => setPaymentMethod(PaymentMethod.CASH)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
-                    paymentMethod === 'cash'
+                    paymentMethod === PaymentMethod.CASH
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      paymentMethod === 'cash'
+                      paymentMethod === PaymentMethod.CASH
                         ? 'border-blue-500'
                         : 'border-slate-300'
                     }`}
                   >
-                    {paymentMethod === 'cash' && (
+                    {paymentMethod === PaymentMethod.CASH && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
                   </div>
                   <span
                     className={`text-sm ${
-                      paymentMethod === 'cash'
+                      paymentMethod === PaymentMethod.CASH
                         ? 'text-blue-700 font-medium'
                         : 'text-slate-700'
                     }`}
@@ -194,27 +174,27 @@ export function OrderPaymentDrawer({
                 </button>
 
                 <button
-                  onClick={() => setPaymentMethod('vnpay')}
+                  onClick={() => setPaymentMethod(PaymentMethod.VNPAY)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
-                    paymentMethod === 'vnpay'
+                    paymentMethod === PaymentMethod.VNPAY
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      paymentMethod === 'vnpay'
+                      paymentMethod === PaymentMethod.VNPAY
                         ? 'border-blue-500'
                         : 'border-slate-300'
                     }`}
                   >
-                    {paymentMethod === 'vnpay' && (
+                    {paymentMethod === PaymentMethod.VNPAY && (
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
                   </div>
                   <span
                     className={`text-sm ${
-                      paymentMethod === 'vnpay'
+                      paymentMethod === PaymentMethod.VNPAY
                         ? 'text-blue-700 font-medium'
                         : 'text-slate-700'
                     }`}
@@ -235,10 +215,18 @@ export function OrderPaymentDrawer({
             </span>
           </div>
           <Button
+            disabled={isPending}
             onClick={handlePayment}
             className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold"
           >
-            Thanh toán
+            {isPending ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <span>Đang xử lý...</span>
+              </div>
+            ) : (
+              'Thanh toán'
+            )}
           </Button>
         </div>
       </DrawerContent>

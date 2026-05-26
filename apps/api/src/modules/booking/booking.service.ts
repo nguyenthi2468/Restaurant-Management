@@ -14,6 +14,7 @@ import {
   Booking,
   BookingStatus,
   DepositStatus,
+  PaymentMethod,
   PaymentStatus,
 } from '@prisma/client';
 import { VnpayService } from './vnpay.service';
@@ -593,6 +594,7 @@ export class BookingService {
           data: {
             bookingId: vnp_TxnRef,
             transactionCode,
+            method: PaymentMethod.VNPAY,
             amount: actualAmount,
             status: PaymentStatus.SUCCESS,
           },
@@ -606,6 +608,7 @@ export class BookingService {
         data: {
           bookingId: vnp_TxnRef,
           transactionCode,
+          method: PaymentMethod.VNPAY,
           amount: actualAmount,
           status: PaymentStatus.FAILED,
         },

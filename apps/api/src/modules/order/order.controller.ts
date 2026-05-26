@@ -11,6 +11,7 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderNoteDto } from './dto/update-order-note.dto';
+import { CompleteOrderDto } from './dto/complete-order.dto';
 import { Action } from '../auth/decorator/action.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionGuard } from '../auth/guards/action.guard';
@@ -175,5 +176,36 @@ export class OrderController {
     @Body() updateNoteDto: UpdateOrderNoteDto,
   ) {
     return this.orderService.updateNote(id, updateNoteDto.note);
+  }
+
+  @Patch(':id/complete')
+  @Action('order:update')
+  @UseGuards(JwtAuthGuard, ActionGuard)
+  @ApiOperation({
+    summary: 'Hoàn thành đơn hàng',
+    description:
+      'Hoàn thành đơn hàng bằng cách cập nhật trạng thái thành COMPLETED và tạo payment',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Đơn hàng đã được hoàn thành thành công',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy đơn hàng với ID được cung cấp',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dữ liệu không hợp lệ',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Token xác thực không hợp lệ hoặc отсутствует',
+  })
+  completeOrder(
+    @Param('id') id: number,
+    @Body() completeOrderDto: CompleteOrderDto,
+  ) {
+    return this.orderService.completeOrder(id, completeOrderDto);
   }
 }

@@ -21,12 +21,13 @@ import {
 import { OrderItemRow } from './OrderItemRow';
 import { CreateOrderDialog } from '@/components/cashier/CreateOrderDialog';
 import { HistoryKitchenTicketDrawer } from '@/components/cashier/HistoryKitchenTicketDrawer';
-import { Order, useUpdateOrderNoteMutation } from '@/features/orders';
+import { Order, useCompleteOrderMutation, useUpdateOrderNoteMutation } from '@/features/orders';
 import { formatCurrency } from '@/utils/currency';
 import { OrderItem } from '@/features/order-items';
 import { KitchenTicket } from '@/features/kitchen';
 import { NoteOrderDialog } from './NoteOrderDialog';
 import { OrderPaymentDrawer } from './OrderPaymentDrawer';
+import { PaymentMethod } from '@/features/payments';
 
 interface OrderPanelProps {
   selectedTable: Table | null;
@@ -40,7 +41,6 @@ interface OrderPanelProps {
   onUpdateQuantity: (item: OrderItem, delta: number) => void;
   onRemoveItem: (itemId: string) => void;
   onNotify: () => void;
-  onPay: () => void;
   onCancel: (orderId: number) => void;
 }
 
@@ -56,7 +56,6 @@ export function OrderPanel({
   onUpdateQuantity,
   onRemoveItem,
   onNotify,
-  onPay,
   onCancel,
 }: OrderPanelProps) {
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
@@ -64,7 +63,7 @@ export function OrderPanel({
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false);
   const updateOrderNoteMutation = useUpdateOrderNoteMutation();
-
+  const completeOrderMutation = useCompleteOrderMutation();
   const onEditNote = (note: string) => {
     updateOrderNoteMutation.mutate(
       {
@@ -81,12 +80,21 @@ export function OrderPanel({
 
   const handleConfirmPayment = (paymentData: {
     orderId: number;
-    paymentMethod: string;
-    amountPaid: number;
-    change: number;
+    paymentMethod: PaymentMethod;
+    totalAmount: number;
   }) => {
-    setPaymentDrawerOpen(false);
-    onPay();
+    completeOrderMutation.mutate({
+      id: paymentData.orderId,
+      data: {
+        paymentMethod: paymentData.paymentMethod,
+        totalAmount: paymentData.totalAmount,
+      },
+    }, {
+      onSuccess: () => {
+        setPaymentDrawerOpen(false);
+      },
+    });
+  
   };
 
   if (!selectedTable) {
@@ -311,6 +319,7 @@ export function OrderPanel({
         onOpenChange={setPaymentDrawerOpen}
         order={order}
         orderItems={orderItems}
+        isPending={completeOrderMutation.isPending}
         totalAmount={totalAmount}
         onConfirmPayment={handleConfirmPayment}
       />

@@ -1,5 +1,6 @@
-import { OrderItem } from "../order-items";
-import { Table } from "../tables";
+import { OrderItem } from '../order-items';
+import { Table } from '../tables';
+import { PaymentMethod } from '../payments';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -29,8 +30,6 @@ export interface OrderTable {
   table: Table;
 }
 
-
-
 export interface CreateOrderData {
   tableIds: string[];
   total?: number;
@@ -52,4 +51,9 @@ export interface UpdateOrderData {
   note?: string;
   customerName?: string;
   customerPhone?: string;
+}
+
+export interface CompleteOrderData {
+  paymentMethod: PaymentMethod;
+  totalAmount: number;
 }

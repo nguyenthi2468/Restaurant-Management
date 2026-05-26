@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderStatus, TableStatus } from '@prisma/client';
+import { CompleteOrderDto } from './dto/complete-order.dto';
+import {
+  OrderStatus,
+  TableStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from '@prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -129,7 +135,29 @@ export class OrderService {
           },
         });
       }
+       const tickets = await tx.kitchenTicket.findMany({
+        where: {
+          orderId: orderId,
+        },
+      });
 
+      for (const ticket of tickets) {
+        await tx.kitchenTicket.update({
+          where: { id: ticket.id },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+
+        await tx.kitchenTicketItem.updateMany({
+          where: {
+            ticketId: ticket.id,
+          },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+      }
       return order;
     });
   }
@@ -145,6 +173,89 @@ export class OrderService {
           },
         },
       },
+    });
+  }
+
+  async completeOrder(orderId: number, completeOrderDto: CompleteOrderDto) {
+    const { paymentMethod, totalAmount } = completeOrderDto;
+
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.COMPLETED,
+          total: totalAmount,
+        },
+        include: {
+          items: true,
+          orderTables: {
+            include: {
+              table: true,
+            },
+          },
+        },
+      });
+
+      await tx.payment.create({
+        data: {
+          orderId: orderId,
+          transactionCode: `PAY_${Date.now()}_${orderId}`,
+          amount: totalAmount,
+          method: paymentMethod,
+          status: PaymentStatus.SUCCESS,
+        },
+      });
+
+      const tickets = await tx.kitchenTicket.findMany({
+        where: {
+          orderId: orderId,
+        },
+      });
+
+      for (const ticket of tickets) {
+        await tx.kitchenTicket.update({
+          where: { id: ticket.id },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+
+        await tx.kitchenTicketItem.updateMany({
+          where: {
+            ticketId: ticket.id,
+          },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+      }
+
+      if (order.orderTables.length > 0) {
+        const tableIds = order.orderTables.map((ot) => ot.tableId);
+        await tx.table.updateMany({
+          where: {
+            id: {
+              in: tableIds,
+            },
+          },
+          data: {
+            status: TableStatus.AVAILABLE,
+          },
+        });
+      }
+
+      return tx.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: true,
+          orderTables: {
+            include: {
+              table: true,
+            },
+          },
+          payments: true,
+        },
+      });
     });
   }
 }
