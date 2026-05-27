@@ -50,7 +50,6 @@ export function OrderPaymentDrawer({
 
   const handlePayment = () => {
     if (!order) return;
-
     onConfirmPayment({
       orderId: order.id,
       paymentMethod,
@@ -131,12 +130,25 @@ export function OrderPaymentDrawer({
                 </span>
               </div>
 
+              {order && order.depositAmount > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">Tiền đặt cọc</span>
+                  <span className="font-semibold text-green-600">
+                    -{formatCurrency(order.depositAmount)}
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-200">
                 <span className="text-slate-900 font-medium">
                   Khách cần trả
                 </span>
                 <span className="font-bold text-blue-600 text-base">
-                  {formatCurrency(totalAmount)}
+                  {formatCurrency(
+                    order && order.depositAmount > 0
+                      ? totalAmount - order.depositAmount
+                      : totalAmount,
+                  )}
                 </span>
               </div>
             </div>

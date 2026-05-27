@@ -660,6 +660,7 @@ export class BookingService {
         customerId: booking.customerId,
         customerName: booking.customerName,
         customerPhone: booking.customerPhone,
+        depositAmount: booking.depositAmount,
         items: {
           create: booking.preOrderItems.map((item) => ({
             menuItemId: item.menuItemId,
@@ -805,7 +806,7 @@ export class BookingService {
           where: { id: vnp_TxnRef },
           data: {
             depositStatus: DepositStatus.PAID,
-            // status: BookingStatus.CONFIRMED,
+            status: BookingStatus.CONFIRMED,
           },
         }),
         this.prisma.payment.create({

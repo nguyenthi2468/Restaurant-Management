@@ -1,4 +1,5 @@
 import { Floor } from '../floor';
+import { Payment } from '../payments';
 
 export enum BookingStatus {
   PENDING = 'PENDING',
@@ -58,6 +59,7 @@ export interface Booking {
   updatedAt: string;
   bookingTables?: BookingTable[];
   preOrderItems?: BookingMenuItem[];
+  payment?: Payment;
 }
 
 export interface CreateBookingTableData {

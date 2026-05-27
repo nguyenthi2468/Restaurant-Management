@@ -276,6 +276,20 @@ export function OrderPanel({
               <span>TỔNG CỘNG:</span>
               <span>${formatCurrency(totalAmount)}</span>
             </div>
+            ${
+              order?.depositAmount && order.depositAmount > 0
+                ? `
+            <div class="info-row" style="font-size: 12px; font-weight: normal; color: #16a34a;">
+              <span>Tiền đặt cọc:</span>
+              <span>-${formatCurrency(order.depositAmount)}</span>
+            </div>
+            <div class="total-row" style="font-size: 13px; color: #2563eb; border-top: 1px dashed #000; padding-top: 5px; margin-top: 5px;">
+              <span>Khách cần trả:</span>
+              <span>${formatCurrency(totalAmount - order.depositAmount)}</span>
+            </div>
+            `
+                : ''
+            }
             <div class="info-row" style="font-size: 12px; font-weight: normal;">
               <span>Số lượng món:</span>
               <span>${orderItems.reduce((acc, item) => acc + item.quantity, 0)}</span>

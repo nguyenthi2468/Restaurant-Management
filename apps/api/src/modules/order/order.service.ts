@@ -268,13 +268,16 @@ export class OrderService {
 
   async completeOrder(orderId: number, completeOrderDto: CompleteOrderDto) {
     const { paymentMethod, totalAmount } = completeOrderDto;
-
+    const orderData = await this.findOne(orderId);
+    if (!orderData) {
+      throw new Error('Order not found');
+    }
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.update({
         where: { id: orderId },
         data: {
           status: OrderStatus.COMPLETED,
-          total: totalAmount,
+          total: Number(totalAmount) - Number(orderData.depositAmount ?? 0),
         },
         include: {
           items: true,
@@ -290,7 +293,7 @@ export class OrderService {
           data: {
             orderId: orderId,
             transactionCode: `PAY_${Date.now()}_${orderId}`,
-            amount: totalAmount,
+            amount: Number(totalAmount) - Number(orderData.depositAmount ?? 0),
             method: paymentMethod,
             status: PaymentStatus.SUCCESS,
           },

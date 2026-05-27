@@ -34,6 +34,7 @@ import { ROUTES } from '@/constants';
 import { BookingStatus, DepositStatus } from '@/features/booking';
 import { formatCurrency } from '@/utils/currency';
 import { TableStatus } from '@/features/tables';
+import { PaymentStatus, PaymentMethod } from '@/features/payments';
 
 const updateBookingSchema = z.object({
   endTime: z.string().min(1, 'End time is required'),
@@ -60,13 +61,13 @@ export default function BookingEditPage() {
   const { data: tablesData } = useTablesQueryWithPagination({
     page: 1,
     limit: 20,
-    status: TableStatus.AVAILABLE
+    status: TableStatus.AVAILABLE,
   });
   const { data: menuItemsData } = useMenuItemsWithPaginationQuery({
     page: 1,
     limit: 20,
   });
-  
+
   const updateMutation = useUpdateBookingMutation();
   const approveDepositMutation = useApproveDepositMutation();
   const markArrivedMutation = useMarkArrivedMutation();
@@ -530,18 +531,18 @@ export default function BookingEditPage() {
                     )}
                     No-Show
                   </Button>
-                <Button
-                  onClick={handleComplete}
-                  disabled={completeMutation.isPending}
-                  className="w-full"
-                >
-                  {completeMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                  )}
-                  Mark as Completed
-                </Button>
+                  <Button
+                    onClick={handleComplete}
+                    disabled={completeMutation.isPending}
+                    className="w-full"
+                  >
+                    {completeMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                    )}
+                    Mark as Completed
+                  </Button>
                 </div>
               )}
 
@@ -563,6 +564,79 @@ export default function BookingEditPage() {
               )}
             </CardContent>
           </Card>
+
+          {booking.payment && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Transaction Code
+                    </span>
+                    <span className="text-sm font-medium">
+                      {booking.payment.transactionCode}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Amount
+                    </span>
+                    <span className="text-sm font-medium">
+                      {formatCurrency(Number(booking.payment.amount))}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Method
+                    </span>
+                    <span className="text-sm font-medium">
+                      {booking.payment.method === PaymentMethod.CASH
+                        ? 'Cash'
+                        : 'VNPay'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Status
+                    </span>
+                    <span
+                      className={`text-sm font-medium ${
+                        booking.payment.status === PaymentStatus.SUCCESS
+                          ? 'text-green-600'
+                          : booking.payment.status === PaymentStatus.FAILED
+                            ? 'text-red-600'
+                            : booking.payment.status === PaymentStatus.REFUNDED
+                              ? 'text-blue-600'
+                              : 'text-yellow-600'
+                      }`}
+                    >
+                      {booking.payment.status === PaymentStatus.SUCCESS
+                        ? 'Success'
+                        : booking.payment.status === PaymentStatus.FAILED
+                          ? 'Failed'
+                          : booking.payment.status === PaymentStatus.REFUNDED
+                            ? 'Refunded'
+                            : 'Pending'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Payment Date
+                    </span>
+                    <span className="text-sm font-medium">
+                      {format(
+                        new Date(booking.payment.createdAt),
+                        'dd/MM/yyyy HH:mm',
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

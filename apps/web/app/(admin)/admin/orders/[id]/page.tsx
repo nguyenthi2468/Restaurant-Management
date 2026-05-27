@@ -186,6 +186,20 @@ export default function OrderDetailPage() {
               <span>TỔNG CỘNG:</span>
               <span>${formatCurrency(Number(order.total))}</span>
             </div>
+            ${
+              order.depositAmount && order.depositAmount > 0
+                ? `
+            <div class="info-row" style="font-size: 12px; font-weight: normal; color: #16a34a;">
+              <span>Tiền đặt cọc:</span>
+              <span>-${formatCurrency(Number(order.depositAmount))}</span>
+            </div>
+            <div class="total-row" style="font-size: 13px; color: #2563eb; border-top: 1px dashed #000; padding-top: 5px; margin-top: 5px;">
+              <span>Khách cần trả:</span>
+              <span>${formatCurrency(Number(order.total) - Number(order.depositAmount))}</span>
+            </div>
+            `
+                : ''
+            }
             <div class="info-row" style="font-size: 12px; font-weight: normal;">
               <span>Số lượng món:</span>
               <span>${order.items ? order.items.reduce((acc, item) => acc + item.quantity, 0) : 0}</span>
@@ -305,6 +319,35 @@ export default function OrderDetailPage() {
     );
   };
 
+  const getPaymentStatusBadge = (status: string) => {
+    const config: Record<string, { label: string; className: string }> = {
+      SUCCESS: {
+        label: 'Success',
+        className: 'bg-green-100 text-green-800',
+      },
+      PENDING: {
+        label: 'Pending',
+        className: 'bg-yellow-100 text-yellow-800',
+      },
+      FAILED: {
+        label: 'Failed',
+        className: 'bg-red-100 text-red-800',
+      },
+      REFUNDED: {
+        label: 'Refunded',
+        className: 'bg-gray-100 text-gray-800',
+      },
+    };
+    const { label, className } = config[status] || config.PENDING;
+    return (
+      <span
+        className={`inline-block px-3 py-1 text-sm rounded-full ${className}`}
+      >
+        {label}
+      </span>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6 flex items-center justify-between">
@@ -349,6 +392,16 @@ export default function OrderDetailPage() {
                     {formatCurrency(Number(order.total))}
                   </p>
                 </div>
+                {order.depositAmount > 0 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Deposit Amount
+                    </p>
+                    <p className="font-medium text-lg">
+                      {formatCurrency(Number(order.depositAmount))}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-muted-foreground">Created At</p>
                   <p className="font-medium">
@@ -512,6 +565,62 @@ export default function OrderDetailPage() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {order.payments && order.payments.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {order.payments.map((payment) => (
+                  <div
+                    key={payment.id}
+                    className="p-4 border rounded-lg space-y-3"
+                  >
+                    <div>
+                      {getPaymentStatusBadge(payment.status)}
+                      <p className="font-medium">Payment #{payment.id}</p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Transaction Code
+                        </p>
+                        <p className="font-medium text-sm">
+                          {payment.transactionCode}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Payment Method
+                        </p>
+                        <p className="font-medium text-sm">
+                          {payment.method === 'CASH' ? 'Cash' : 'VNPay'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Amount</p>
+                        <p className="font-medium text-lg">
+                          {formatCurrency(Number(payment.amount))}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Payment Date
+                        </p>
+                        <p className="font-medium text-sm">
+                          {format(
+                            new Date(payment.createdAt),
+                            'dd/MM/yyyy HH:mm',
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
