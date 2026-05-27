@@ -370,7 +370,7 @@ export class OrderService {
     });
     const amount = Number(
       orderItems.reduce((acc, item) => acc + Number(item.price), 0),
-    );
+    )- Number(order.depositAmount ?? 0);
     await this.prisma.order.update({
       where: { id: orderId },
       data: {
