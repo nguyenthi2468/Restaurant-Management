@@ -12,6 +12,8 @@ import {
   TableStatus,
   PaymentMethod,
   PaymentStatus,
+  KitchenTicketStatus,
+  KitchenItemStatus,
 } from '@prisma/client';
 import { VnpayService } from './vnpay.service';
 
@@ -302,19 +304,14 @@ export class OrderService {
       });
 
       for (const ticket of tickets) {
-        await tx.kitchenTicket.update({
-          where: { id: ticket.id },
-          data: {
-            status: 'CANCELLED',
-          },
-        });
 
         await tx.kitchenTicketItem.updateMany({
           where: {
             ticketId: ticket.id,
+            status: KitchenItemStatus.PENDING,
           },
           data: {
-            status: 'CANCELLED',
+            status: KitchenItemStatus.SERVED,
           },
         });
       }

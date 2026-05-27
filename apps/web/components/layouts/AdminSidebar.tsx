@@ -101,6 +101,12 @@ export const navItems: NavItem[] = [
     action: 'reservation.read',
   },
   {
+    title: 'Orders',
+    href: ROUTES.ADMIN_ORDERS,
+    icon: Receipt,
+    action: 'order.read',
+  },
+  {
     title: 'Users',
     href: ROUTES.ADMIN_USERS,
     icon: Users,

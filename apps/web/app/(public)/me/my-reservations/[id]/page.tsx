@@ -24,14 +24,7 @@ import {
   useBookingQuery,
 } from '@/features/booking';
 import { useAuth } from '@/providers/AuthProvider';
-import {
-  ArrowLeft,
-  Calendar,
-  Clock,
-  Loader2,
-  MapPin,
-  Users,
-} from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Loader2, MapPin, Users } from 'lucide-react';
 
 const statusLabels: Record<BookingStatus, string> = {
   [BookingStatus.PENDING]: 'Đang chờ',
@@ -62,9 +55,7 @@ const ReservationDetailPage = () => {
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Chi tiết đặt bàn</CardTitle>
-            <CardDescription>
-              Thông tin chi tiết về đặt bàn của bạn
-            </CardDescription>
+            <CardDescription>Thông tin chi tiết về đặt bàn của bạn</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center py-12">
@@ -82,15 +73,11 @@ const ReservationDetailPage = () => {
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Chi tiết đặt bàn</CardTitle>
-            <CardDescription>
-              Thông tin chi tiết về đặt bàn của bạn
-            </CardDescription>
+            <CardDescription>Thông tin chi tiết về đặt bàn của bạn</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center py-12 text-destructive">
-              <p className="text-lg font-medium">
-                Không tìm thấy thông tin đặt bàn
-              </p>
+              <p className="text-lg font-medium">Không tìm thấy thông tin đặt bàn</p>
               <Button
                 variant="outline"
                 className="mt-4"
@@ -127,8 +114,7 @@ const ReservationDetailPage = () => {
                   Đặt bàn #{booking.id.slice(-6)}
                 </CardTitle>
                 <CardDescription>
-                  Đặt lúc{' '}
-                  {format(new Date(booking.createdAt), 'dd/MM/yyyy HH:mm')}
+                  Đặt lúc {format(new Date(booking.createdAt), 'dd/MM/yyyy HH:mm')}
                 </CardDescription>
               </div>
               <div className="flex gap-2">
@@ -156,21 +142,15 @@ const ReservationDetailPage = () => {
                 <h3 className="text-lg font-semibold">Thông tin khách hàng</h3>
                 <div className="space-y-2">
                   <div className="flex items-start">
-                    <span className="text-muted-foreground min-w-[120px]">
-                      Họ tên:
-                    </span>
+                    <span className="text-muted-foreground min-w-[120px]">Họ tên:</span>
                     <span className="font-medium">{booking.customerName}</span>
                   </div>
                   <div className="flex items-start">
-                    <span className="text-muted-foreground min-w-[120px]">
-                      Số điện thoại:
-                    </span>
+                    <span className="text-muted-foreground min-w-[120px]">Số điện thoại:</span>
                     <span className="font-medium">{booking.customerPhone}</span>
                   </div>
                   <div className="flex items-start">
-                    <span className="text-muted-foreground min-w-[120px]">
-                      Email:
-                    </span>
+                    <span className="text-muted-foreground min-w-[120px]">Email:</span>
                     <span className="font-medium">{booking.customerEmail}</span>
                   </div>
                 </div>
@@ -182,23 +162,16 @@ const ReservationDetailPage = () => {
                   <div className="flex items-start">
                     <Calendar className="mr-2 h-4 w-4 text-muted-foreground mt-0.5" />
                     <div className="flex flex-col">
-                      <span className="text-muted-foreground text-sm">
-                        Thời gian đến:
-                      </span>
+                      <span className="text-muted-foreground text-sm">Thời gian đến:</span>
                       <span className="font-medium">
-                        {format(
-                          new Date(booking.bookingTime),
-                          'dd/MM/yyyy HH:mm',
-                        )}
+                        {format(new Date(booking.bookingTime), 'dd/MM/yyyy HH:mm')}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-start">
                     <Clock className="mr-2 h-4 w-4 text-muted-foreground mt-0.5" />
                     <div className="flex flex-col">
-                      <span className="text-muted-foreground text-sm">
-                        Thời gian kết thúc:
-                      </span>
+                      <span className="text-muted-foreground text-sm">Thời gian kết thúc:</span>
                       <span className="font-medium">
                         {format(new Date(booking.endTime), 'dd/MM/yyyy HH:mm')}
                       </span>
@@ -207,13 +180,10 @@ const ReservationDetailPage = () => {
                   <div className="flex items-start">
                     <Users className="mr-2 h-4 w-4 text-muted-foreground mt-0.5" />
                     <div className="flex flex-col">
-                      <span className="text-muted-foreground text-sm">
-                        Số lượng khách:
-                      </span>
+                      <span className="text-muted-foreground text-sm">Số lượng khách:</span>
                       <span className="font-medium">
                         {booking.numberOfGuests} người lớn
-                        {booking.numberOfChildren > 0 &&
-                          `, ${booking.numberOfChildren} trẻ em`}
+                        {booking.numberOfChildren > 0 && `, ${booking.numberOfChildren} trẻ em`}
                       </span>
                     </div>
                   </div>
@@ -346,10 +316,7 @@ const ReservationDetailPage = () => {
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell
-                        colSpan={3}
-                        className="text-right font-semibold"
-                      >
+                      <TableCell colSpan={3} className="text-right font-semibold">
                         Tổng cộng:
                       </TableCell>
                       <TableCell className="text-right font-semibold text-lg">
@@ -358,8 +325,7 @@ const ReservationDetailPage = () => {
                           currency: 'VND',
                         }).format(
                           booking.preOrderItems.reduce(
-                            (total, item) =>
-                              total + Number(item.price) * item.quantity,
+                            (total, item) => total + Number(item.price) * item.quantity,
                             0,
                           ),
                         )}
