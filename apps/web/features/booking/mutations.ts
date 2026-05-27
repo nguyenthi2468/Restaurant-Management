@@ -135,6 +135,14 @@ export const useCompleteBookingMutation = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['booking', data.id] });
+       if (data.bookingTables?.length) {
+        data.bookingTables.forEach((bookingTable) => {
+          queryClient.invalidateQueries({
+            queryKey: ['order', 'served', bookingTable.tableId],
+            exact: true,
+          });
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['tables', 'with-bookings', { limit : 24 }] });
       toast.success('Hoàn thành đặt bàn thành công');
     },
