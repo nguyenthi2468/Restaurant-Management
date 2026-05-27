@@ -5,7 +5,7 @@ import { useGetOrderByIdQuery } from '@/features/orders';
 import { useGetKitchenTicketsByOrderIdQuery } from '@/features/kitchen';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { ROUTES } from '@/constants';
 import { OrderStatus } from '@/features/orders';
@@ -20,6 +20,209 @@ export default function OrderDetailPage() {
   const { data: order, isLoading, isError } = useGetOrderByIdQuery(orderId);
   const { data: kitchenTickets, isLoading: isKitchenTicketsLoading } =
     useGetKitchenTicketsByOrderIdQuery(Number(order?.id));
+
+  const handlePrintOrder = () => {
+    if (!order) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Hóa đơn #${order.id}</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: 'Courier New', monospace;
+              padding: 20px;
+              max-width: 300px;
+              margin: 0 auto;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 20px;
+              border-bottom: 2px dashed #000;
+              padding-bottom: 10px;
+            }
+            .header h1 {
+              font-size: 18px;
+              margin-bottom: 5px;
+            }
+            .header p {
+              font-size: 12px;
+            }
+            .info {
+              margin-bottom: 15px;
+              font-size: 12px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 5px;
+            }
+            .items {
+              margin-bottom: 15px;
+              border-top: 1px dashed #000;
+              border-bottom: 1px dashed #000;
+              padding: 10px 0;
+            }
+            .item {
+              margin-bottom: 10px;
+              font-size: 12px;
+            }
+            .item-name {
+              font-weight: bold;
+              margin-bottom: 3px;
+            }
+            .item-details {
+              display: flex;
+              justify-content: space-between;
+              padding-left: 10px;
+            }
+            .total {
+              margin-top: 15px;
+              padding-top: 10px;
+              border-top: 2px solid #000;
+            }
+            .total-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              font-size: 11px;
+              border-top: 1px dashed #000;
+              padding-top: 10px;
+            }
+            .note {
+              margin-top: 10px;
+              padding: 10px;
+              background: #f5f5f5;
+              border-radius: 4px;
+              font-size: 11px;
+            }
+            @media print {
+              body {
+                padding: 10px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>HÓA ĐƠN</h1>
+            <p>Nhà hàng</p>
+          </div>
+          
+          <div class="info">
+            <div class="info-row">
+              <span>Mã đơn:</span>
+              <span><strong>#${order.id}</strong></span>
+            </div>
+            <div class="info-row">
+              <span>Bàn:</span>
+              <span><strong>${order.orderTables && order.orderTables.length > 0 ? order.orderTables[0].table.name : 'N/A'}</strong></span>
+            </div>
+            <div class="info-row">
+              <span>Ngày:</span>
+              <span>${new Date().toLocaleString('vi-VN')}</span>
+            </div>
+            ${
+              order.customerName
+                ? `
+            <div class="info-row">
+              <span>Khách hàng:</span>
+              <span>${order.customerName}</span>
+            </div>
+            `
+                : ''
+            }
+            ${
+              order.customerPhone
+                ? `
+            <div class="info-row">
+              <span>SĐT:</span>
+              <span>${order.customerPhone}</span>
+            </div>
+            `
+                : ''
+            }
+          </div>
+          
+          <div class="items">
+            ${
+              order.items && order.items.length > 0
+                ? order.items
+                    .map(
+                      (item) => `
+              <div class="item">
+                <div class="item-name">${item.menuItem?.name || 'Món ăn'}</div>
+                <div class="item-details">
+                  <span>${item.quantity} x ${formatCurrency(Number(item.price))}</span>
+                  <span><strong>${formatCurrency(Number(item.price) * item.quantity)}</strong></span>
+                </div>
+                ${item.note ? `<div style="padding-left: 10px; font-size: 10px; color: #666; margin-top: 2px;">Ghi chú: ${item.note}</div>` : ''}
+              </div>
+            `,
+                    )
+                    .join('')
+                : '<div class="item">Không có món nào</div>'
+            }
+          </div>
+          
+          <div class="total">
+            <div class="total-row">
+              <span>TỔNG CỘNG:</span>
+              <span>${formatCurrency(Number(order.total))}</span>
+            </div>
+            <div class="info-row" style="font-size: 12px; font-weight: normal;">
+              <span>Số lượng món:</span>
+              <span>${order.items ? order.items.reduce((acc, item) => acc + item.quantity, 0) : 0}</span>
+            </div>
+          </div>
+          
+          ${
+            order.note
+              ? `
+          <div class="note">
+            <strong>Ghi chú đơn hàng:</strong><br/>
+            ${order.note}
+          </div>
+          `
+              : ''
+          }
+          
+          <div class="footer">
+            <p>Cảm ơn quý khách!</p>
+            <p>Hẹn gặp lại!</p>
+          </div>
+          
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
 
   if (isLoading) {
     return (
@@ -115,7 +318,13 @@ export default function OrderDetailPage() {
           </Button>
           <h1 className="text-3xl font-bold">Order Details</h1>
         </div>
-        {getStatusBadge(order.status)}
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={handlePrintOrder}>
+            <Printer className="h-4 w-4 mr-2" />
+            Print
+          </Button>
+          {getStatusBadge(order.status)}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -171,7 +380,7 @@ export default function OrderDetailPage() {
               )}
             </CardContent>
           </Card>
- {order.items && order.items.length > 0 && (
+          {order.items && order.items.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Order Items</CardTitle>
@@ -211,7 +420,7 @@ export default function OrderDetailPage() {
               </CardContent>
             </Card>
           )}
-          
+
           {kitchenTickets && kitchenTickets.length > 0 && (
             <Card>
               <CardHeader>
@@ -281,8 +490,6 @@ export default function OrderDetailPage() {
               </CardContent>
             </Card>
           )}
-
-         
         </div>
 
         <div className="space-y-6">

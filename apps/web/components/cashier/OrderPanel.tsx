@@ -117,6 +117,203 @@ export function OrderPanel({
     }
   };
 
+  const handlePrintOrder = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Hóa đơn #${order?.id}</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: 'Courier New', monospace;
+              padding: 20px;
+              max-width: 300px;
+              margin: 0 auto;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 20px;
+              border-bottom: 2px dashed #000;
+              padding-bottom: 10px;
+            }
+            .header h1 {
+              font-size: 18px;
+              margin-bottom: 5px;
+            }
+            .header p {
+              font-size: 12px;
+            }
+            .info {
+              margin-bottom: 15px;
+              font-size: 12px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 5px;
+            }
+            .items {
+              margin-bottom: 15px;
+              border-top: 1px dashed #000;
+              border-bottom: 1px dashed #000;
+              padding: 10px 0;
+            }
+            .item {
+              margin-bottom: 10px;
+              font-size: 12px;
+            }
+            .item-name {
+              font-weight: bold;
+              margin-bottom: 3px;
+            }
+            .item-details {
+              display: flex;
+              justify-content: space-between;
+              padding-left: 10px;
+            }
+            .total {
+              margin-top: 15px;
+              padding-top: 10px;
+              border-top: 2px solid #000;
+            }
+            .total-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              font-size: 11px;
+              border-top: 1px dashed #000;
+              padding-top: 10px;
+            }
+            .note {
+              margin-top: 10px;
+              padding: 10px;
+              background: #f5f5f5;
+              border-radius: 4px;
+              font-size: 11px;
+            }
+            @media print {
+              body {
+                padding: 10px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>HÓA ĐƠN</h1>
+            <p>Nhà hàng</p>
+          </div>
+          
+          <div class="info">
+            <div class="info-row">
+              <span>Mã đơn:</span>
+              <span><strong>#${order?.id}</strong></span>
+            </div>
+            <div class="info-row">
+              <span>Bàn:</span>
+              <span><strong>${selectedTable?.name}</strong></span>
+            </div>
+            <div class="info-row">
+              <span>Ngày:</span>
+              <span>${new Date().toLocaleString('vi-VN')}</span>
+            </div>
+            ${
+              order?.customerName
+                ? `
+            <div class="info-row">
+              <span>Khách hàng:</span>
+              <span>${order.customerName}</span>
+            </div>
+            `
+                : ''
+            }
+            ${
+              order?.customerPhone
+                ? `
+            <div class="info-row">
+              <span>SĐT:</span>
+              <span>${order.customerPhone}</span>
+            </div>
+            `
+                : ''
+            }
+          </div>
+          
+          <div class="items">
+            ${orderItems
+              .map(
+                (item) => `
+              <div class="item">
+                <div class="item-name">${item.menuItem?.name || 'Món ăn'}</div>
+                <div class="item-details">
+                  <span>${item.quantity} x ${formatCurrency(Number(item.price))}</span>
+                  <span><strong>${formatCurrency(Number(item.price) * item.quantity)}</strong></span>
+                </div>
+                ${item.note ? `<div style="padding-left: 10px; font-size: 10px; color: #666; margin-top: 2px;">Ghi chú: ${item.note}</div>` : ''}
+              </div>
+            `,
+              )
+              .join('')}
+          </div>
+          
+          <div class="total">
+            <div class="total-row">
+              <span>TỔNG CỘNG:</span>
+              <span>${formatCurrency(totalAmount)}</span>
+            </div>
+            <div class="info-row" style="font-size: 12px; font-weight: normal;">
+              <span>Số lượng món:</span>
+              <span>${orderItems.reduce((acc, item) => acc + item.quantity, 0)}</span>
+            </div>
+          </div>
+          
+          ${
+            order?.note
+              ? `
+          <div class="note">
+            <strong>Ghi chú đơn hàng:</strong><br/>
+            ${order.note}
+          </div>
+          `
+              : ''
+          }
+          
+          <div class="footer">
+            <p>Cảm ơn quý khách!</p>
+            <p>Hẹn gặp lại!</p>
+          </div>
+          
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+
   if (!selectedTable) {
     return (
       <div className="w-full md:w-80 lg:w-96 xl:w-[480px] bg-white md:border-l border-slate-200 flex flex-col">
@@ -156,7 +353,9 @@ export function OrderPanel({
             Tạo đơn cho bàn này
           </Button>
           <Button
-            onClick={() => {setReservationDrawerOpen(true)}}
+            onClick={() => {
+              setReservationDrawerOpen(true);
+            }}
             className="w-full"
             size="lg"
           >
@@ -174,11 +373,11 @@ export function OrderPanel({
             }}
           />
         )}
-         <ReservationTableDrawer
-        tableId={selectedTable?.id || ''}
-        isOpen={reservationDrawerOpen}
-        onOpenChange={setReservationDrawerOpen}
-      />
+        <ReservationTableDrawer
+          tableId={selectedTable?.id || ''}
+          isOpen={reservationDrawerOpen}
+          onOpenChange={setReservationDrawerOpen}
+        />
       </div>
     );
   }
@@ -297,7 +496,7 @@ export function OrderPanel({
             >
               <NotepadText size={12} />
             </Button>
-            <Button size="icon-xs" variant="ghost">
+            <Button size="icon-xs" variant="ghost" onClick={handlePrintOrder}>
               <Printer size={12} />
             </Button>
           </div>
