@@ -22,7 +22,7 @@ export const useGetKitchenTicketByIdQuery = (id: string) => {
   });
 };
 
-export const useGetKitchenTicketsByOrderIdQuery = (orderId: number | string) => {
+export const useGetKitchenTicketsByOrderIdQuery = (orderId: number) => {
   return useQuery({
     queryKey: ['kitchen-tickets', 'order', orderId],
     queryFn: () => getKitchenTicketsByOrderId(orderId),

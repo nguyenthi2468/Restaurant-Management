@@ -238,6 +238,9 @@ export class TableService {
     const bookedTableIds = await this.prisma.bookingTable.findMany({
       where: {
         booking: {
+          status: {
+            notIn: [BookingStatus.CANCELLED, BookingStatus.COMPLETED],
+          },
           AND: [
             { bookingTime: { lt: calculatedEndTime } },
             { endTime: { gt: bookingTime } },

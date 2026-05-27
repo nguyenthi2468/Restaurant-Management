@@ -182,37 +182,60 @@ export function ReservationForm() {
 
   const selectedTables = form.watch('tables') || [];
 
-  const handleTableToggle = (tableId: string) => {
-    const currentTables = form.getValues('tables') || [];
-    const isSelected = currentTables.some((t) => t.tableId === tableId);
+const handleTableToggle = (tableId: string) => {
+  const currentTables = form.getValues('tables') || [];
+  const isSelected = currentTables.some((t) => t.tableId === tableId);
 
-    if (isSelected) {
-      form.setValue(
-        'tables',
-        currentTables.filter((t) => t.tableId !== tableId),
+  if (isSelected) {
+    form.setValue(
+      'tables',
+      currentTables.filter((t) => t.tableId !== tableId),
+    );
+  } else {
+    const newTable = allTables.find((t) => t.id === tableId);
+    if (!newTable) return;
+
+    const currentSeats = currentTables.reduce((sum, t) => {
+      const table = allTables.find((at) => at.id === t.tableId);
+      return sum + (table?.seats || 0);
+    }, 0);
+
+    const remainingSeats = totalPersons - currentSeats;
+
+    // Kiểm tra ngay từ bàn đầu tiên, bỏ điều kiện currentTables.length > 0
+    if (newTable.seats > remainingSeats) {
+      const selectedTableIds = currentTables.map((t) => t.tableId);
+      const hasAlternative = allTables.some(
+        (t) =>
+          !selectedTableIds.includes(t.id) &&
+          t.id !== tableId &&
+          t.seats <= remainingSeats &&
+          t.seats > 0,
       );
-    } else {
-      const newTable = allTables.find((t) => t.id === tableId);
-      if (!newTable) return;
 
-      const currentSeats = currentTables.reduce((sum, t) => {
-        const table = allTables.find((at) => at.id === t.tableId);
-        return sum + (table?.seats || 0);
-      }, 0);
-
-      if (
-        currentTables.length > 0 &&
-        currentSeats + newTable.seats > totalPersons
-      ) {
+      if (hasAlternative) {
         toast.error(
-          `Không thể chọn thêm bàn ${newTable.seats} chỗ vì vượt quá số người (${totalPersons} người)`,
+          `Còn bàn phù hợp hơn cho ${remainingSeats} chỗ còn lại. Vui lòng chọn bàn nhỏ hơn.`,
         );
-        return;
+        return; // ← chặn
       }
 
-      form.setValue('tables', [...currentTables, { tableId }]);
+      // Không còn bàn phù hợp hơn → cảnh báo nhưng vẫn cho chọn
+      // toast.error(
+      //   `Không có bàn ${remainingSeats} chỗ, hệ thống chọn bàn ${newTable.seats} chỗ thay thế.`,
+      // );
+      // Không return → tiếp tục setValue
     }
-  };
+
+    // Chặn khi đã đủ hoặc vượt quá số người
+    if (currentSeats >= totalPersons) {
+      toast.error(`Đã đủ ${totalPersons} người, không thể chọn thêm bàn.`);
+      return; // ← chặn
+    }
+
+    form.setValue('tables', [...currentTables, { tableId }]);
+  }
+};
 
   const handleMenuItemToggle = (menuItemId: string, price: number) => {
     const currentItems = form.getValues('preOrderItems') || [];
