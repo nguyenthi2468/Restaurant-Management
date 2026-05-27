@@ -108,10 +108,7 @@ export default function Header() {
                     <Link href="/me">Account</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Link href="/me/my-bookings">My Bookings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link href="/me/sale">My offers</Link>
+                    <Link href="/me/my-reservations">My Reservations</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>

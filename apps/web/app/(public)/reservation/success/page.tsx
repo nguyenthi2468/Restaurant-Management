@@ -293,9 +293,9 @@ export function SuccessContent() {
           </Button>
           <Button
             className="flex-1"
-            onClick={() => router.push(`/me/my-bookings/${booking.id}`)}
+            onClick={() => router.push(`/me/my-reservations/${booking.id}`)}
           >
-            View Booking Details
+            View Reservation Details
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

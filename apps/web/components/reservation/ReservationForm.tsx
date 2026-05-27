@@ -45,6 +45,7 @@ import {
 import { formatCurrency } from '@/utils/currency';
 import { useRouter } from 'next/navigation';
 import { Booking } from '@/features/booking/types';
+import { useAuth } from '@/providers/AuthProvider';
 
 const getMinimumBookingTime = (): Date => {
   const now = new Date();
@@ -82,6 +83,7 @@ const isBookingTimeAllowed = (date: Date): boolean => {
 };
 
 export function ReservationForm() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [selectedFloorId, setSelectedFloorId] = useState<string>('');
   const [showTableSelection, setShowTableSelection] = useState(false);
@@ -161,7 +163,10 @@ export function ReservationForm() {
   const onSubmit = async (data: BookingFormValues) => {
     setLoading(true);
     try {
-      const booking: Booking = await createBookingMutation.mutateAsync(data);
+      const booking: Booking = await createBookingMutation.mutateAsync({
+        ...data,
+        customerId: user?.id || undefined,
+      });
 
       // Check if depositAmount > 0, redirect to confirm-payment page
       const depositAmount =

@@ -332,7 +332,7 @@ export function PaymentResult() {
           </Button>
           <Button
             className="flex-1"
-            onClick={() => router.push(`/me/my-bookings/${booking.id}`)}
+            onClick={() => router.push(`/me/my-reservations/${booking.id}`)}
           >
             View Booking Details
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -349,7 +349,7 @@ export function PaymentResult() {
                 </p>
                 <Button
                   variant="default"
-                  onClick={() => router.push(`/me/my-bookings/${booking.id}`)}
+                  onClick={() => router.push(`/me/my-reservations/${booking.id}`)}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   <CreditCard className="w-4 h-4 mr-2" />

@@ -4,6 +4,7 @@ import {
   getBookingById,
   getBookingsWithPagination,
   getBookingsByTableId,
+  getMyBookingsWithPagination,
 } from './api';
 import { BookingQueryParams, QueryBookingByTableParams } from './types';
 
@@ -18,6 +19,13 @@ export const useBookingsWithPaginationQuery = (params?: BookingQueryParams) => {
   return useQuery({
     queryKey: ['bookings', 'paginated', params],
     queryFn: () => getBookingsWithPagination(params),
+  });
+};
+
+export const useMyBookingsWithPaginationQuery = (params?: BookingQueryParams) => {
+  return useQuery({
+    queryKey: ['my-bookings', 'paginated', params],
+    queryFn: () => getMyBookingsWithPagination(params),
   });
 };
 

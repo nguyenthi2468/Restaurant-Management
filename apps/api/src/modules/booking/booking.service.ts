@@ -234,6 +234,81 @@ export class BookingService {
     };
   }
 
+  async findMyBookingsWithPagination(
+    customerId: string,
+    queryDto: QueryBookingDto,
+  ): Promise<PaginatedBookingResponseDto> {
+    const { search, status, page = 1, limit = 10 } = queryDto;
+
+    const where: Prisma.BookingWhereInput = {
+      customerId,
+    };
+
+    if (search) {
+      where.OR = [
+        {
+          customerName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          customerPhone: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          bookingTables: {
+            include: {
+              table: {
+                include: {
+                  floor: true,
+                },
+              },
+            },
+          },
+          preOrderItems: {
+            include: {
+              menuItem: true,
+            },
+          },
+          payments: true,
+        },
+        orderBy: {
+          bookingTime: 'desc',
+        },
+      }),
+      this.prisma.booking.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: bookings as any,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
+  }
+
   async findByTableIdWithPagination(
     tableId: string,
     queryDto: QueryBookingByTableDto,

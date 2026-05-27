@@ -118,3 +118,13 @@ export const getBookingsByTableId = async (
   );
   return response.data;
 };
+
+export const getMyBookingsWithPagination = async (
+  params?: BookingQueryParams,
+) => {
+  const response = await api.get<PaginatedBookingResponse>(
+    `${API_ENDPOINTS.BOOKINGS.BASE}/my-bookings`,
+    { params },
+  );
+  return response.data;
+};

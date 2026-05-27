@@ -88,6 +88,24 @@ export class BookingController {
     return this.bookingService.findAllWithPagination(queryDto);
   }
 
+  @Get('my-bookings')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Get current user's bookings with search and pagination",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Paginated list of user's bookings",
+    type: PaginatedBookingResponseDto,
+  })
+  async findMyBookings(
+    @Query() queryDto: QueryBookingDto,
+    @Req() req: any,
+  ): Promise<PaginatedBookingResponseDto> {
+    const userId = req.user.id;
+    return this.bookingService.findMyBookingsWithPagination(userId, queryDto);
+  }
+
   @Get(':id')
   @Action('reservation:read')
   @ApiOperation({ summary: 'Get a booking by ID' })
