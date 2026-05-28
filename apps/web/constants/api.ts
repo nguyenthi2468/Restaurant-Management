@@ -52,4 +52,10 @@ export const API_ENDPOINTS = {
     ITEM_STATUS: (itemId: string) =>
       `${API_ENDPOINTS.KITCHEN_TICKETS.BASE}/items/${itemId}/status`,
   },
+  EMPLOYEE_SCHEDULES: {
+    SHIFTS: '/employee-schedules/shifts',
+    SCHEDULES: '/employee-schedules/schedules',
+    ATTENDANCE: '/employee-schedules/attendance',
+    TIME_OFF_REQUESTS: '/employee-schedules/time-off-requests',
+  },
 };

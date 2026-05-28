@@ -39,7 +39,11 @@ model User {
   resetTokens      PasswordResetToken[]
   galleries        ImageGallery[]
   folderGalleries  FolderGallery[]
-  bookings         Booking[] // Added for Booking relation
+  bookings         Booking[]
+  employeeSchedules EmployeeSchedule[] @relation("EmployeeSchedules")
+  timeOffRequests TimeOffRequest[] @relation("EmployeeTimeOffRequests")
+  timeOffRequestsReviewed TimeOffRequest[] @relation("TimeOffReviewedBy")
+  attendances Attendance[] @relation("EmployeeAttendances")
 }
 model Role {
   id          String           @id @default(cuid())
@@ -513,4 +517,119 @@ enum KitchenItemStatus {
   READY
   SERVED
   CANCELLED
+}
+
+enum ShiftType {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+  FULL_DAY
+}
+
+enum ScheduleStatus {
+  SCHEDULED
+  COMPLETED
+  ABSENT
+  LATE
+  CANCELLED
+}
+
+enum TimeOffRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum TimeOffType {
+  SICK_LEAVE
+  VACATION
+  PERSONAL
+  UNPAID
+}
+
+enum AttendanceStatus {
+  ON_TIME
+  LATE
+  ABSENT
+  EXCUSED
+}
+
+// ==================== EMPLOYEE SCHEDULE MANAGEMENT ====================
+
+model Shift {
+  id          String    @id @default(cuid())
+  name        String
+  type        ShiftType
+  startTime   String
+  endTime     String
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  schedules EmployeeSchedule[]
+
+  @@index([isActive])
+}
+
+model EmployeeSchedule {
+  id         String         @id @default(cuid())
+  employeeId String
+  employee   User           @relation("EmployeeSchedules", fields: [employeeId], references: [id], onDelete: Cascade)
+  shiftId    String
+  shift      Shift          @relation(fields: [shiftId], references: [id])
+  date       DateTime
+  status     ScheduleStatus @default(SCHEDULED)
+  note       String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([employeeId, date, shiftId])
+  @@index([employeeId])
+  @@index([shiftId])
+  @@index([date])
+  @@index([status])
+}
+
+model TimeOffRequest {
+  id           String               @id @default(cuid())
+  employeeId   String
+  employee     User                 @relation("EmployeeTimeOffRequests", fields: [employeeId], references: [id], onDelete: Cascade)
+  type         TimeOffType
+  startDate    DateTime
+  endDate      DateTime
+  reason       String?
+  status       TimeOffRequestStatus @default(PENDING)
+  reviewedById String?
+  reviewedBy   User?                @relation("TimeOffReviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+  reviewNote   String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@index([employeeId])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  employeeId   String
+  employee     User             @relation("EmployeeAttendances", fields: [employeeId], references: [id], onDelete: Cascade)
+  date         DateTime
+  clockIn      DateTime?
+  clockOut     DateTime?
+  status       AttendanceStatus @default(ON_TIME)
+  workHours    Decimal?         @db.Decimal(5, 2)
+  overtimeHours Decimal?        @db.Decimal(5, 2)
+  note         String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([employeeId])
+  @@index([date])
+  @@index([status])
 }

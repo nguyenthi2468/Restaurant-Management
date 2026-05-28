@@ -22,6 +22,7 @@ import { OrderItemModule } from './modules/order-item/order-item.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { PusherModule } from './modules/pusher/pusher.module';
 import { KitchenModule } from './modules/kitchen/kitchen.module';
+import { EmployeeSchedulesModule } from './modules/employee-schedules/employee-schedules.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { KitchenModule } from './modules/kitchen/kitchen.module';
     BookingModule,
     PusherModule,
     KitchenModule,
+    EmployeeSchedulesModule,
   ],
   controllers: [AppController],
   providers: [
