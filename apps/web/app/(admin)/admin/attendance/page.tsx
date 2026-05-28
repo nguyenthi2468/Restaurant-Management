@@ -99,6 +99,16 @@ export default function AttendancePage() {
     return `${numHours.toFixed(1)}h`;
   };
 
+  const handleStatusChange = (
+    attendanceId: string,
+    newStatus: AttendanceStatus,
+  ) => {
+    updateMutation.mutate({
+      id: attendanceId,
+      data: { status: newStatus },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -209,6 +219,7 @@ export default function AttendancePage() {
                 <TableHead>Số giờ làm</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Ghi chú</TableHead>
+                <TableHead>Hành động</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -244,6 +255,35 @@ export default function AttendancePage() {
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">
                       {attendance.note || '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={attendance.status}
+                        onValueChange={(value) =>
+                          handleStatusChange(
+                            attendance.id,
+                            value as AttendanceStatus,
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={AttendanceStatus.ON_TIME}>
+                            Đúng giờ
+                          </SelectItem>
+                          <SelectItem value={AttendanceStatus.ABSENT}>
+                            Vắng mặt
+                          </SelectItem>
+                          <SelectItem value={AttendanceStatus.LATE}>
+                            Đi muộn
+                          </SelectItem>
+                          <SelectItem value={AttendanceStatus.EXCUSED}>
+                            Có phép
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))
