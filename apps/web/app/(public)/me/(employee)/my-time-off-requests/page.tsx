@@ -75,7 +75,7 @@ export default function MyTimeOffRequestsPage() {
     watch,
   } = useForm<CreateTimeOffRequestForm>({
     defaultValues: {
-      type: TimeOffRequestType.ANNUAL_LEAVE,
+      type: TimeOffRequestType.VACATION,
       startDate: '',
       endDate: '',
       reason: '',
@@ -126,10 +126,9 @@ export default function MyTimeOffRequestsPage() {
   const getTypeLabel = (type: TimeOffRequestType) => {
     const typeLabels = {
       [TimeOffRequestType.SICK_LEAVE]: 'Nghỉ ốm',
-      [TimeOffRequestType.ANNUAL_LEAVE]: 'Nghỉ phép năm',
-      [TimeOffRequestType.PERSONAL_LEAVE]: 'Nghỉ cá nhân',
-      [TimeOffRequestType.UNPAID_LEAVE]: 'Nghỉ không lương',
-      [TimeOffRequestType.OTHER]: 'Khác',
+      [TimeOffRequestType.VACATION]: 'Nghỉ phép',
+      [TimeOffRequestType.PERSONAL]: 'Nghỉ cá nhân',
+      [TimeOffRequestType.UNPAID]: 'Nghỉ không lương',
     };
     return typeLabels[type] || type;
   };
@@ -150,7 +149,6 @@ export default function MyTimeOffRequestsPage() {
       },
       {
         onSuccess: () => {
-          toast.success('Tạo yêu cầu nghỉ phép thành công');
           setIsDialogOpen(false);
           reset();
         },
@@ -195,20 +193,17 @@ export default function MyTimeOffRequestsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={TimeOffRequestType.ANNUAL_LEAVE}>
-                        Nghỉ phép năm
+                      <SelectItem value={TimeOffRequestType.VACATION}>
+                        Nghỉ phép
                       </SelectItem>
                       <SelectItem value={TimeOffRequestType.SICK_LEAVE}>
                         Nghỉ ốm
                       </SelectItem>
-                      <SelectItem value={TimeOffRequestType.PERSONAL_LEAVE}>
+                      <SelectItem value={TimeOffRequestType.PERSONAL}>
                         Nghỉ cá nhân
                       </SelectItem>
-                      <SelectItem value={TimeOffRequestType.UNPAID_LEAVE}>
+                      <SelectItem value={TimeOffRequestType.UNPAID}>
                         Nghỉ không lương
-                      </SelectItem>
-                      <SelectItem value={TimeOffRequestType.OTHER}>
-                        Khác
                       </SelectItem>
                     </SelectContent>
                   </Select>

@@ -146,10 +146,9 @@ export enum TimeOffRequestStatus {
 
 export enum TimeOffRequestType {
   SICK_LEAVE = 'SICK_LEAVE',
-  ANNUAL_LEAVE = 'ANNUAL_LEAVE',
-  PERSONAL_LEAVE = 'PERSONAL_LEAVE',
-  UNPAID_LEAVE = 'UNPAID_LEAVE',
-  OTHER = 'OTHER',
+  VACATION = 'VACATION',
+  PERSONAL = 'PERSONAL',
+  UNPAID = 'UNPAID',
 }
 
 export interface TimeOffRequest {

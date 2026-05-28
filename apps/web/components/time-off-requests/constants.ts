@@ -19,8 +19,7 @@ export const statusLabels: Record<TimeOffRequestStatus, string> = {
 
 export const typeLabels: Record<TimeOffRequestType, string> = {
   [TimeOffRequestType.SICK_LEAVE]: 'Nghỉ ốm',
-  [TimeOffRequestType.ANNUAL_LEAVE]: 'Nghỉ phép năm',
-  [TimeOffRequestType.PERSONAL_LEAVE]: 'Nghỉ cá nhân',
-  [TimeOffRequestType.UNPAID_LEAVE]: 'Nghỉ không lương',
-  [TimeOffRequestType.OTHER]: 'Khác',
+  [TimeOffRequestType.VACATION]: 'Nghỉ phép năm',
+  [TimeOffRequestType.PERSONAL]: 'Nghỉ cá nhân',
+  [TimeOffRequestType.UNPAID]: 'Nghỉ không lương',
 };

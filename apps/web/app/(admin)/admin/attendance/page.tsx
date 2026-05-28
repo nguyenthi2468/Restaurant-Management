@@ -30,6 +30,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ClockInDialog } from '@/components/attendance/ClockInDialog';
+import { ClockOutDialog } from '@/components/attendance/ClockOutDialog';
 
 const statusColors: Record<AttendanceStatus, string> = {
   [AttendanceStatus.ON_TIME]: 'bg-green-500',
@@ -51,6 +53,9 @@ export default function AttendancePage() {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [page, setPage] = useState(1);
+  const [openClockInDialog, setOpenClockInDialog] = useState(false);
+  const [openClockOutDialog, setOpenClockOutDialog] = useState(false);
+
   const limit = 10;
 
   const queryParams = {
@@ -129,13 +134,13 @@ export default function AttendancePage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Xuất báo cáo
-          </Button>
-          <Button>
+          <Button onClick={() => setOpenClockInDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Thêm bản ghi
+            Chấm công vào
+          </Button>
+          <Button onClick={() => setOpenClockOutDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Chấm công ra
           </Button>
         </div>
       </div>
@@ -273,6 +278,14 @@ export default function AttendancePage() {
           </div>
         </div>
       )}
+      <ClockInDialog
+        open={openClockInDialog}
+        onOpenChange={setOpenClockInDialog}
+      />
+      <ClockOutDialog
+        open={openClockOutDialog}
+        onOpenChange={setOpenClockOutDialog}
+      />
     </div>
   );
 }

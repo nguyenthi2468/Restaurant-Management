@@ -12,6 +12,7 @@ import {
   getTimeOffRequests,
   getTimeOffRequestsByEmployee,
   getTimeOffRequestById,
+  getQRCode,
 } from './api';
 import {
   QueryEmployeeScheduleDto,
@@ -123,5 +124,13 @@ export const useTimeOffRequestQuery = (id: string) => {
     queryKey: ['time-off-request', id],
     queryFn: () => getTimeOffRequestById(id),
     enabled: !!id,
+  });
+};
+
+export const useQRCodeQuery = (employeeId: string) => {
+  return useQuery({
+    queryKey: ['qrcode', employeeId],
+    queryFn: () => getQRCode(employeeId),
+    enabled: !!employeeId,
   });
 };

@@ -25,6 +25,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { TimeOffRequestList } from '@/components/time-off-requests/TimeOffRequestList';
 import { ApproveRejectDialog } from '@/components/time-off-requests/ApproveRejectDialog';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import {
   statusLabels,
   typeLabels,
@@ -41,9 +42,11 @@ export default function TimeOffRequestsPage() {
 
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<TimeOffRequest | null>(
     null,
   );
+  const [deleteRequestId, setDeleteRequestId] = useState<string | null>(null);
   const [reviewNote, setReviewNote] = useState('');
 
   const queryParams = {
@@ -109,8 +112,18 @@ export default function TimeOffRequestsPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa yêu cầu nghỉ phép này?')) {
-      deleteMutation.mutate(id);
+    setDeleteRequestId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deleteRequestId) {
+      deleteMutation.mutate(deleteRequestId, {
+        onSuccess: () => {
+          setDeleteDialogOpen(false);
+          setDeleteRequestId(null);
+        },
+      });
     }
   };
 
@@ -225,6 +238,17 @@ export default function TimeOffRequestsPage() {
         onReviewNoteChange={setReviewNote}
         onConfirmApprove={confirmApprove}
         onConfirmReject={confirmReject}
+      />
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Xóa yêu cầu nghỉ phép"
+        description="Bạn có chắc chắn muốn xóa yêu cầu nghỉ phép này? Hành động này không thể hoàn tác."
+        confirmText="Xóa"
+        cancelText="Hủy"
+        isLoading={deleteMutation.isPending}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteDialogOpen(false)}
       />
     </div>
   );

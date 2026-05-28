@@ -46,7 +46,12 @@ export default function MyAttendancePage() {
     startDate,
     endDate,
   );
-
+ const formatWorkHours = (hours?: number) => {
+    if (hours == null) return '-';
+    const numHours = typeof hours === 'number' ? hours : Number(hours);
+    if (isNaN(numHours)) return '-';
+    return `${numHours.toFixed(1)}h`;
+  };
   const getStatusBadge = (status: AttendanceStatus) => {
     const statusConfig = {
       [AttendanceStatus.ON_TIME]: {
@@ -161,7 +166,7 @@ export default function MyAttendancePage() {
             <CardDescription>Tổng giờ làm việc</CardDescription>
             <CardTitle className="text-3xl flex items-center gap-2">
               <Clock className="h-6 w-6" />
-              {stats.totalHours.toFixed(1)}h
+              {formatWorkHours(stats.totalHours)}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -256,7 +261,7 @@ export default function MyAttendancePage() {
                       </TableCell>
                       <TableCell>
                         {attendance.workHours
-                          ? `${attendance.workHours.toFixed(1)}h`
+                          ? formatWorkHours(attendance.workHours)
                           : '-'}
                       </TableCell>
                       <TableCell>{getStatusBadge(attendance.status)}</TableCell>

@@ -20,7 +20,7 @@ export class TimeOffRequestService {
       throw new NotFoundException(`Nhân viên với ID ${employeeId} không tìm thấy`);
     }
 
-    if (startDate >= endDate) {
+    if (startDate > endDate) {
       throw new BadRequestException('Ngày bắt đầu phải trước ngày kết thúc');
     }
 

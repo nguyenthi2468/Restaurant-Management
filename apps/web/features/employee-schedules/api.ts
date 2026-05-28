@@ -259,3 +259,11 @@ export const rejectTimeOffRequest = async (id: string, reviewNote?: string) => {
   );
   return response.data;
 };
+
+export const getQRCode = async (employeeId: string) => {
+  const response = await api.get(
+    `${API_ENDPOINTS.EMPLOYEE_SCHEDULES.ATTENDANCE}/qdcode/${employeeId}`,
+    { responseType: 'blob' },
+  );
+  return URL.createObjectURL(response.data);
+};

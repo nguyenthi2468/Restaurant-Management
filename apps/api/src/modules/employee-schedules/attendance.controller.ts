@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  Res,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,7 +27,8 @@ import { ClockOutDto } from './dto/attendance/clock-out.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionGuard } from '../auth/guards/action.guard';
 import { Action } from '../auth/decorator/action.decorator';
-
+import * as QRCode from 'qrcode';
+import { Response } from 'express';
 @ApiTags('employee-schedules/attendance')
 @ApiBearerAuth()
 @Controller('employee-schedules/attendance')
@@ -53,7 +55,13 @@ export class AttendanceController {
   create(@Body() createAttendanceDto: CreateAttendanceDto) {
     return this.attendanceService.create(createAttendanceDto);
   }
+  @Get('qdcode/:employeeId')
+  async generate(@Param('employeeId') employeeId: string, @Res() res: Response) {
+    const qr = await QRCode.toBuffer(employeeId);
 
+    res.setHeader('Content-Type', 'image/png');
+    res.send(qr);
+  }
   @Get()
   @Action('attendance:read')
   @UseGuards(ActionGuard)
