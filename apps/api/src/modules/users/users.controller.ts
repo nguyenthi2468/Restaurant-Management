@@ -92,14 +92,9 @@ export class UsersController {
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy người dùng' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getById(@Req() req: Request, @Param('id') id: string) {
-    const requesterId = (req.user as any).id;
-    const data = await this.users.getPublicProfile(requesterId, id);
-    const groups = data.email ? ['private'] : [];
-    return plainToInstance(PublicUserDto, data, {
-      groups,
-      excludeExtraneousValues: true,
-    });
+  async getById(@Param('id') id: string) {
+    const user = await this.users.getUserById(id);
+    return user;
   }
 
   @Get()

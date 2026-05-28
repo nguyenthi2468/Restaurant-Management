@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, IsDate, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsDate,
+  IsEnum,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { ScheduleStatus } from '@prisma/client';
 
 export class QueryEmployeeScheduleDto {
@@ -24,4 +31,16 @@ export class QueryEmployeeScheduleDto {
   @IsOptional()
   @IsEnum(ScheduleStatus)
   status?: ScheduleStatus;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  page?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  limit?: number;
 }

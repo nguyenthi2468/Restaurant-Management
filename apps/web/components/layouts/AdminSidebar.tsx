@@ -109,12 +109,12 @@ export const navItems: NavItem[] = [
   },
   {
     title: 'Employee Schedules',
-    href: ROUTES.ADMIN_EMPLOYEE_SCHEDULES_BASE,
+    href: ROUTES.ADMIN_EMPLOYEE_SCHEDULES,
     icon: Clock,
     action: 'employee-schedule:read',
     submenu: [
       { title: 'Shifts', href: ROUTES.ADMIN_SHIFTS, action: 'employee-schedule:read' },
-      { title: 'Schedules', href: ROUTES.ADMIN_SCHEDULES, action: 'employee-schedule:read' },
+      { title: 'Schedules', href: ROUTES.ADMIN_EMPLOYEE_SCHEDULES, action: 'employee-schedule:read' },
       { title: 'Attendance', href: ROUTES.ADMIN_ATTENDANCE, action: 'employee-schedule:read' },
       { title: 'Time Off Requests', href: ROUTES.ADMIN_TIME_OFF_REQUESTS, action: 'employee-schedule:read' },
     ],

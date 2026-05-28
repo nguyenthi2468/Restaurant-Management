@@ -11,3 +11,11 @@ export const shiftFormSchema = z.object({
 });
 
 export type ShiftFormValues = z.infer<typeof shiftFormSchema>;
+
+export const assignShiftFormSchema = z.object({
+  shiftId: z.string().min(1, 'Ca làm việc là bắt buộc'),
+  date: z.string().min(1, 'Ngày là bắt buộc'),
+  note: z.string().optional(),
+});
+
+export type AssignShiftFormValues = z.infer<typeof assignShiftFormSchema>;

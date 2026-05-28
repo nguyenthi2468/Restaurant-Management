@@ -1,3 +1,5 @@
+import { User } from "../user";
+
 export enum ShiftType{
  MORNING = 'MORNING',
   AFTERNOON = 'AFTERNOON',
@@ -43,11 +45,7 @@ export interface EmployeeSchedule {
   note?: string;
   createdAt: string;
   updatedAt: string;
-  employee?: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  employee?: User;
   shift?: Shift;
 }
 
@@ -207,10 +205,12 @@ export interface QueryTimeOffRequestDto {
 
 export interface PaginatedResponse<T> {
   data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export type PaginatedShiftResponse = PaginatedResponse<Shift>;

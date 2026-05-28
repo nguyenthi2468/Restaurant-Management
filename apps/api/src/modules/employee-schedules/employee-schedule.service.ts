@@ -60,7 +60,7 @@ export class EmployeeScheduleService {
   }
 
   async findAll(query: QueryEmployeeScheduleDto) {
-    const { employeeId, shiftId, startDate, endDate, status } = query;
+    const { employeeId, shiftId, startDate, endDate, status, page = 1, limit = 10 } = query;
 
     const where: any = {};
 
@@ -86,21 +86,41 @@ export class EmployeeScheduleService {
       }
     }
 
-    return this.prisma.employeeSchedule.findMany({
-      where,
-      include: {
-        employee: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const [data, total] = await Promise.all([
+      this.prisma.employeeSchedule.findMany({
+        where,
+        include: {
+          employee: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
+          shift: true,
         },
-        shift: true,
+        orderBy: { date: 'asc' },
+        skip,
+        take,
+      }),
+      this.prisma.employeeSchedule.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
       },
-      orderBy: { date: 'asc' },
-    });
+    };
   }
 
   async findOne(id: string) {

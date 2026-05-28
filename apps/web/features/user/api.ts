@@ -2,13 +2,24 @@ import { API_ENDPOINTS } from '@/constants';
 import api from '@/lib/axios';
 import { PaginatedResponse } from '@/types';
 import { UsersQueryParams } from './types';
-import { ChangePasswordFormValues, RoleAssignUserFormValues, UserFormValues } from './validator';
+import {
+  ChangePasswordFormValues,
+  RoleAssignUserFormValues,
+  UserFormValues,
+} from './validator';
 import { User } from './types';
 
 export const getUsers = async (params?: UsersQueryParams) => {
   const response = await api.get<PaginatedResponse<User>>(
     API_ENDPOINTS.USER.USERS,
-    { params }
+    { params },
+  );
+  return response.data;
+};
+
+export const getUserById = async (id: string) => {
+  const response = await api.get<User>(
+    `${API_ENDPOINTS.USER.USERS}/${id}`,
   );
   return response.data;
 };
@@ -33,15 +44,21 @@ export const updateProfile = async (data: UserFormValues) => {
 export const changePassword = async (data: ChangePasswordFormValues) => {
   const response = await api.post(
     `${API_ENDPOINTS.USER.PROFILE}/change-password`,
-    data
+    data,
   );
   return response.data;
 };
 
-export const assignRoleToUser = async (id: string, data: RoleAssignUserFormValues) => {
-  const response = await api.post(`${API_ENDPOINTS.USER.ROLES}/assign-to-user`, {userId: id, ...data})
+export const assignRoleToUser = async (
+  id: string,
+  data: RoleAssignUserFormValues,
+) => {
+  const response = await api.post(
+    `${API_ENDPOINTS.USER.ROLES}/assign-to-user`,
+    { userId: id, ...data },
+  );
   return response.data;
-}
+};
 
 export const uploadAvatar = async (file: File) => {
   const formData = new FormData();
@@ -54,7 +71,7 @@ export const uploadAvatar = async (file: File) => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    }
+    },
   );
 
   return response.data;

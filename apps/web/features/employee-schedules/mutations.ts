@@ -89,8 +89,9 @@ export const useCreateEmployeeScheduleMutation = () => {
   return useMutation({
     mutationFn: (data: CreateEmployeeScheduleData) =>
       createEmployeeSchedule(data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['employee-schedules'] });
+      queryClient.invalidateQueries({ queryKey: ['employee-schedule', data.employeeId] });
       toast.success('Phân ca làm việc thành công');
     },
     onError: (error: any) => {

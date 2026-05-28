@@ -177,7 +177,13 @@ export class UsersService {
     });
     return user;
   }
-
+  async getUserById(id: string){
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
   // ========== PUBLIC PROFILE ==========
   async getPublicProfile(requesterId: string, targetUserId: string) {
     const user = await this.prisma.user.findUnique({
@@ -198,14 +204,7 @@ export class UsersService {
     if (!userId) return false;
     const exists = await this.prisma.user.findFirst({
       where: {
-        id: userId,
-        roles: {
-          some: {
-            role: {
-              name: { in: ['admin', 'manager'], mode: 'insensitive' },
-            },
-          },
-        },
+        id: userId
       },
       select: { id: true },
     });
