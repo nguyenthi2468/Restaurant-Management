@@ -40,7 +40,7 @@ export class TimeOffRequestService {
   }
 
   async findAll(query: QueryTimeOffRequestDto) {
-    const { employeeId, type, status, startDate, endDate } = query;
+    const { employeeId, type, status, startDate, endDate, page = 1, limit = 10 } = query;
 
     const where: any = {};
 
@@ -73,28 +73,46 @@ export class TimeOffRequestService {
       ];
     }
 
-    return this.prisma.timeOffRequest.findMany({
-      where,
-      include: {
-        employee: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const [data, total] = await Promise.all([
+      this.prisma.timeOffRequest.findMany({
+        where,
+        include: {
+          employee: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+          reviewedBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
         },
-        reviewedBy: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      this.prisma.timeOffRequest.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { createdAt: 'desc' },
-    });
+    };
   }
 
   async findOne(id: string) {

@@ -127,11 +127,11 @@ export function TimeOffRequestList({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {request.reviewer ? (
+                      {request.reviewedBy ? (
                         <div className="text-sm">
                           <div>
-                            {request.reviewer.firstName}{' '}
-                            {request.reviewer.lastName}
+                            {request.reviewedBy.firstName}{' '}
+                            {request.reviewedBy.lastName}
                           </div>
                           {request.reviewedAt && (
                             <div className="text-muted-foreground">

@@ -23,6 +23,28 @@ const navigationItems = [
     description: 'Xem và quản lý đặt bàn',
     href: '/me/my-reservations',
   },
+  {
+    id: 'clock',
+    label: 'Chấm công',
+    icon: Menu,
+    description: 'Chấm công và chấm nghỉ',
+    href: '/me/clock',
+  },
+  {
+    id: 'attendance',
+    label: 'Lịch sử chấm công',
+    icon: Menu,
+    description: 'Chấm công và chấm nghỉ',
+    href: '/me/my-attendance',
+  },
+  {
+    id: 'timeoffrequests',
+    label: 'Yêu cầu nghỉ',
+    icon: Star,
+    description: 'Xem và quản lý yêu cầu nghỉ',
+    href: '/me/my-time-off-requests',
+  },
+
 ];
 
 export function AccountSidebar() {

@@ -51,7 +51,7 @@ export default function EmployeeScheduleDetailPage() {
     const totalSchedules = schedules?.length || 0;
     const totalAttendances = attendances?.length || 0;
     const presentCount =
-      attendances?.filter((a) => a.status === AttendanceStatus.PRESENT)
+      attendances?.filter((a) => a.status === AttendanceStatus.ON_TIME)
         .length || 0;
     const totalHours =
       attendances?.reduce((sum, a) => sum + (Number(a.workHours) || 0), 0) || 0;
@@ -69,11 +69,10 @@ export default function EmployeeScheduleDetailPage() {
       AttendanceStatus,
       'default' | 'secondary' | 'destructive'
     > = {
-      [AttendanceStatus.PRESENT]: 'default',
+      [AttendanceStatus.ON_TIME]: 'default',
       [AttendanceStatus.ABSENT]: 'destructive',
       [AttendanceStatus.LATE]: 'secondary',
-      [AttendanceStatus.EARLY_LEAVE]: 'secondary',
-      [AttendanceStatus.ON_LEAVE]: 'secondary',
+      [AttendanceStatus.EXCUSED]: 'default',
     };
     return variants[status] || 'default';
   };

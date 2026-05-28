@@ -123,7 +123,7 @@ export class TimeOffRequestController {
     @Request() req: any,
     @Body('reviewNote') reviewNote?: string,
   ) {
-    return this.timeOffRequestService.approve(id, req.user.userId, reviewNote);
+    return this.timeOffRequestService.approve(id, req.user.id, reviewNote);
   }
 
   @Post(':id/reject')
@@ -140,6 +140,6 @@ export class TimeOffRequestController {
     @Request() req: any,
     @Body('reviewNote') reviewNote?: string,
   ) {
-    return this.timeOffRequestService.reject(id, req.user.userId, reviewNote);
+    return this.timeOffRequestService.reject(id, req.user.id, reviewNote);
   }
 }

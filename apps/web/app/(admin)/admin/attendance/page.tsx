@@ -9,12 +9,7 @@ import {
   useUpdateAttendanceMutation,
   useDeleteAttendanceMutation,
 } from '@/features/employee-schedules/mutations';
-import {
-  Attendance,
-  AttendanceStatus,
-  CreateAttendanceData,
-  UpdateAttendanceData,
-} from '@/features/employee-schedules/types';
+import { AttendanceStatus } from '@/features/employee-schedules/types';
 import { Spinner } from '@/components/ui/spinner';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -37,19 +32,17 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const statusColors: Record<AttendanceStatus, string> = {
-  [AttendanceStatus.PRESENT]: 'bg-green-500',
+  [AttendanceStatus.ON_TIME]: 'bg-green-500',
   [AttendanceStatus.ABSENT]: 'bg-red-500',
   [AttendanceStatus.LATE]: 'bg-yellow-500',
-  [AttendanceStatus.EARLY_LEAVE]: 'bg-orange-500',
-  [AttendanceStatus.ON_LEAVE]: 'bg-blue-500',
+  [AttendanceStatus.EXCUSED]: 'bg-blue-500',
 };
 
 const statusLabels: Record<AttendanceStatus, string> = {
-  [AttendanceStatus.PRESENT]: 'Có mặt',
+  [AttendanceStatus.ON_TIME]: 'Có mặt',
   [AttendanceStatus.ABSENT]: 'Vắng mặt',
   [AttendanceStatus.LATE]: 'Đi muộn',
-  [AttendanceStatus.EARLY_LEAVE]: 'Về sớm',
-  [AttendanceStatus.ON_LEAVE]: 'Nghỉ phép',
+  [AttendanceStatus.EXCUSED]: 'Nghỉ phép',
 };
 
 export default function AttendancePage() {
@@ -95,8 +88,10 @@ export default function AttendancePage() {
   };
 
   const formatWorkHours = (hours?: number) => {
-    if (!hours) return '-';
-    return `${hours.toFixed(1)}h`;
+    if (hours == null) return '-';
+    const numHours = typeof hours === 'number' ? hours : Number(hours);
+    if (isNaN(numHours)) return '-';
+    return `${numHours.toFixed(1)}h`;
   };
 
   if (isLoading) {
@@ -167,16 +162,15 @@ export default function AttendancePage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                <SelectItem value={AttendanceStatus.PRESENT}>Có mặt</SelectItem>
+                <SelectItem value={AttendanceStatus.ON_TIME}>
+                  Đúng giờ
+                </SelectItem>
                 <SelectItem value={AttendanceStatus.ABSENT}>
                   Vắng mặt
                 </SelectItem>
                 <SelectItem value={AttendanceStatus.LATE}>Đi muộn</SelectItem>
-                <SelectItem value={AttendanceStatus.EARLY_LEAVE}>
-                  Về sớm
-                </SelectItem>
-                <SelectItem value={AttendanceStatus.ON_LEAVE}>
-                  Nghỉ phép
+                <SelectItem value={AttendanceStatus.EXCUSED}>
+                  Có phép
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -210,7 +204,6 @@ export default function AttendancePage() {
                 <TableHead>Số giờ làm</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Ghi chú</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -246,20 +239,6 @@ export default function AttendancePage() {
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">
                       {attendance.note || '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm">
-                          Sửa
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive"
-                        >
-                          Xóa
-                        </Button>
-                      </div>
                     </TableCell>
                   </TableRow>
                 ))

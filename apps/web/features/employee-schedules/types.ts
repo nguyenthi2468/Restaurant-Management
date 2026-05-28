@@ -73,11 +73,10 @@ export interface QueryEmployeeScheduleDto {
 }
 
 export enum AttendanceStatus {
-  PRESENT = 'PRESENT',
-  ABSENT = 'ABSENT',
+  ON_TIME = 'ON_TIME',
   LATE = 'LATE',
-  EARLY_LEAVE = 'EARLY_LEAVE',
-  ON_LEAVE = 'ON_LEAVE',
+  ABSENT = 'ABSENT',
+  EXCUSED = 'EXCUSED',
 }
 
 export interface Attendance {
@@ -161,7 +160,6 @@ export interface TimeOffRequest {
   endDate: string;
   reason?: string;
   status: TimeOffRequestStatus;
-  reviewedBy?: string;
   reviewNote?: string;
   reviewedAt?: string;
   createdAt: string;
@@ -172,7 +170,7 @@ export interface TimeOffRequest {
     lastName: string;
     email: string;
   };
-  reviewer?: {
+  reviewedBy?: {
     id: string;
     firstName: string;
     lastName: string;

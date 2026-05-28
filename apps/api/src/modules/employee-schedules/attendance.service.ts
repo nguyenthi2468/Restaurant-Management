@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAttendanceDto } from './dto/attendance/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/attendance/update-attendance.dto';
@@ -19,7 +23,9 @@ export class AttendanceService {
     });
 
     if (!employee) {
-      throw new NotFoundException(`Nhân viên với ID ${employeeId} không tìm thấy`);
+      throw new NotFoundException(
+        `Nhân viên với ID ${employeeId} không tìm thấy`,
+      );
     }
 
     const existing = await this.prisma.attendance.findUnique({
@@ -53,7 +59,14 @@ export class AttendanceService {
   }
 
   async findAllWithPagination(query: QueryAttendanceDto) {
-    const { employeeId, startDate, endDate, status, page = 1, limit = 10 } = query;
+    const {
+      employeeId,
+      startDate,
+      endDate,
+      status,
+      page = 1,
+      limit = 10,
+    } = query;
 
     const where: any = {};
 
@@ -126,7 +139,9 @@ export class AttendanceService {
     });
 
     if (!attendance) {
-      throw new NotFoundException(`Bản ghi chấm công với ID ${id} không tìm thấy`);
+      throw new NotFoundException(
+        `Bản ghi chấm công với ID ${id} không tìm thấy`,
+      );
     }
 
     return attendance;
@@ -160,14 +175,17 @@ export class AttendanceService {
   }
 
   async clockIn(clockInDto: ClockInDto) {
-    const { employeeId, clockInTime } = clockInDto;
+    const { employeeId } = clockInDto;
+    const clockInTime = new Date();
 
     const employee = await this.prisma.user.findUnique({
       where: { id: employeeId },
     });
 
     if (!employee) {
-      throw new NotFoundException(`Nhân viên với ID ${employeeId} không tìm thấy`);
+      throw new NotFoundException(
+        `Nhân viên với ID ${employeeId} không tìm thấy`,
+      );
     }
 
     const date = new Date(clockInTime);
@@ -227,9 +245,9 @@ export class AttendanceService {
   }
 
   async clockOut(clockOutDto: ClockOutDto) {
-    const { employeeId, clockOutTime } = clockOutDto;
-
-    const date = new Date(clockOutTime);
+    const { employeeId } = clockOutDto;
+    const clockOutTime = new Date();
+    const date = new Date();
     date.setHours(0, 0, 0, 0);
 
     const attendance = await this.prisma.attendance.findUnique({
