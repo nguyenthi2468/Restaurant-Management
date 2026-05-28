@@ -27,4 +27,10 @@ export const ROUTES = {
   ADMIN_TABLES: '/admin/tables',
   ADMIN_RESERVATIONS: '/admin/reservations',
   ADMIN_ORDERS: '/admin/orders',
+  ADMIN_SHIFTS: '/admin/shifts',
+  ADMIN_SCHEDULES: '/admin/schedules',
+  ADMIN_ATTENDANCE: '/admin/attendance',
+  ADMIN_TIME_OFF_REQUESTS: '/admin/time-off-requests',
+  ADMIN_EMPLOYEE_SCHEDULES: '/admin/employee-schedules',
+  ADMIN_EMPLOYEE_SCHEDULES_BASE: '/admin/employee-schedules/base',
 };

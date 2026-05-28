@@ -1,25 +1,30 @@
-export enum ShiftStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
+export enum ShiftType{
+ MORNING = 'MORNING',
+  AFTERNOON = 'AFTERNOON',
+  EVENING = 'EVENING',
+  NIGHT = 'NIGHT',
+  FULL_DAY = 'FULL_DAY',
 }
 
 export interface Shift {
   id: string;
   name: string;
+  type: ShiftType;
   startTime: string;
   endTime: string;
   description?: string;
-  status: ShiftStatus;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateShiftData {
   name: string;
+  type: ShiftType;
   startTime: string;
   endTime: string;
   description?: string;
-  status?: ShiftStatus;
+  isActive: boolean;
 }
 
 export interface UpdateShiftData {
@@ -27,7 +32,7 @@ export interface UpdateShiftData {
   startTime?: string;
   endTime?: string;
   description?: string;
-  status?: ShiftStatus;
+  isActive?: boolean;
 }
 
 export interface EmployeeSchedule {

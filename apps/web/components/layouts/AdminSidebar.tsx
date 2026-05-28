@@ -9,6 +9,7 @@ import {
   CreditCard,
   Utensils,
   Calendar,
+  Clock,
 } from 'lucide-react';
 import { ChevronDown, Home, Users } from 'lucide-react';
 import Link from 'next/link';
@@ -105,6 +106,18 @@ export const navItems: NavItem[] = [
     href: ROUTES.ADMIN_ORDERS,
     icon: Receipt,
     action: 'order.read',
+  },
+  {
+    title: 'Employee Schedules',
+    href: ROUTES.ADMIN_EMPLOYEE_SCHEDULES_BASE,
+    icon: Clock,
+    action: 'employee-schedule:read',
+    submenu: [
+      { title: 'Shifts', href: ROUTES.ADMIN_SHIFTS, action: 'employee-schedule:read' },
+      { title: 'Schedules', href: ROUTES.ADMIN_SCHEDULES, action: 'employee-schedule:read' },
+      { title: 'Attendance', href: ROUTES.ADMIN_ATTENDANCE, action: 'employee-schedule:read' },
+      { title: 'Time Off Requests', href: ROUTES.ADMIN_TIME_OFF_REQUESTS, action: 'employee-schedule:read' },
+    ],
   },
   {
     title: 'Users',

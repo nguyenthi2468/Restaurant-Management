@@ -1,12 +1,11 @@
-import { IsString, IsOptional, IsBoolean, IsEnum } from 'class-validator';
-import { ShiftType } from '@prisma/client';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateShiftDto {
   @IsString()
   name!: string;
 
-  @IsEnum(ShiftType)
-  type!: ShiftType;
+  @IsString()
+  type!: string;
 
   @IsString()
   startTime!: string;
