@@ -15,6 +15,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/attendance/create-attendance.dto';
@@ -38,8 +39,14 @@ export class AttendanceController {
   @UseGuards(ActionGuard)
   @ApiOperation({ summary: 'Tạo bản ghi chấm công' })
   @ApiBody({ type: CreateAttendanceDto })
-  @ApiResponse({ status: 201, description: 'Bản ghi chấm công đã được tạo thành công' })
-  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc bản ghi đã tồn tại' })
+  @ApiResponse({
+    status: 201,
+    description: 'Bản ghi chấm công đã được tạo thành công',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dữ liệu không hợp lệ hoặc bản ghi đã tồn tại',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy nhân viên' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -50,19 +57,58 @@ export class AttendanceController {
   @Get()
   @Action('attendance:read')
   @UseGuards(ActionGuard)
-  @ApiOperation({ summary: 'Lấy danh sách bản ghi chấm công với bộ lọc' })
-  @ApiResponse({ status: 200, description: 'Danh sách bản ghi chấm công' })
+  @ApiOperation({
+    summary: 'Lấy danh sách bản ghi chấm công với bộ lọc và phân trang',
+  })
+  @ApiQuery({
+    name: 'employeeId',
+    required: false,
+    description: 'Lọc theo ID nhân viên',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'Ngày bắt đầu (ISO format)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: 'Ngày kết thúc (ISO format)',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['PRESENT', 'ABSENT', 'LATE', 'EARLY_LEAVE', 'ON_LEAVE'],
+    description: 'Lọc theo trạng thái chấm công',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Số trang (bắt đầu từ 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Số lượng mục trên mỗi trang',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bản ghi chấm công với metadata phân trang',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   findAll(@Query() query: QueryAttendanceDto) {
-    return this.attendanceService.findAll(query);
+    return this.attendanceService.findAllWithPagination(query);
   }
 
   @Get('employee/:employeeId')
   @Action('attendance:read')
   @UseGuards(ActionGuard)
   @ApiOperation({ summary: 'Lấy danh sách chấm công của nhân viên' })
-  @ApiResponse({ status: 200, description: 'Danh sách chấm công của nhân viên' })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách chấm công của nhân viên',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   findByEmployee(
@@ -94,12 +140,18 @@ export class AttendanceController {
   @UseGuards(ActionGuard)
   @ApiOperation({ summary: 'Cập nhật bản ghi chấm công' })
   @ApiBody({ type: UpdateAttendanceDto })
-  @ApiResponse({ status: 200, description: 'Bản ghi chấm công đã được cập nhật' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bản ghi chấm công đã được cập nhật',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy bản ghi chấm công' })
   @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  update(@Param('id') id: string, @Body() updateAttendanceDto: UpdateAttendanceDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAttendanceDto: UpdateAttendanceDto,
+  ) {
     return this.attendanceService.update(id, updateAttendanceDto);
   }
 
@@ -121,7 +173,10 @@ export class AttendanceController {
   @ApiOperation({ summary: 'Chấm công vào' })
   @ApiBody({ type: ClockInDto })
   @ApiResponse({ status: 201, description: 'Chấm công vào thành công' })
-  @ApiResponse({ status: 400, description: 'Nhân viên đã chấm công vào hôm nay' })
+  @ApiResponse({
+    status: 400,
+    description: 'Nhân viên đã chấm công vào hôm nay',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy nhân viên' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -135,8 +190,14 @@ export class AttendanceController {
   @ApiOperation({ summary: 'Chấm công ra' })
   @ApiBody({ type: ClockOutDto })
   @ApiResponse({ status: 200, description: 'Chấm công ra thành công' })
-  @ApiResponse({ status: 400, description: 'Nhân viên chưa chấm công vào hoặc đã chấm công ra' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy bản ghi chấm công vào' })
+  @ApiResponse({
+    status: 400,
+    description: 'Nhân viên chưa chấm công vào hoặc đã chấm công ra',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy bản ghi chấm công vào',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   clockOut(@Body() clockOutDto: ClockOutDto) {

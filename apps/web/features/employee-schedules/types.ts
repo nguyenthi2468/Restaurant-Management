@@ -1,7 +1,7 @@
-import { User } from "../user";
+import { User } from '../user';
 
-export enum ShiftType{
- MORNING = 'MORNING',
+export enum ShiftType {
+  MORNING = 'MORNING',
   AFTERNOON = 'AFTERNOON',
   EVENING = 'EVENING',
   NIGHT = 'NIGHT',
@@ -93,7 +93,8 @@ export interface Attendance {
   updatedAt: string;
   employee?: {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
   };
 }
@@ -167,12 +168,14 @@ export interface TimeOffRequest {
   updatedAt: string;
   employee?: {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
   };
   reviewer?: {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
   };
 }
