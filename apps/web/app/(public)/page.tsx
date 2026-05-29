@@ -5,7 +5,6 @@ import Gallery from "@/components/sections/Gallery";
 import Hero from "@/components/sections/Hero";
 import MenuCategories from "@/components/sections/MenuCategories";
 import Services from "@/components/sections/Services";
-import SetMenus from "@/components/sections/SetMenus";
 
 export default function Home() {
   return (
@@ -14,7 +13,6 @@ export default function Home() {
         <About />
       <FeaturedMenu />
       <MenuCategories />
-      <SetMenus />
       <Services />
       <Contact />
       </div>

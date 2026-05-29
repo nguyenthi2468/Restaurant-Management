@@ -43,9 +43,11 @@ export class MenuCategoryService {
           },
         },
         menuItems: {
+          include:{
+            image: true
+          },
           where: { isAvailable: true },
           orderBy: { position: 'asc' },
-          take: 3,
         },
       },
     });
