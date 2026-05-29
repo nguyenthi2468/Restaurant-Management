@@ -10,6 +10,7 @@ import {
   Utensils,
   Calendar,
   Clock,
+  Contact,
 } from 'lucide-react';
 import { ChevronDown, Home, Users } from 'lucide-react';
 import Link from 'next/link';
@@ -118,6 +119,12 @@ export const navItems: NavItem[] = [
       { title: 'Attendance', href: ROUTES.ADMIN_ATTENDANCE, action: 'employee-schedule:read' },
       { title: 'Time Off Requests', href: ROUTES.ADMIN_TIME_OFF_REQUESTS, action: 'employee-schedule:read' },
     ],
+  },
+   {
+    title: "Contacts",
+    href: ROUTES.ADMIN_CONTACTS,
+    icon: Contact,
+    action: "contacts.read",
   },
   {
     title: 'Users',

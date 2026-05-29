@@ -24,6 +24,7 @@ import { PusherModule } from './modules/pusher/pusher.module';
 import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { EmployeeSchedulesModule } from './modules/employee-schedules/employee-schedules.module';
 import { AiModule } from './modules/ai/ai.module';
+import { ContactModule } from './modules/contact/contact.module';
 
 @Module({
   imports: [
@@ -56,7 +57,8 @@ import { AiModule } from './modules/ai/ai.module';
     PusherModule,
     KitchenModule,
     EmployeeSchedulesModule,
-    AiModule
+    AiModule,
+    ContactModule
   ],
   controllers: [AppController],
   providers: [
