@@ -7,20 +7,30 @@ import { User, Package, Menu, X, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { usePermission } from '@/providers/PermissionProvider';
 
-const navigationItems = [
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  description: string;
+  href: string;
+  action?: string;
+}
+
+const navigationItems: NavItem[] = [
   {
     id: 'account',
-    label: 'Tài khoản',
+    label: 'Tài khoản',
     icon: User,
-    description: 'Quản lý thông tin cá nhân',
+    description: 'Quản lý thông tin cá nhân',
     href: '/me',
   },
   {
     id: 'myreservations',
-    label: 'Đặt bàn của bạn',
+    label: 'Đặt bàn của bạn',
     icon: Package,
-    description: 'Xem và quản lý đặt bàn',
+    description: 'Xem và quản lý đặt bàn',
     href: '/me/my-reservations',
   },
   {
@@ -29,6 +39,7 @@ const navigationItems = [
     icon: Menu,
     description: 'Chấm công và chấm nghỉ',
     href: '/me/clock',
+    action: 'attendance:read',
   },
   {
     id: 'attendance',
@@ -36,6 +47,7 @@ const navigationItems = [
     icon: Menu,
     description: 'Chấm công và chấm nghỉ',
     href: '/me/my-attendance',
+    action: 'attendance:read',
   },
   {
     id: 'timeoffrequests',
@@ -43,13 +55,23 @@ const navigationItems = [
     icon: Star,
     description: 'Xem và quản lý yêu cầu nghỉ',
     href: '/me/my-time-off-requests',
+    action: 'attendance:read',
   },
-
 ];
 
 export function AccountSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { can } = usePermission();
+
+  function filterMenu(
+    menu: NavItem[],
+    can: (action: string) => boolean,
+  ): NavItem[] {
+    return menu.filter((item) => !item.action || can(item.action));
+  }
+
+  const filteredMenu = filterMenu(navigationItems, can);
 
   const SidebarContent = () => (
     <Card className="p-6">
@@ -61,7 +83,7 @@ export function AccountSidebar() {
       </div>
 
       <nav className="mt-6 space-y-1">
-        {navigationItems.map((item) => {
+        {filteredMenu.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
 
@@ -71,7 +93,7 @@ export function AccountSidebar() {
                 variant={isActive ? 'secondary' : 'ghost'}
                 className={cn(
                   'w-full justify-start h-auto p-3 text-left',
-                  isActive && 'bg-primary/10 text-primary border-primary/20'
+                  isActive && 'bg-primary/10 text-primary border-primary/20',
                 )}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -80,7 +102,6 @@ export function AccountSidebar() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{item.label}</span>
-                      
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {item.description}
