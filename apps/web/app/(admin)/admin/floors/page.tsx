@@ -50,7 +50,6 @@ function FloorsPage() {
     if (deleteId) {
       deleteFloorMutation.mutate(deleteId, {
         onSuccess: () => {
-          toast.success('Xóa tầng thành công');
           setOpenDeleteDialog(false);
           setDeleteId(null);
         },
