@@ -33,5 +33,5 @@ export const ROUTES = {
   ADMIN_TIME_OFF_REQUESTS: '/admin/time-off-requests',
   ADMIN_EMPLOYEE_SCHEDULES: '/admin/employee-schedules',
   ADMIN_EMPLOYEE_SCHEDULES_BASE: '/admin/employee-schedules/base',
-  ADMIN_CONTACTS:'/admin/contacts'
+  ADMIN_CONTACTS:'/admin/contacts',
 };

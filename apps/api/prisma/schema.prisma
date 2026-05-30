@@ -697,8 +697,8 @@ model News {
   // audit
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: SetNull)
-
-  image ImageGallery[]
+  imageId String?
+  image ImageGallery? @relation(fields: [imageId], references: [id], onDelete: SetNull)
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())

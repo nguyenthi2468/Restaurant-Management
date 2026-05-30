@@ -25,6 +25,7 @@ import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { EmployeeSchedulesModule } from './modules/employee-schedules/employee-schedules.module';
 import { AiModule } from './modules/ai/ai.module';
 import { ContactModule } from './modules/contact/contact.module';
+import { NewsModule } from './modules/news/news.module';
 
 @Module({
   imports: [
@@ -58,7 +59,8 @@ import { ContactModule } from './modules/contact/contact.module';
     KitchenModule,
     EmployeeSchedulesModule,
     AiModule,
-    ContactModule
+    ContactModule,
+    NewsModule
   ],
   controllers: [AppController],
   providers: [

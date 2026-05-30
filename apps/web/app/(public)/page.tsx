@@ -4,6 +4,7 @@ import FeaturedMenu from "@/components/sections/FeaturedMenu";
 import Gallery from "@/components/sections/Gallery";
 import Hero from "@/components/sections/Hero";
 import MenuCategories from "@/components/sections/MenuCategories";
+import NewsSection from "@/components/sections/NewsSection";
 import Services from "@/components/sections/Services";
 
 export default function Home() {
@@ -14,7 +15,7 @@ export default function Home() {
       <FeaturedMenu />
       <MenuCategories />
       <Services />
-      <Contact />
+      <NewsSection/>
       </div>
   );
 }
