@@ -37,6 +37,7 @@ function MenuItemManagementTable({ menuItems, onDelete }: MenuItemTableProps) {
             <TableHead className="text-foreground">Danh mục</TableHead>
             <TableHead className="text-foreground">Giá</TableHead>
             <TableHead className="text-foreground">Đặc điểm</TableHead>
+            <TableHead className="text-foreground">Nổi bật</TableHead>
             <TableHead className="text-foreground">Trạng thái</TableHead>
             <TableHead className="text-foreground flex justify-end">
               Hành động
@@ -108,6 +109,17 @@ function MenuItemManagementTable({ menuItems, onDelete }: MenuItemTableProps) {
                     </span>
                   )}
                 </div>
+              </TableCell>
+              <TableCell className="text-foreground font-medium">
+                {menuItem.isFeature ? (
+                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                    Nổi bật
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                    Thường
+                  </span>
+                )}
               </TableCell>
               <TableCell className="text-foreground font-medium">
                 {menuItem.isAvailable ? (

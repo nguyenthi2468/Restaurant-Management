@@ -16,6 +16,7 @@ export const menuItemSchema = z.object({
   imageId: z.string().optional(),
   position: z.number().int().min(0).optional().default(0),
   isAvailable: z.boolean().optional().default(true),
+  isFeature: z.boolean().optional().default(false),
   isVegetarian: z.boolean().optional().default(false),
   isVegan: z.boolean().optional().default(false),
   isGlutenFree: z.boolean().optional().default(false),

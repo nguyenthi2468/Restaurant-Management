@@ -68,6 +68,7 @@ export class MenuItemService {
       search,
       isAvailable,
       menuCategoryId,
+      isFeature,
       page = 1,
       limit = 10,
     } = queryDto;
@@ -83,6 +84,10 @@ export class MenuItemService {
 
     if (isAvailable !== undefined) {
       where.isAvailable = isAvailable;
+    }
+
+    if (isFeature !== undefined) {
+      where.isFeature = isFeature;
     }
 
     if (menuCategoryId) {
@@ -174,10 +179,33 @@ export class MenuItemService {
 
     const updateData: Record<string, any> = {};
     Object.entries(updateMenuItemDto).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'ingredients') {
+      if (
+        value !== undefined &&
+        key !== 'ingredients' &&
+        key !== 'categoryId' &&
+        key !== 'imageId'
+      ) {
         updateData[key] = value;
       }
     });
+
+    if (updateMenuItemDto.categoryId !== undefined) {
+      updateData.category = {
+        connect: { id: updateMenuItemDto.categoryId },
+      };
+    }
+
+    if (updateMenuItemDto.imageId !== undefined) {
+      if (updateMenuItemDto.imageId === null) {
+        updateData.image = {
+          disconnect: true,
+        };
+      } else {
+        updateData.image = {
+          connect: { id: updateMenuItemDto.imageId },
+        };
+      }
+    }
 
     return this.prisma.$transaction(async (tx) => {
       const updatedMenuItem = await tx.menuItem.update({

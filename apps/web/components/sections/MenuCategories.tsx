@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { formatCurrency } from '@/utils/currency';
 import { useMenuCategoriesWithMenuItemsQuery } from '@/features/menu-categories/queries';
+import Link from 'next/link';
 
 export default function MenuCategories() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -193,16 +194,26 @@ export default function MenuCategories() {
 
         {!selectedCategory && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {categories.map((cat) => (
-              <div key={cat.id}>
-                <h3 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-3">
-                  {cat.name}
-                </h3>
-                <div className="space-y-4">
-                  {menuItems
-                    .filter((item) => item.category === cat.id)
-                    .slice(0, 3)
-                    .map((item) => (
+            {categories.map((cat) => {
+              const items = menuItems.filter(
+                (item) => item.category === cat.id,
+              );
+              const hasMoreThanFour = items.length > 4;
+              return (
+                <div key={cat.id}>
+                  <h3 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-3">
+                    {cat.name}
+                    {hasMoreThanFour && (
+                      <Link
+                        href="/menu"
+                        className="px-3 py-1 bg-primary/10 text-primary hover:bg-primary/20 text-sm rounded-md transition-colors"
+                      >
+                        Xem thêm menu
+                      </Link>
+                    )}
+                  </h3>
+                  <div className="space-y-4">
+                    {items.slice(0, 4).map((item) => (
                       <div
                         key={item.id}
                         className="pb-4 border-b border-border/30"
@@ -220,19 +231,20 @@ export default function MenuCategories() {
                         </p>
                       </div>
                     ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         <div className="mt-16 text-center">
-          <a
-            href="#contact"
+          <Link
+            href="/reservation"
             className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
           >
             Đặt bàn
-          </a>
+          </Link>
         </div>
       </div>
     </section>
