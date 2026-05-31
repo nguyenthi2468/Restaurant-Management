@@ -106,7 +106,9 @@ export class UpdateMenuItemDto {
   @IsBoolean()
   @IsOptional()
   isSpicy?: boolean;
-
+  @IsBoolean()
+  @IsOptional()
+  isFeature?: boolean;
   @ApiPropertyOptional({
     description: 'Thời gian chuẩn bị (phút)',
     example: 20,

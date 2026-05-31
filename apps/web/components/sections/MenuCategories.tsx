@@ -1,71 +1,121 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { menuItems } from '@/data/restaurant';
-import { useRef, useState } from 'react';
-import { useInView } from 'framer-motion';
+import { useState } from 'react';
 import { formatCurrency } from '@/utils/currency';
+import { useMenuCategoriesWithMenuItemsQuery } from '@/features/menu-categories/queries';
+import Link from 'next/link';
 
 export default function MenuCategories() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const categories = [
-    { id: 'appetizers', name: 'Món khai vị', color: 'from-blue-500/20' },
-    { id: 'mains', name: 'Món chính', color: 'from-amber-500/20' },
-    { id: 'desserts', name: 'Tráng miệng', color: 'from-rose-500/20' },
-    { id: 'beverages', name: 'Đồ uống', color: 'from-purple-500/20' },
+  const {
+    data: apiCategories,
+    isLoading,
+    isError,
+  } = useMenuCategoriesWithMenuItemsQuery();
+
+  const colorPalette = [
+    'from-blue-500/20',
+    'from-amber-500/20',
+    'from-rose-500/20',
+    'from-purple-500/20',
+    'from-green-500/20',
+    'from-indigo-500/20',
   ];
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  const categories =
+    apiCategories
+      ?.filter((cat) => cat.isActive)
+      .map((cat, idx) => ({
+        id: cat.id,
+        name: cat.name,
+        color: colorPalette[idx % colorPalette.length],
+      })) || [];
 
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  };
+  const menuItems =
+    apiCategories?.flatMap((cat) =>
+      cat.menuItems
+        .filter((item) => item.isAvailable)
+        .map((item) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description || '',
+          price: item.price,
+          category: cat.id,
+          vegetarian: item.isVegetarian,
+          vegan: item.isVegan,
+        })),
+    ) || [];
+
+  if (isLoading) {
+    return (
+      <section
+        id="menu-categories"
+        className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background"
+      >
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-lg text-foreground/60">Đang tải thực đơn...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section
+        id="menu-categories"
+        className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background"
+      >
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-lg text-red-500">
+            Không thể tải thực đơn. Vui lòng thử lại sau.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!isLoading && categories.length === 0) {
+    return (
+      <section
+        id="menu-categories"
+        className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background"
+      >
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-lg text-foreground/60">
+            Chưa có danh mục thực đơn nào.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section id="menu-categories" className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background">
+    <section
+      id="menu-categories"
+      className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-background"
+    >
       <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <motion.div
-          ref={ref}
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.8 }}
-        >
+        <div className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-serif font-bold text-foreground mb-4">
             Toàn bộ thực đơn
           </h2>
           <p className="text-lg text-foreground/60 max-w-2xl mx-auto">
             Khám phá đầy đủ các món ăn được tuyển chọn cẩn thận của chúng tôi
           </p>
-        </motion.div>
+        </div>
 
-        {/* Category Cards */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12"
-          variants={container}
-          initial="hidden"
-          animate={isInView ? 'show' : 'hidden'}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
           {categories.map((cat, idx) => {
             const items = menuItems.filter((item) => item.category === cat.id);
             return (
-              <motion.button
+              <button
                 key={cat.id}
-                variants={item}
-                onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                onClick={() =>
+                  setSelectedCategory(
+                    selectedCategory === cat.id ? null : cat.id,
+                  )
+                }
                 className="relative group"
               >
                 <div
@@ -74,7 +124,9 @@ export default function MenuCategories() {
                   }`}
                 >
                   {/* Background Gradient */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} to-transparent`}></div>
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${cat.color} to-transparent`}
+                  ></div>
 
                   {/* Content */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-t from-card/80 via-card/40 to-transparent group-hover:from-card group-hover:via-card/60 transition-all duration-300">
@@ -89,19 +141,13 @@ export default function MenuCategories() {
                   {/* Hover Border */}
                   <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/50 rounded-lg transition-colors duration-300"></div>
                 </div>
-              </motion.button>
+              </button>
             );
           })}
-        </motion.div>
+        </div>
 
-        {/* Menu Items Grid */}
         {selectedCategory && (
-          <motion.div
-            className="mt-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="mt-12">
             <h3 className="text-2xl font-serif font-bold text-foreground mb-8">
               {categories.find((c) => c.id === selectedCategory)?.name}
             </h3>
@@ -110,13 +156,9 @@ export default function MenuCategories() {
               {menuItems
                 .filter((item) => item.category === selectedCategory)
                 .map((menuItem, idx) => (
-                  <motion.div
+                  <div
                     key={menuItem.id}
                     className="bg-card rounded-lg p-6 border border-border/50 hover:border-primary/50 transition-colors"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    whileHover={{ y: -4 }}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -144,34 +186,37 @@ export default function MenuCategories() {
                     <p className="text-foreground/70 text-sm leading-relaxed">
                       {menuItem.description}
                     </p>
-                  </motion.div>
+                  </div>
                 ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {/* All Categories View */}
         {!selectedCategory && (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            {categories.map((cat) => (
-              <div key={cat.id}>
-                <h3 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-3">
-                  {cat.name}
-                </h3>
-                <div className="space-y-4">
-                  {menuItems
-                    .filter((item) => item.category === cat.id)
-                    .slice(0, 3)
-                    .map((item) => (
-                      <motion.div
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {categories.map((cat) => {
+              const items = menuItems.filter(
+                (item) => item.category === cat.id,
+              );
+              const hasMoreThanFour = items.length > 4;
+              return (
+                <div key={cat.id}>
+                  <h3 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-3">
+                    {cat.name}
+                    {hasMoreThanFour && (
+                      <Link
+                        href="/menu"
+                        className="px-3 py-1 bg-primary/10 text-primary hover:bg-primary/20 text-sm rounded-md transition-colors"
+                      >
+                        Xem thêm menu
+                      </Link>
+                    )}
+                  </h3>
+                  <div className="space-y-4">
+                    {items.slice(0, 4).map((item) => (
+                      <div
                         key={item.id}
                         className="pb-4 border-b border-border/30"
-                        whileHover={{ x: 4 }}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-serif font-bold text-foreground">
@@ -184,30 +229,23 @@ export default function MenuCategories() {
                         <p className="text-sm text-foreground/70">
                           {item.description}
                         </p>
-                      </motion.div>
+                      </div>
                     ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </motion.div>
+              );
+            })}
+          </div>
         )}
 
-        {/* CTA Button */}
-        <motion.div
-          className="mt-16 text-center"
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
-          <motion.a
-            href="#contact"
+        <div className="mt-16 text-center">
+          <Link
+            href="/reservation"
             className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
           >
             Đặt bàn
-          </motion.a>
-        </motion.div>
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -37,6 +37,7 @@ function MenuItemForm({
       imageId: '',
       position: 0,
       isAvailable: true,
+      isFeature: false,
       isVegetarian: false,
       isVegan: false,
       isGlutenFree: false,
@@ -345,6 +346,27 @@ function MenuItemForm({
                       </FieldLabel>
                       <p className="text-xs text-muted-foreground">
                         Món ăn có sẵn để đặt
+                      </p>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="isFeature"
+                render={({ field }) => (
+                  <div className="flex items-center justify-between bg-background p-3 rounded-lg border shadow-sm">
+                    <div className="space-y-1">
+                      <FieldLabel className="text-sm font-medium">
+                        Món nổi bật
+                      </FieldLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Hiển thị trong danh sách nổi bật
                       </p>
                     </div>
                     <Switch

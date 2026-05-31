@@ -12,6 +12,7 @@ export interface MenuItem {
   image: GalleryImages | null;
   position: number;
   isAvailable: boolean;
+  isFeature: boolean;
   isVegetarian: boolean;
   isVegan: boolean;
   isGlutenFree: boolean;
@@ -37,6 +38,7 @@ export interface MenuItemQueryParams {
   menuCategoryId?: string;
   search?: string;
   isAvailable?: boolean;
+  isFeature?: boolean;
   page?: number;
   limit?: number;
 }

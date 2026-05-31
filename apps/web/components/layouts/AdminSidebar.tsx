@@ -10,6 +10,8 @@ import {
   Utensils,
   Calendar,
   Clock,
+  Contact,
+  Newspaper,
 } from 'lucide-react';
 import { ChevronDown, Home, Users } from 'lucide-react';
 import Link from 'next/link';
@@ -54,12 +56,6 @@ export const navItems: NavItem[] = [
     href: ROUTES.ADMIN_DASHBOARD,
     icon: Home,
     action: 'dashboard.read',
-  },
-  {
-    title: 'News',
-    href: ROUTES.ADMIN_NEWS,
-    icon: FileText,
-    action: 'news.read',
   },
   {
     title: 'Menu Categories',
@@ -118,6 +114,18 @@ export const navItems: NavItem[] = [
       { title: 'Attendance', href: ROUTES.ADMIN_ATTENDANCE, action: 'employee-schedule:read' },
       { title: 'Time Off Requests', href: ROUTES.ADMIN_TIME_OFF_REQUESTS, action: 'employee-schedule:read' },
     ],
+  },
+   {
+    title: "Contacts",
+    href: ROUTES.ADMIN_CONTACTS,
+    icon: Contact,
+    action: "contacts.read",
+  },
+  {
+    title: "News",
+    href: ROUTES.ADMIN_NEWS,
+    icon: Newspaper,
+    action: "news.read",
   },
   {
     title: 'Users',

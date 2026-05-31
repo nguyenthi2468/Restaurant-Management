@@ -66,7 +66,7 @@ export default function Hero() {
             Khám phá thực đơn
           </motion.a>
           <motion.a
-            href="#contact"
+            href="/reservation"
             className="px-8 py-3 border-2 border-primary text-primary rounded-md font-medium hover:bg-primary/5 transition-colors inline-block"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

@@ -107,7 +107,6 @@ export class BookingController {
   }
 
   @Get(':id')
-  @Action('reservation:read')
   @ApiOperation({ summary: 'Get a booking by ID' })
   @ApiParam({ name: 'id', description: 'Booking UUID' })
   @ApiResponse({ status: 200, description: 'Booking found', type: BookingDto })

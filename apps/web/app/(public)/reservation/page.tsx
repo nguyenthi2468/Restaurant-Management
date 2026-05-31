@@ -1,3 +1,4 @@
+import { PageTitle } from '@/components/common/PageTitle';
 import { ReservationForm } from '@/components/reservation/ReservationForm';
 import { Calendar, Clock, Users } from 'lucide-react';
 
@@ -9,16 +10,8 @@ export const metadata = {
 export default function ReservationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <PageTitle title='Đặt bàn' description='Đặt bàn ngay hôm nay để trải nghiệm ẩm thực tuyệt vời'  />
       <div className="container mx-auto px-4 py-12 max-w-5xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">
-            Đặt bàn trực tuyến
-          </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Đặt bàn ngay hôm nay để trải nghiệm ẩm thực tuyệt vời tại nhà hàng
-            của chúng tôi. Chúng tôi cam kết mang đến cho bạn dịch vụ tốt nhất.
-          </p>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 text-center">
