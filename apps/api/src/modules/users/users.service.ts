@@ -15,6 +15,7 @@ const userPublicSelect = {
   email: true,
   firstName: true,
   lastName: true,
+  phone: true,
   createdAt: true,
   updatedAt: true,
   roles: {

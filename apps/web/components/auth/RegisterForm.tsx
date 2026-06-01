@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
-import { Mail, User } from 'lucide-react';
+import { Mail, User, Phone } from 'lucide-react';
 import { Lock } from 'lucide-react';
 import { Eye } from 'lucide-react';
 import { EyeOff } from 'lucide-react';
@@ -131,6 +131,34 @@ const RegisterForm = () => {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Nhập email"
+                    className="pl-10"
+                    disabled={loading}
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <span className="text-xs text-destructive mt-1 block">
+                      {fieldState.error?.message}
+                    </span>
+                  )}
+                </div>
+              </Field>
+            )}
+          />
+        </FieldGroup>
+
+        {/* Phone field */}
+        <FieldGroup>
+          <Controller
+            name="phone"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="register-form-phone">Số điện thoại</FieldLabel>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Nhập số điện thoại"
                     className="pl-10"
                     disabled={loading}
                     {...field}

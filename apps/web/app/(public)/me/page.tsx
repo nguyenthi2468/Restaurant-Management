@@ -11,7 +11,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { User, Camera, Key, EyeOff, Eye, Save, Loader2 } from 'lucide-react';
+import {
+  User,
+  Camera,
+  Key,
+  EyeOff,
+  Eye,
+  Save,
+  Loader2,
+  Phone,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   Field,
@@ -65,6 +74,7 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       profileForm.reset({
+        phone: user.phone || '',
         firstName: user.firstName,
         lastName: user.lastName,
       });
@@ -229,8 +239,32 @@ const Profile = () => {
                   )}
                 />
               </FieldGroup>
+              <FieldGroup>
+                <Controller
+                  name="phone"
+                  control={profileForm.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>Phone Number</FieldLabel>
+                      <div className="col-span-3">
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            {...field}
+                            placeholder="Enter phone number"
+                            className="pl-10"
+                          />
+                        </div>
+                        {fieldState.invalid && (
+                          <FieldError>{fieldState.error?.message}</FieldError>
+                        )}
+                      </div>
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
             </div>
-                   
+
             <Separator />
 
             <div className="flex justify-end gap-4 mt-5">
