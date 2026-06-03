@@ -51,11 +51,11 @@ interface SubMenuItem {
   action: string;
 }
 export const navItems: NavItem[] = [
-  {
-    title: 'Dashboard',
+ {
+    title: 'AI',
     href: ROUTES.ADMIN_DASHBOARD,
-    icon: Home,
-    action: 'dashboard.read',
+    icon: BotMessageSquare,
+    action: 'ai.read',
   },
   {
     title: 'Menu Categories',
