@@ -12,6 +12,7 @@ import {
   Clock,
   Contact,
   Newspaper,
+  BotMessageSquare,
 } from 'lucide-react';
 import { ChevronDown, Home, Users } from 'lucide-react';
 import Link from 'next/link';
