@@ -52,96 +52,116 @@ interface SubMenuItem {
   action: string;
 }
 export const navItems: NavItem[] = [
- {
+  {
     title: 'AI',
     href: ROUTES.ADMIN_DASHBOARD,
     icon: BotMessageSquare,
     action: 'ai.read',
   },
   {
-    title: 'Menu Categories',
+    title: 'Danh mục món ăn',
     href: ROUTES.ADMIN_MENU_CATEGORIES,
     icon: Bookmark,
     action: 'menu_categories.read',
   },
   {
-    title: 'Menu Items',
+    title: 'Món ăn',
     href: ROUTES.ADMIN_MENU_ITEMS,
     icon: ChefHat,
     action: 'menu_items.read',
   },
   {
-    title: 'Tables',
+    title: 'Bàn',
     href: ROUTES.ADMIN_TABLES,
     icon: Armchair,
     action: 'tables.read',
     submenu: [
-      { title: 'Floors', href: ROUTES.ADMIN_FLOORS, action: 'tables.read' },
-      { title: 'Tables', href: ROUTES.ADMIN_TABLES, action: 'tables.read' },
+      { title: 'Sàn', href: ROUTES.ADMIN_FLOORS, action: 'tables.read' },
+      { title: 'Bàn', href: ROUTES.ADMIN_TABLES, action: 'tables.read' },
     ],
   },
   {
-    title: 'Cashier',
+    title: 'Thu ngân',
     href: ROUTES.ADMIN_CASHIER,
     icon: CreditCard,
     action: 'cashier.read',
   },
   {
-    title: 'Kitchen',
+    title: 'Bếp',
     href: ROUTES.ADMIN_KITCHEN,
     icon: Utensils,
     action: 'kitchen.read',
   },
   {
-    title: 'Reservations',
+    title: 'Đặt bàn',
     href: ROUTES.ADMIN_RESERVATIONS,
     icon: Calendar,
     action: 'reservation.read',
   },
   {
-    title: 'Orders',
+    title: 'Đơn hàng',
     href: ROUTES.ADMIN_ORDERS,
     icon: Receipt,
     action: 'order.read',
   },
   {
-    title: 'Employee Schedules',
+    title: 'Lịch làm việc',
     href: ROUTES.ADMIN_EMPLOYEE_SCHEDULES,
     icon: Clock,
     action: 'employee-schedule:read',
     submenu: [
-      { title: 'Shifts', href: ROUTES.ADMIN_SHIFTS, action: 'employee-schedule:read' },
-      { title: 'Schedules', href: ROUTES.ADMIN_EMPLOYEE_SCHEDULES, action: 'employee-schedule:read' },
-      { title: 'Attendance', href: ROUTES.ADMIN_ATTENDANCE, action: 'employee-schedule:read' },
-      { title: 'Time Off Requests', href: ROUTES.ADMIN_TIME_OFF_REQUESTS, action: 'employee-schedule:read' },
+      {
+        title: 'Ca làm',
+        href: ROUTES.ADMIN_SHIFTS,
+        action: 'employee-schedule:read',
+      },
+      {
+        title: 'Lịch làm việc',
+        href: ROUTES.ADMIN_EMPLOYEE_SCHEDULES,
+        action: 'employee-schedule:read',
+      },
+      {
+        title: 'Chấm công',
+        href: ROUTES.ADMIN_ATTENDANCE,
+        action: 'employee-schedule:read',
+      },
+      {
+        title: 'Yêu cầu nghỉ phép',
+        href: ROUTES.ADMIN_TIME_OFF_REQUESTS,
+        action: 'employee-schedule:read',
+      },
     ],
   },
-   {
-    title: "Contacts",
+  {
+    title: 'Liên hệ',
     href: ROUTES.ADMIN_CONTACTS,
     icon: Contact,
-    action: "contacts.read",
+    action: 'contacts.read',
   },
   {
-    title: "News",
+    title: 'Tin tức',
     href: ROUTES.ADMIN_NEWS,
     icon: Newspaper,
-    action: "news.read",
+    action: 'news.read',
   },
   {
-    title: 'Users',
+    title: 'Người dùng',
     href: ROUTES.ADMIN_USERS,
     icon: Users,
     action: 'users.list',
     submenu: [
-      { title: 'Users', href: ROUTES.ADMIN_USERS, action: 'users.list' },
-      { title: 'Roles', href: ROUTES.ADMIN_ROLES, action: 'roles.list' },
+      { title: 'Người dùng', href: ROUTES.ADMIN_USERS, action: 'users.list' },
+      { title: 'Vai trò', href: ROUTES.ADMIN_ROLES, action: 'roles.list' },
       {
-        title: 'Permissions',
+        title: 'Quyền hạn',
         href: ROUTES.ADMIN_PERMISSIONS,
         action: 'permissions.list',
       },
-      { title: 'Actions', href: ROUTES.ADMIN_ACTIONS, action: 'actions.list' },
+      {
+        title: 'Hành động',
+        href: ROUTES.ADMIN_ACTIONS,
+        action: 'actions.list',
+      },
     ],
   },
 ];
@@ -172,7 +192,9 @@ export default function AdminSidebar() {
       <SidebarHeader>
         <SidebarGroup>
           <SidebarGroupLabel>
-            <h1 className="text-2xl text-black font-bold">Admin Panel</h1>
+            <h1 className="text-2xl text-black font-bold">
+              Bảng điều khiển quản trị
+            </h1>
           </SidebarGroupLabel>
         </SidebarGroup>
       </SidebarHeader>
