@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Download } from 'lucide-react';
+import { Plus, Search, Download, MapPin } from 'lucide-react';
 import { useAttendancesQuery } from '@/features/employee-schedules/queries';
 import {
   useCreateAttendanceMutation,
@@ -32,6 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClockInDialog } from '@/components/attendance/ClockInDialog';
 import { ClockOutDialog } from '@/components/attendance/ClockOutDialog';
+import { LocationAttendanceDialog } from '@/components/attendance/LocationAttendanceDialog';
 
 const statusColors: Record<AttendanceStatus, string> = {
   [AttendanceStatus.ON_TIME]: 'bg-green-500',
@@ -55,7 +56,7 @@ export default function AttendancePage() {
   const [page, setPage] = useState(1);
   const [openClockInDialog, setOpenClockInDialog] = useState(false);
   const [openClockOutDialog, setOpenClockOutDialog] = useState(false);
-
+  const [openLocationDialog, setOpenLocationDialog] = useState(false);
   const limit = 10;
 
   const queryParams = {
@@ -144,6 +145,10 @@ export default function AttendancePage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={() => setOpenLocationDialog(true)}>
+            <MapPin className="h-4 w-4 mr-2" />
+            Vị trí
+          </Button>
           <Button onClick={() => setOpenClockInDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Chấm công vào
@@ -325,6 +330,10 @@ export default function AttendancePage() {
       <ClockOutDialog
         open={openClockOutDialog}
         onOpenChange={setOpenClockOutDialog}
+      />
+      <LocationAttendanceDialog
+        open={openLocationDialog}
+        onOpenChange={setOpenLocationDialog}
       />
     </div>
   );
