@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -9,18 +10,75 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Download } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '@/components/ui/input-otp';
+import { Clock, Download, LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import {
   useQRCodeQuery,
   AttendanceStatus,
+  useClockInWithOtpMutation,
+  useClockOutWithOtpMutation,
 } from '@/features/employee-schedules';
+
 export default function ClockPage() {
   const { user } = useAuth();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [actionType, setActionType] = useState<'clockIn' | 'clockOut'>(
+    'clockIn',
+  );
 
   const { data: qrCodeUrl, isLoading: isQRLoading } = useQRCodeQuery(
     user?.id || '',
-  )
+  );
+
+  const clockInMutation = useClockInWithOtpMutation();
+  const clockOutMutation = useClockOutWithOtpMutation();
+
+  const handleOpenDialog = (type: 'clockIn' | 'clockOut') => {
+    setActionType(type);
+    setOtpValue('');
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setOtpValue('');
+  };
+
+  const handleSubmitOtp = async () => {
+    if (!user?.id || otpValue.length !== 6) return;
+
+    try {
+      if (actionType === 'clockIn') {
+        await clockInMutation.mutateAsync({
+          employeeId: user.id,
+          otp: otpValue,
+        });
+      } else {
+        await clockOutMutation.mutateAsync({
+          employeeId: user.id,
+          otp: otpValue,
+        });
+      }
+      handleCloseDialog();
+    } catch (error) {
+      // Error is handled by the mutation
+      console.error(error);
+    }
+  };
 
   const getStatusBadge = (status: AttendanceStatus) => {
     const statusConfig = {
@@ -109,7 +167,88 @@ export default function ClockPage() {
             )}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Chấm công bằng OTP
+            </CardTitle>
+            <CardDescription>
+              Nhập mã OTP để chấm công vào và ra
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => handleOpenDialog('clockIn')}
+                className="gap-2"
+                size="lg"
+              >
+                <LogIn className="h-5 w-5" />
+                Chấm công vào
+              </Button>
+              <Button
+                onClick={() => handleOpenDialog('clockOut')}
+                variant="outline"
+                className="gap-2"
+                size="lg"
+              >
+                <LogOut className="h-5 w-5" />
+                Chấm công ra
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === 'clockIn' ? 'Chấm công vào' : 'Chấm công ra'}
+            </DialogTitle>
+            <DialogDescription>
+              Nhập mã OTP 6 chữ số để{' '}
+              {actionType === 'clockIn' ? 'chấm công vào' : 'chấm công ra'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-6 py-4">
+            <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+            <p className="text-sm text-muted-foreground">
+              Nhập mã OTP được tạo từ ứng dụng xác thực
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>
+              Hủy
+            </Button>
+            <Button
+              onClick={handleSubmitOtp}
+              disabled={
+                otpValue.length !== 6 ||
+                clockInMutation.isPending ||
+                clockOutMutation.isPending
+              }
+            >
+              {clockInMutation.isPending || clockOutMutation.isPending
+                ? 'Đang xử lý...'
+                : 'Xác nhận'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -11,6 +11,8 @@ import {
   deleteAttendance,
   clockIn,
   clockOut,
+  clockInWithOtp,
+  clockOutWithOtp,
   createTimeOffRequest,
   updateTimeOffRequest,
   deleteTimeOffRequest,
@@ -27,6 +29,8 @@ import {
   UpdateAttendanceData,
   ClockInData,
   ClockOutData,
+  ClockInOtpData,
+  ClockOutOtpData,
   CreateTimeOffRequestData,
   UpdateTimeOffRequestData,
 } from './types';
@@ -91,7 +95,9 @@ export const useCreateEmployeeScheduleMutation = () => {
       createEmployeeSchedule(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['employee-schedules'] });
-      queryClient.invalidateQueries({ queryKey: ['employee-schedule', data.employeeId] });
+      queryClient.invalidateQueries({
+        queryKey: ['employee-schedule', data.employeeId],
+      });
       toast.success('Phân ca làm việc thành công');
     },
     onError: (error: any) => {
@@ -324,6 +330,40 @@ export const useRejectTimeOffRequestMutation = () => {
     onError: (error: any) => {
       toast.error(
         error?.response?.data?.message || 'Không thể từ chối yêu cầu nghỉ phép',
+      );
+      console.error(error);
+    },
+  });
+};
+
+export const useClockInWithOtpMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ClockInOtpData) => clockInWithOtp(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendances'] });
+      toast.success('Chấm công vào với OTP thành công');
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || 'Không thể chấm công vào với OTP',
+      );
+      console.error(error);
+    },
+  });
+};
+
+export const useClockOutWithOtpMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ClockOutOtpData) => clockOutWithOtp(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendances'] });
+      toast.success('Chấm công ra với OTP thành công');
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || 'Không thể chấm công ra với OTP',
       );
       console.error(error);
     },

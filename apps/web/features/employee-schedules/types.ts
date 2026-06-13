@@ -137,6 +137,16 @@ export interface ClockOutData {
   clockOut?: Date | string;
 }
 
+export interface ClockInOtpData {
+  employeeId: string;
+  otp: string;
+}
+
+export interface ClockOutOtpData {
+  employeeId: string;
+  otp: string;
+}
+
 export enum TimeOffRequestStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',

@@ -10,7 +10,7 @@ import { QueryAttendanceDto } from './dto/attendance/query-attendance.dto';
 import { ClockInDto } from './dto/attendance/clock-in.dto';
 import { ClockOutDto } from './dto/attendance/clock-out.dto';
 import { AttendanceStatus } from '@prisma/client';
-
+import { createGuardrails, generate, OTP, verify } from 'otplib';
 @Injectable()
 export class AttendanceService {
   constructor(private readonly prisma: PrismaService) {}
@@ -317,5 +317,43 @@ export class AttendanceService {
     const diffMs = clockOut.getTime() - clockIn.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
     return Math.round(diffHours * 100) / 100;
+  }
+
+  async generateOTP() {
+    const token = await generate({
+      secret: 'JBSWY3DPEHPK3PXP',
+      guardrails: createGuardrails({ MIN_SECRET_BYTES: 10 }),
+      period: 30,
+    });
+    return token;
+  }
+
+  async verifyOTP(token: string) {
+    const isValid = await verify({
+      secret: 'JBSWY3DPEHPK3PXP',
+      guardrails: createGuardrails({ MIN_SECRET_BYTES: 10 }),
+      token,
+    });
+    return isValid.valid;
+  }
+  
+  async clockInWithOtp(employeeId: string, otp: string) {
+    const isValid = await this.verifyOTP(otp);
+    
+    if (!isValid) {
+      throw new BadRequestException('Mã OTP không hợp lệ hoặc đã hết hạn');
+    }
+
+    return this.clockIn({ employeeId });
+  }
+
+  async clockOutWithOtp(employeeId: string, otp: string) {
+    const isValid = await this.verifyOTP(otp);
+
+    if (!isValid) {
+      throw new BadRequestException('Mã OTP không hợp lệ hoặc đã hết hạn');
+    }
+
+    return this.clockOut({ employeeId });
   }
 }

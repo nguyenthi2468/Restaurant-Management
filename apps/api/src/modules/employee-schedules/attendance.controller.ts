@@ -24,6 +24,8 @@ import { UpdateAttendanceDto } from './dto/attendance/update-attendance.dto';
 import { QueryAttendanceDto } from './dto/attendance/query-attendance.dto';
 import { ClockInDto } from './dto/attendance/clock-in.dto';
 import { ClockOutDto } from './dto/attendance/clock-out.dto';
+import { ClockInOtpDto } from './dto/attendance/clock-in-otp.dto';
+import { ClockOutOtpDto } from './dto/attendance/clock-out-otp.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActionGuard } from '../auth/guards/action.guard';
 import { Action } from '../auth/decorator/action.decorator';
@@ -56,11 +58,27 @@ export class AttendanceController {
     return this.attendanceService.create(createAttendanceDto);
   }
   @Get('qdcode/:employeeId')
-  async generate(@Param('employeeId') employeeId: string, @Res() res: Response) {
+  async generate(
+    @Param('employeeId') employeeId: string,
+    @Res() res: Response,
+  ) {
     const qr = await QRCode.toBuffer(employeeId);
 
     res.setHeader('Content-Type', 'image/png');
     res.send(qr);
+  }
+
+  @Get('generate-otp')
+  @ApiOperation({ summary: 'Tạo mã OTP cho chấm công' })
+  @ApiResponse({
+    status: 200,
+    description: 'Mã OTP đã được tạo thành công',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async generateOTP() {
+    const otp = await this.attendanceService.generateOTP();
+    return { otp };
   }
   @Get()
   @Action('attendance:read')
@@ -210,5 +228,45 @@ export class AttendanceController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   clockOut(@Body() clockOutDto: ClockOutDto) {
     return this.attendanceService.clockOut(clockOutDto);
+  }
+
+  @Post('clock-in-otp')
+  @ApiOperation({ summary: 'Chấm công vào với xác thực OTP' })
+  @ApiBody({ type: ClockInOtpDto })
+  @ApiResponse({ status: 201, description: 'Chấm công vào thành công' })
+  @ApiResponse({
+    status: 400,
+    description: 'Mã OTP không hợp lệ hoặc nhân viên đã chấm công vào hôm nay',
+  })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy nhân viên' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  clockInWithOtp(@Body() clockInOtpDto: ClockInOtpDto) {
+    return this.attendanceService.clockInWithOtp(
+      clockInOtpDto.employeeId,
+      clockInOtpDto.otp,
+    );
+  }
+
+  @Post('clock-out-otp')
+  @ApiOperation({ summary: 'Chấm công ra với xác thực OTP' })
+  @ApiBody({ type: ClockOutOtpDto })
+  @ApiResponse({ status: 200, description: 'Chấm công ra thành công' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Mã OTP không hợp lệ, nhân viên chưa chấm công vào hoặc đã chấm công ra',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy bản ghi chấm công vào',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  clockOutWithOtp(@Body() clockOutOtpDto: ClockOutOtpDto) {
+    return this.attendanceService.clockOutWithOtp(
+      clockOutOtpDto.employeeId,
+      clockOutOtpDto.otp,
+    );
   }
 }

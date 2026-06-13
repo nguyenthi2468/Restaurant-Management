@@ -16,6 +16,8 @@ import {
   PaginatedAttendanceResponse,
   ClockInData,
   ClockOutData,
+  ClockInOtpData,
+  ClockOutOtpData,
   TimeOffRequest,
   CreateTimeOffRequestData,
   UpdateTimeOffRequestData,
@@ -193,6 +195,22 @@ export const clockOut = async (data: ClockOutData) => {
   return response.data;
 };
 
+export const clockInWithOtp = async (data: ClockInOtpData) => {
+  const response = await api.post<Attendance>(
+    `${API_ENDPOINTS.EMPLOYEE_SCHEDULES.ATTENDANCE}/clock-in-otp`,
+    data,
+  );
+  return response.data;
+};
+
+export const clockOutWithOtp = async (data: ClockOutOtpData) => {
+  const response = await api.post<Attendance>(
+    `${API_ENDPOINTS.EMPLOYEE_SCHEDULES.ATTENDANCE}/clock-out-otp`,
+    data,
+  );
+  return response.data;
+};
+
 export const getTimeOffRequests = async (params?: QueryTimeOffRequestDto) => {
   const response = await api.get<PaginatedTimeOffRequestResponse>(
     API_ENDPOINTS.EMPLOYEE_SCHEDULES.TIME_OFF_REQUESTS,
@@ -266,4 +284,11 @@ export const getQRCode = async (employeeId: string) => {
     { responseType: 'blob' },
   );
   return URL.createObjectURL(response.data);
+};
+
+export const generateOTP = async () => {
+  const response = await api.get<{ otp: string }>(
+    `${API_ENDPOINTS.EMPLOYEE_SCHEDULES.ATTENDANCE}/generate-otp`,
+  );
+  return response.data;
 };
