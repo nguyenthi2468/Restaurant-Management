@@ -5,6 +5,7 @@ import {
   TableWithBookings,
   TableStatus,
   useTablesWithBookingsQuery,
+  useReservationsByDateQuery,
 } from '@/features/tables';
 import { Floor, useFloorsQuery } from '@/features/floor';
 import type { OrderItem } from '@/features/order-items';
@@ -41,6 +42,16 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePusherChannel } from '@/hooks/usePusherChannel';
 import { useQueryClient } from '@tanstack/react-query';
 import { ReturnOrderItemsDialog } from '@/components/cashier/ReturnOrderItemsDialog';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState<'tables' | 'menu'>('tables');
@@ -53,8 +64,12 @@ export default function CashierPage() {
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [currentPageTable, setCurrentPageTable] = useState(1);
   const [currentPageMenu, setCurrentPageMenu] = useState(1);
-  const [openReturnOrderItemsDialog, setOpenReturnOrderItemsDialog] = useState(false);
-  const [selectedOrderItem, setSelectedOrderItem] = useState<OrderItem | null>(null);
+  const [openReturnOrderItemsDialog, setOpenReturnOrderItemsDialog] =
+    useState(false);
+  const [selectedOrderItem, setSelectedOrderItem] = useState<OrderItem | null>(
+    null,
+  );
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
@@ -70,9 +85,11 @@ export default function CashierPage() {
       limit: 24,
     });
   const { data: floors = [] } = useFloorsQuery();
-  const { data: orderData, isLoading: isLoadingOrderData } = useGetServedOrderByTableIdQuery(
-    selectedTableId ?? '',
+  const { data: reservationsByDate } = useReservationsByDateQuery(
+    selectedDate ? format(selectedDate, 'dd/MM/yyyy') : '',
   );
+  const { data: orderData, isLoading: isLoadingOrderData } =
+    useGetServedOrderByTableIdQuery(selectedTableId ?? '');
   const { data: tickets, isLoading: isLoadingTickets } =
     useGetKitchenTicketsByOrderIdQuery(orderData?.id || 0);
   const { data: menuCategories = [] } = useMenuCategoriesQuery();
@@ -93,7 +110,7 @@ export default function CashierPage() {
       queryClient.invalidateQueries({
         queryKey: ['kitchen-tickets', 'order', orderData.id],
       });
-      
+
       const audio = new Audio('/audio/kichen_bell.mp3');
       audio.play().catch((error) => {
         console.error('Error playing audio:', error);
@@ -195,7 +212,7 @@ export default function CashierPage() {
     async (item: OrderItem, delta: number) => {
       if (!orderItems) return;
 
-      if(tickets && tickets.length > 0 && delta < 0){
+      if (tickets && tickets.length > 0 && delta < 0) {
         setSelectedOrderItem(item);
         setOpenReturnOrderItemsDialog(true);
         return;
@@ -278,7 +295,7 @@ export default function CashierPage() {
               remainingQuantity: item.quantity - totalSentQuantity,
             };
           })
-          .filter(({remainingQuantity }) => remainingQuantity > 0) // Lọc món ăn có số lượng còn lại lớn hơn 0
+          .filter(({ remainingQuantity }) => remainingQuantity > 0) // Lọc món ăn có số lượng còn lại lớn hơn 0
           .map(({ item, remainingQuantity }) => ({
             menuItemId: item.menuItemId,
             quantity: remainingQuantity,
@@ -286,7 +303,9 @@ export default function CashierPage() {
           }));
 
         if (newItems.length === 0) {
-          toast.error('Không có món ăn nào mới hoặc thay đổi số lượng để tạo vé bếp');
+          toast.error(
+            'Không có món ăn nào mới hoặc thay đổi số lượng để tạo vé bếp',
+          );
           return;
         }
 
@@ -338,35 +357,41 @@ export default function CashierPage() {
     tickets,
   ]);
 
-  const handleReturnItems = useCallback(async (quantity: number, reason: string) => {
-    if (!selectedOrderItem) {
-      toast.error('Vui lòng chọn món ăn');
-      return;
-    }
-    if (quantity > selectedOrderItem.quantity) {
-      toast.error('Số lượng hủy không thể lớn hơn số lượng món ăn');
-      return;
-    }
-    if(quantity === selectedOrderItem.quantity){
-      handleRemoveItem(selectedOrderItem.id);
-      handleDeleteItem();
-      return
-    }
-    await toast.promise(updateOrderItemMutation.mutateAsync({
-      id: selectedOrderItem.id,
-      data: {
-        note: reason,
-        quantity: selectedOrderItem.quantity - quantity,
-      },
-    }), {
-      loading: 'Đang hủy món...',
-      success: 'Món ăn đã được hủy',
-      error: (err: ApiError) =>
-        err?.response?.data?.message || 'Hủy món thất bại',
-    });
-    setSelectedOrderItem(null);
-    setOpenReturnOrderItemsDialog(false);
-  }, [selectedOrderItem, updateOrderItemMutation]);
+  const handleReturnItems = useCallback(
+    async (quantity: number, reason: string) => {
+      if (!selectedOrderItem) {
+        toast.error('Vui lòng chọn món ăn');
+        return;
+      }
+      if (quantity > selectedOrderItem.quantity) {
+        toast.error('Số lượng hủy không thể lớn hơn số lượng món ăn');
+        return;
+      }
+      if (quantity === selectedOrderItem.quantity) {
+        handleRemoveItem(selectedOrderItem.id);
+        handleDeleteItem();
+        return;
+      }
+      await toast.promise(
+        updateOrderItemMutation.mutateAsync({
+          id: selectedOrderItem.id,
+          data: {
+            note: reason,
+            quantity: selectedOrderItem.quantity - quantity,
+          },
+        }),
+        {
+          loading: 'Đang hủy món...',
+          success: 'Món ăn đã được hủy',
+          error: (err: ApiError) =>
+            err?.response?.data?.message || 'Hủy món thất bại',
+        },
+      );
+      setSelectedOrderItem(null);
+      setOpenReturnOrderItemsDialog(false);
+    },
+    [selectedOrderItem, updateOrderItemMutation],
+  );
 
   const handlePay = useCallback(() => {
     if (!selectedTable) return;
@@ -409,6 +434,35 @@ export default function CashierPage() {
               }}
             />
 
+            <div className="px-4 py-2 border-b border-slate-200 bg-white">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? (
+                      format(selectedDate, 'PPP', { locale: vi })
+                    ) : (
+                      <span>Chọn ngày xem đặt bàn</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    locale={vi}
+                    disabled={{
+                      before: new Date(new Date().setHours(0, 0, 0, 0)),
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
             <StatusFilters
               selectedStatus={statusFilter}
               onStatusChange={setStatusFilter}
@@ -423,6 +477,7 @@ export default function CashierPage() {
               currentPage={currentPageTable}
               totalPages={meta?.totalPages || 0}
               onPageChange={setCurrentPageTable}
+              reservationCounts={reservationsByDate?.data}
             />
           </>
         )}

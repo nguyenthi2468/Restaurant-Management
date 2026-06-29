@@ -1,4 +1,4 @@
-import { TableWithBookings } from '@/features/tables';
+import { TableReservationCount, TableWithBookings } from '@/features/tables';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { TableCard } from './TableCard';
@@ -11,6 +11,7 @@ interface TableGridProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  reservationCounts?: TableReservationCount[];
 }
 
 export function TableGrid({
@@ -21,6 +22,7 @@ export function TableGrid({
   currentPage,
   totalPages,
   onPageChange,
+  reservationCounts,
 }: TableGridProps) {
   return (
     <>
@@ -31,14 +33,21 @@ export function TableGrid({
           </div>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 sm:gap-3 py-3 sm:py-4 px-2 sm:px-3">
-            {tables.map((table) => (
-              <TableCard
-                key={table.id}
-                table={table}
-                isSelected={selectedTableId === table.id}
-                onSelect={onSelectTable}
-              />
-            ))}
+            {tables.map((table) => {
+
+                const reservationCount =
+                 reservationCounts?.find((r) => r.tableId === table.id)?.count ||
+                  0;
+              return (
+                <TableCard
+                  key={table.id}
+                  table={table}
+                  isSelected={selectedTableId === table.id}
+                  onSelect={onSelectTable}
+                  reservationCount={reservationCount}
+                />
+              );
+            })}
           </div>
         )}
       </ScrollArea>

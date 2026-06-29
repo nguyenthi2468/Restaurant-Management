@@ -6,6 +6,7 @@ import type {
   PaginatedTableResponse,
   PaginatedTableWithBookingsResponse,
   QueryTableDto,
+  ReservationsByDateResponse,
 } from './types';
 import type { TableFormValues } from './validator';
 
@@ -110,5 +111,15 @@ export const countAvailableTables = async (params: CheckAvailableTablesDto) => {
     `${API_ENDPOINTS.TABLES}/available/count`,
     { params },
   );
+  return response.data;
+};
+
+// Get reservation counts by date
+export const getReservationsByDate = async (date: string) => {
+  const response = await api.get<{
+    data: { tableId: string; count: number }[];
+  }>(`${API_ENDPOINTS.TABLES}/reservations/by-date`, {
+    params: { date },
+  });
   return response.data;
 };

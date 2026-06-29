@@ -435,4 +435,43 @@ export class TableService {
       },
     };
   }
+
+  async getReservationCountsByDate(dateString: string): Promise<
+    {
+      tableId: string;
+      count: number;
+    }[]
+  > {
+    const [day, month, year] = dateString.split('/').map(Number);
+    const startDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const endDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+    const bookingTables = await this.prisma.bookingTable.findMany({
+      where: {
+        booking: {
+          AND: [
+            { bookingTime: { gte: startDate } },
+            { bookingTime: { lte: endDate } },
+          ],
+          status: {
+            notIn: [BookingStatus.CANCELLED],
+          },
+        },
+      },
+      select: {
+        tableId: true,
+      },
+    });
+
+    const countMap = new Map<string, number>();
+    bookingTables.forEach((bt) => {
+      const current = countMap.get(bt.tableId) || 0;
+      countMap.set(bt.tableId, current + 1);
+    });
+
+    return Array.from(countMap.entries()).map(([tableId, count]) => ({
+      tableId,
+      count,
+    }));
+  }
 }

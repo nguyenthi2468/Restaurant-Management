@@ -19,7 +19,7 @@ export function TabNavigation({
   onSearchChange,
 }: TabNavigationProps) {
   return (
-    <div className="flex items-center gap-2 px-2 sm:px-4 pt-3 pb-2 overflow-x-auto">
+    <div className="flex items-center gap-2 px-2 sm:px-4 pt-3 pb-2 overflow-x-auto overflow-y-hidden">
       <button
         onClick={() => onTabChange('tables')}
         className={cn(

@@ -8,6 +8,7 @@ import {
   SearchTablesParams,
   checkAvailableTables,
   countAvailableTables,
+  getReservationsByDate,
 } from './api';
 import { CheckAvailableTablesDto, QueryTableDto } from './types';
 
@@ -66,5 +67,13 @@ export const useCountAvailableTablesQuery = (
     queryKey: ['availableTablesCount', params],
     queryFn: () => countAvailableTables(params),
     ...options,
+  });
+};
+
+export const useReservationsByDateQuery = (date: string) => {
+  return useQuery({
+    queryKey: ['reservations', 'by-date', date],
+    queryFn: () => getReservationsByDate(date),
+    enabled: !!date,
   });
 };

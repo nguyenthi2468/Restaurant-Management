@@ -84,3 +84,16 @@ export interface PaginatedTableWithBookingsResponse {
   data: TableWithBookings[];
   meta: TableMeta;
 }
+
+export interface QueryReservationsByDateDto {
+  date: string; // dd/mm/yyyy format
+}
+
+export interface TableReservationCount {
+  tableId: string;
+  count: number;
+}
+
+export interface ReservationsByDateResponse {
+  data: TableReservationCount[];
+}

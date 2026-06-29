@@ -14,9 +14,15 @@ interface TableCardProps {
   table: TableWithBookings;
   isSelected: boolean;
   onSelect: (table: TableWithBookings) => void;
+  reservationCount: number
 }
 
-export function TableCard({ table, isSelected, onSelect }: TableCardProps) {
+export function TableCard({
+  table,
+  isSelected,
+  onSelect,
+  reservationCount = 0,
+}: TableCardProps) {
   const isOccupied = table.status === TableStatus.OCCUPIED;
   const isMaintenance = table.status === TableStatus.MAINTENANCE;
   let [minutesUsed, setMinutesUsed] = useState(() =>
@@ -58,6 +64,11 @@ export function TableCard({ table, isSelected, onSelect }: TableCardProps) {
 
   const renderTableContent = () => (
     <>
+      {reservationCount > 0 && (
+        <div className="absolute top-1 right-1 z-50 flex items-center justify-center bg-yellow-500 text-white rounded-full w-5 h-5 text-[10px] font-bold">
+          {reservationCount}
+        </div>
+      )}
       {soonestBooking && (
         <div className="absolute top-2 left-2 flex items-center gap-1 text-[10px] text-orange-600">
           <Calendar size={10} />

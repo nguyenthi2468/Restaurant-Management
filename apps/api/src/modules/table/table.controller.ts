@@ -24,6 +24,8 @@ import { CheckAvailableTablesDto } from './dto/check-available-tables.dto';
 import { QueryTableDto } from './dto/query-table.dto';
 import { PaginatedTableResponseDto } from './dto/paginated-table-response.dto';
 import { PaginatedTableWithBookingsResponseDto } from './dto/table-with-bookings.dto';
+import { QueryReservationsByDateDto } from './dto/query-reservations-by-date.dto';
+import { ReservationsByDateResponseDto } from './dto/table-reservations-count.dto';
 
 @ApiTags('tables')
 @ApiBearerAuth()
@@ -225,5 +227,29 @@ export class TableController {
     );
 
     return { count };
+  }
+
+  @Get('reservations/by-date')
+  @ApiOperation({
+    summary: 'Lấy số lượng đặt bàn theo ngày',
+    description:
+      'Trả về danh sách các bàn và số lượng đặt bàn trong ngày được chỉ định. Ngày phải theo định dạng dd/mm/yyyy.',
+  })
+  @ApiQuery({
+    name: 'date',
+    required: true,
+    description: 'Ngày cần tra cứu (định dạng dd/mm/yyyy)',
+    example: '29/06/2026',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bàn và số lượng đặt bàn',
+    type: ReservationsByDateResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getReservationsByDate(@Query() dto: QueryReservationsByDateDto) {
+    const data = await this.tableService.getReservationCountsByDate(dto.date);
+    return { data };
   }
 }
